@@ -34,76 +34,76 @@ export function App() {
   });
 
   return (
-    <div className="min-h-screen bg-[#060810] text-slate-100 flex flex-col selection:bg-indigo-500/30 selection:text-indigo-200 relative overflow-hidden bg-grid-cyber">
-      {/* Ambient background light glows */}
+    <div className="min-h-screen bg-[#040c1a] text-sky-100 flex flex-col relative overflow-hidden bg-grid-cyber selection:bg-cyan-500/30 selection:text-white">
+      {/* Dynamic Ambient Aurora Glows */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
         <div
-          className="absolute -top-40 left-1/4 w-[650px] h-[650px] bg-indigo-600/15 rounded-full blur-[140px] animate-pulse"
-          style={{ animationDuration: '8s' }}
+          className="absolute -top-32 left-1/4 w-[750px] h-[750px] bg-cyan-500/22 rounded-full blur-[160px] animate-pulse"
+          style={{ animationDuration: '9s' }}
         />
         <div
-          className="absolute top-1/3 -right-20 w-[550px] h-[550px] bg-purple-600/12 rounded-full blur-[150px]"
+          className="absolute top-1/3 -right-24 w-[600px] h-[600px] bg-blue-600/22 rounded-full blur-[170px]"
         />
         <div
-          className="absolute -bottom-20 left-1/3 w-[600px] h-[600px] bg-cyan-600/10 rounded-full blur-[160px]"
+          className="absolute -bottom-24 left-1/3 w-[650px] h-[650px] bg-teal-400/18 rounded-full blur-[160px]"
         />
       </div>
 
       {/* Top Navigation Bar */}
-      <header className="sticky top-0 z-50 bg-[#060812]/80 backdrop-blur-2xl border-b border-white/[0.08] shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
+      <header className="sticky top-0 z-50 bg-[#040e22]/85 backdrop-blur-2xl border-b border-cyan-500/20 shadow-[0_4px_35px_rgba(0,242,254,0.1)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4 relative z-10">
           {/* Logo & Brand */}
           <div
             onClick={() => setActiveTab('generator')}
             className="flex items-center gap-3 cursor-pointer group shrink-0"
           >
-            <div className="relative p-2.5 bg-gradient-to-tr from-indigo-500 via-purple-600 to-pink-500 rounded-2xl text-white shadow-lg shadow-indigo-500/30 group-hover:shadow-indigo-500/50 group-hover:scale-105 transition-all duration-300">
-              <Compass className="w-5 h-5 transition-transform duration-500 group-hover:rotate-45" />
-              <div className="absolute inset-0 rounded-2xl bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="relative p-2.5 bg-gradient-to-tr from-cyan-400 via-teal-400 to-blue-600 rounded-2xl text-slate-950 shadow-lg shadow-cyan-500/30 group-hover:shadow-cyan-400/60 group-hover:scale-105 transition-all duration-300">
+              <Compass className="w-5 h-5 transition-transform duration-500 group-hover:rotate-45 font-bold" />
+              <div className="absolute inset-0 rounded-2xl bg-white/25 opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-extrabold text-base tracking-tight text-white bg-gradient-to-r from-white via-slate-100 to-slate-300 bg-clip-text text-transparent">
+                <span className="font-black text-base tracking-tight bg-gradient-to-r from-white via-cyan-100 to-cyan-400 bg-clip-text text-transparent">
                   PanoramaAI
                 </span>
-                <span className="text-[10px] font-mono px-1.5 py-0.5 bg-indigo-500/15 border border-indigo-400/30 text-indigo-300 rounded-md font-semibold tracking-wider">
+                <span className="text-[10px] font-mono px-2 py-0.5 bg-cyan-400/15 border border-cyan-400/40 text-cyan-300 rounded-md font-bold tracking-wider shadow-sm">
                   STUDIO
                 </span>
               </div>
-              <div className="text-[10px] text-slate-400 hidden sm:flex items-center gap-1.5 font-medium">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <div className="text-[10px] text-cyan-300/70 hidden sm:flex items-center gap-1.5 font-medium">
+                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_#00F2FE]" />
                 <span>AI 360° VR &amp; Skybox Engine</span>
               </div>
             </div>
           </div>
 
           {/* Navigation Tabs Bar */}
-          <nav className="flex items-center gap-1 bg-[#0c1020]/80 border border-white/[0.08] p-1.5 rounded-2xl backdrop-blur-xl shadow-inner overflow-x-auto max-w-full">
+          <nav className="flex items-center gap-1 bg-[#06152d]/90 border border-cyan-500/25 p-1.5 rounded-2xl backdrop-blur-xl shadow-inner overflow-x-auto max-w-full">
             <button
               type="button"
               onClick={() => setActiveTab('generator')}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-1.5 transition-all shrink-0 cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shrink-0 cursor-pointer ${
                 activeTab === 'generator'
-                  ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/30 font-semibold'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]'
+                  ? 'bg-gradient-to-r from-cyan-400 to-blue-600 text-slate-950 shadow-md shadow-cyan-500/35 font-extrabold'
+                  : 'text-cyan-200/70 hover:text-white hover:bg-cyan-500/10'
               }`}
             >
-              <Sparkles className="w-3.5 h-3.5 text-indigo-300" />
+              <Sparkles className="w-3.5 h-3.5 text-cyan-300 fill-current" />
               <span>AI Generator</span>
             </button>
 
             <button
               type="button"
               onClick={() => setActiveTab('viewer')}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-1.5 transition-all shrink-0 cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shrink-0 cursor-pointer ${
                 activeTab === 'viewer'
-                  ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/30 font-semibold'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]'
+                  ? 'bg-gradient-to-r from-cyan-400 to-blue-600 text-slate-950 shadow-md shadow-cyan-500/35 font-extrabold'
+                  : 'text-cyan-200/70 hover:text-white hover:bg-cyan-500/10'
               }`}
             >
-              <Eye className="w-3.5 h-3.5 text-emerald-400" />
+              <Eye className="w-3.5 h-3.5 text-teal-300" />
               <span>360° Viewer</span>
-              <span className="text-[9px] px-1 py-0.2 bg-emerald-500/20 text-emerald-300 rounded font-mono font-bold">
+              <span className="text-[9px] px-1 py-0.2 bg-teal-400/25 text-teal-300 rounded font-mono font-bold">
                 FREE
               </span>
             </button>
@@ -111,39 +111,39 @@ export function App() {
             <button
               type="button"
               onClick={() => setActiveTab('cubemap')}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-1.5 transition-all shrink-0 cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shrink-0 cursor-pointer ${
                 activeTab === 'cubemap'
-                  ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/30 font-semibold'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]'
+                  ? 'bg-gradient-to-r from-cyan-400 to-blue-600 text-slate-950 shadow-md shadow-cyan-500/35 font-extrabold'
+                  : 'text-cyan-200/70 hover:text-white hover:bg-cyan-500/10'
               }`}
             >
-              <Box className="w-3.5 h-3.5 text-cyan-400" />
+              <Box className="w-3.5 h-3.5 text-cyan-300" />
               <span>Cubemap</span>
             </button>
 
             <button
               type="button"
               onClick={() => setActiveTab('globe')}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-1.5 transition-all shrink-0 cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shrink-0 cursor-pointer ${
                 activeTab === 'globe'
-                  ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/30 font-semibold'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]'
+                  ? 'bg-gradient-to-r from-cyan-400 to-blue-600 text-slate-950 shadow-md shadow-cyan-500/35 font-extrabold'
+                  : 'text-cyan-200/70 hover:text-white hover:bg-cyan-500/10'
               }`}
             >
-              <Globe2 className="w-3.5 h-3.5 text-amber-400" />
+              <Globe2 className="w-3.5 h-3.5 text-teal-300" />
               <span>Photo to Globe</span>
             </button>
 
             <button
               type="button"
               onClick={() => setActiveTab('pricing')}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-1.5 transition-all shrink-0 cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shrink-0 cursor-pointer ${
                 activeTab === 'pricing'
-                  ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/30 font-semibold'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]'
+                  ? 'bg-gradient-to-r from-cyan-400 to-blue-600 text-slate-950 shadow-md shadow-cyan-500/35 font-extrabold'
+                  : 'text-cyan-200/70 hover:text-white hover:bg-cyan-500/10'
               }`}
             >
-              <CreditCard className="w-3.5 h-3.5 text-pink-400" />
+              <CreditCard className="w-3.5 h-3.5 text-blue-300" />
               <span>Pricing</span>
             </button>
           </nav>
@@ -153,7 +153,7 @@ export function App() {
             <button
               type="button"
               onClick={() => setActiveTab('pricing')}
-              className="shimmer-btn px-4 py-2 bg-gradient-to-r from-indigo-500 via-purple-600 to-pink-500 hover:from-indigo-400 hover:to-pink-400 text-white text-xs font-semibold rounded-xl shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-1.5 cursor-pointer"
+              className="shimmer-btn px-4 py-2 bg-gradient-to-r from-cyan-400 via-teal-300 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 text-xs font-extrabold rounded-xl shadow-lg shadow-cyan-400/35 hover:shadow-cyan-400/60 hover:scale-105 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer"
             >
               <Zap className="w-3.5 h-3.5 fill-current" />
               <span>Upgrade Pro</span>
@@ -193,44 +193,44 @@ export function App() {
         {activeTab === 'admin' && <AdminTab />}
       </main>
 
-      {/* Modern Studio Footer */}
-      <footer className="border-t border-white/[0.08] bg-[#060812]/90 backdrop-blur-xl py-8 mt-12 text-xs text-slate-400 relative z-10">
+      {/* Modern Oceanic Studio Footer */}
+      <footer className="border-t border-cyan-500/15 bg-[#030915]/90 backdrop-blur-xl py-8 mt-12 text-xs text-cyan-200/60 relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2.5">
-            <div className="p-1.5 bg-indigo-500/10 border border-indigo-500/20 rounded-lg text-indigo-400">
+            <div className="p-1.5 bg-cyan-500/15 border border-cyan-500/30 rounded-lg text-cyan-400">
               <Compass className="w-3.5 h-3.5" />
             </div>
-            <span className="text-slate-200 font-semibold tracking-tight">PanoramaAI Studio</span>
-            <span className="text-slate-600">•</span>
-            <span className="text-slate-400">Industrial Equirectangular 360° VR Pipeline</span>
+            <span className="text-white font-bold tracking-tight">PanoramaAI Studio</span>
+            <span className="text-cyan-800">•</span>
+            <span className="text-cyan-300/80">Industrial Equirectangular 360° VR Pipeline</span>
           </div>
 
-          <div className="flex items-center gap-4 text-slate-400 text-xs">
+          <div className="flex items-center gap-4 text-cyan-200/70 text-xs font-medium">
             <button
               type="button"
               onClick={() => setActiveTab('viewer')}
-              className="hover:text-indigo-400 transition-colors cursor-pointer"
+              className="hover:text-cyan-300 transition-colors cursor-pointer"
             >
               Free 360 Viewer
             </button>
             <button
               type="button"
               onClick={() => setActiveTab('cubemap')}
-              className="hover:text-indigo-400 transition-colors cursor-pointer"
+              className="hover:text-cyan-300 transition-colors cursor-pointer"
             >
               Cubemap Slicer
             </button>
             <button
               type="button"
               onClick={() => setActiveTab('globe')}
-              className="hover:text-indigo-400 transition-colors cursor-pointer"
+              className="hover:text-cyan-300 transition-colors cursor-pointer"
             >
               Photo to Globe
             </button>
             <button
               type="button"
               onClick={() => setActiveTab('pricing')}
-              className="hover:text-indigo-400 transition-colors cursor-pointer"
+              className="hover:text-cyan-300 transition-colors cursor-pointer"
             >
               Pricing &amp; API
             </button>
@@ -244,19 +244,19 @@ export function App() {
                   alert('Invalid PIN');
                 }
               }}
-              className="text-slate-600 hover:text-slate-400 text-[10px] transition-colors cursor-pointer"
+              className="text-cyan-800 hover:text-cyan-600 text-[10px] transition-colors cursor-pointer"
             >
               Admin
             </button>
           </div>
 
-          <div className="flex items-center gap-3 text-slate-500">
-            <span className="flex items-center gap-1.5 text-[11px] px-2 py-0.5 rounded-full bg-white/[0.04] border border-white/[0.06]">
-              <Activity className="w-3 h-3 text-emerald-400" />
+          <div className="flex items-center gap-3 text-cyan-400/60">
+            <span className="flex items-center gap-1.5 text-[11px] px-2.5 py-0.5 rounded-full bg-cyan-950/60 border border-cyan-500/30 text-cyan-300">
+              <Activity className="w-3 h-3 text-teal-400" />
               <span>WebGL 3D Active</span>
             </span>
             <div className="flex items-center gap-1 text-[11px]">
-              <Code2 className="w-3.5 h-3.5" />
+              <Code2 className="w-3.5 h-3.5 text-cyan-400" />
               <span>Three.js • 2:1 Equirectangular</span>
             </div>
           </div>

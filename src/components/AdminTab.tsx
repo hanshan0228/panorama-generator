@@ -140,7 +140,7 @@ export function AdminTab() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900/60 backdrop-blur-xl border border-slate-800 p-6 rounded-2xl shadow-xl">
         <div>
           <div className="flex items-center gap-2">
-            <span className="p-2 bg-gradient-to-tr from-indigo-500 to-purple-600 rounded-lg text-white shadow-md">
+            <span className="p-2 bg-gradient-to-tr from-cyan-400 to-blue-600 rounded-lg text-slate-950 shadow-md shadow-cyan-500/20">
               <Server className="w-4 h-4" />
             </span>
             <h2 className="text-xl font-bold text-white">System Admin &amp; Operations Center</h2>
@@ -155,9 +155,9 @@ export function AdminTab() {
           <button
             type="button"
             onClick={() => setActiveSubSection('models')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all cursor-pointer ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
               activeSubSection === 'models'
-                ? 'bg-indigo-600 text-white shadow'
+                ? 'bg-gradient-to-r from-cyan-400 to-blue-600 text-slate-950 shadow-md shadow-cyan-500/30'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
@@ -168,9 +168,9 @@ export function AdminTab() {
           <button
             type="button"
             onClick={() => setActiveSubSection('users')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all cursor-pointer ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
               activeSubSection === 'users'
-                ? 'bg-indigo-600 text-white shadow'
+                ? 'bg-gradient-to-r from-cyan-400 to-blue-600 text-slate-950 shadow-md shadow-cyan-500/30'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
@@ -181,9 +181,9 @@ export function AdminTab() {
           <button
             type="button"
             onClick={() => setActiveSubSection('billing')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all cursor-pointer ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
               activeSubSection === 'billing'
-                ? 'bg-indigo-600 text-white shadow'
+                ? 'bg-gradient-to-r from-cyan-400 to-blue-600 text-slate-950 shadow-md shadow-cyan-500/30'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
@@ -206,7 +206,7 @@ export function AdminTab() {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-semibold text-slate-200 flex items-center gap-2">
-              <Activity className="w-4 h-4 text-indigo-400" />
+              <Activity className="w-4 h-4 text-cyan-400" />
               <span>Model Router Endpoints</span>
             </h3>
             <button
@@ -226,7 +226,7 @@ export function AdminTab() {
                   isDefault: false,
                 });
               }}
-              className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-medium flex items-center gap-1.5 cursor-pointer shadow-sm transition-colors"
+              className="px-3 py-1.5 bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 rounded-lg text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-sm shadow-cyan-500/25 transition-all"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Add Endpoint</span>
@@ -249,7 +249,7 @@ export function AdminTab() {
                     <div className="flex items-center gap-2">
                       <span className="font-semibold text-white text-sm">{ep.name}</span>
                       {ep.isDefault && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 font-mono">
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-mono">
                           DEFAULT
                         </span>
                       )}
@@ -314,7 +314,7 @@ export function AdminTab() {
                     <button
                       type="button"
                       onClick={() => handleSetDefaultEndpoint(ep.id)}
-                      className="text-xs text-indigo-400 hover:text-indigo-300 cursor-pointer"
+                      className="text-xs text-cyan-400 hover:text-cyan-300 font-medium cursor-pointer"
                     >
                       Set as Default Router →
                     </button>
@@ -438,7 +438,7 @@ export function AdminTab() {
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg flex items-center gap-1"
+                    className="px-4 py-1.5 bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 font-bold rounded-lg flex items-center gap-1 shadow-md shadow-cyan-500/20"
                   >
                     <Check className="w-3.5 h-3.5" />
                     <span>Save Endpoint</span>
@@ -462,7 +462,7 @@ export function AdminTab() {
                 placeholder="Search email, name, or user ID..."
                 value={userSearchQuery}
                 onChange={(e) => setUserSearchQuery(e.target.value)}
-                className="w-full pl-8 pr-3 py-1.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+                className="w-full pl-8 pr-3 py-1.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-cyan-400"
               />
             </div>
 
@@ -474,9 +474,9 @@ export function AdminTab() {
                   key={plan}
                   type="button"
                   onClick={() => setUserPlanFilter(plan)}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-medium uppercase transition-colors cursor-pointer ${
+                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold uppercase transition-colors cursor-pointer ${
                     userPlanFilter === plan
-                      ? 'bg-indigo-600 text-white'
+                      ? 'bg-gradient-to-r from-cyan-400 to-blue-600 text-slate-950 shadow-sm shadow-cyan-500/30'
                       : 'bg-slate-950 text-slate-400 hover:text-slate-200 border border-slate-800'
                   }`}
                 >
@@ -514,7 +514,7 @@ export function AdminTab() {
                             u.plan === 'enterprise'
                               ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
                               : u.plan === 'pro'
-                              ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30'
+                              ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
                               : 'bg-slate-800 text-slate-400'
                           }`}
                         >
@@ -531,7 +531,7 @@ export function AdminTab() {
                             onClick={() =>
                               setEditingUserCredits({ id: u.id, amount: u.creditsBalance })
                             }
-                            className="text-[11px] text-indigo-400 hover:text-indigo-300 ml-1 cursor-pointer"
+                            className="text-[11px] text-cyan-400 hover:text-cyan-300 font-medium ml-1 cursor-pointer"
                           >
                             Adjust
                           </button>
@@ -638,7 +638,7 @@ export function AdminTab() {
             </div>
             <button
               type="submit"
-              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-medium flex items-center gap-1.5 cursor-pointer shadow-lg shadow-indigo-500/20"
+              className="px-4 py-2 bg-gradient-to-r from-cyan-400 via-teal-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 rounded-xl font-bold flex items-center gap-1.5 cursor-pointer shadow-lg shadow-cyan-500/25 transition-all"
             >
               <Save className="w-3.5 h-3.5" />
               <span>Save Configuration</span>

@@ -42,35 +42,35 @@ const STYLE_PRESETS: StylePreset[] = [
     name: 'Cyberpunk Neon',
     description: 'Futuristic sci-fi megacity, rain-slicked highway, glowing holographic neon',
     promptSuffix: 'cyberpunk futuristic metropolis at night, glowing neon billboards, volumetric fog, rainy reflections',
-    previewColor: 'from-pink-500 to-cyan-500',
+    previewColor: 'from-pink-500 to-cyan-400',
   },
   {
     id: 'nature',
     name: 'Tropical Sunset',
     description: 'Golden hour coastline, crystal water reflections, palm trees, warm skies',
     promptSuffix: 'tropical island sunset, golden reflections on ocean waves, palm trees, purple clouds',
-    previewColor: 'from-amber-500 to-orange-600',
+    previewColor: 'from-amber-400 to-orange-500',
   },
   {
     id: 'space',
     name: 'Cosmic Nebula',
     description: 'Deep space stars, swirling celestial dust, planets, stellar rings',
     promptSuffix: 'deep space nebula, purple and teal cosmic dust, glowing galaxies, ringed planet, stellar skybox',
-    previewColor: 'from-purple-600 to-indigo-800',
+    previewColor: 'from-cyan-400 to-blue-600',
   },
   {
     id: 'interior',
     name: 'Modern Penthouse',
     description: 'Floor-to-ceiling glass panoramic loft, oak flooring, architectural lighting',
     promptSuffix: 'luxury modern penthouse interior, floor-to-ceiling glass windows, evening city view, warm oak wood',
-    previewColor: 'from-stone-600 to-amber-700',
+    previewColor: 'from-teal-500 to-sky-700',
   },
   {
     id: 'fantasy',
     name: 'Celestial Ruins',
     description: 'Floating ancient temple, enchanted glowing runes, aurora borealis sky',
     promptSuffix: 'ancient fantasy temple ruins, floating celestial stones, glowing magical runes, aurora sky',
-    previewColor: 'from-emerald-500 to-teal-700',
+    previewColor: 'from-emerald-400 to-teal-600',
   },
 ];
 
@@ -237,19 +237,19 @@ export function GeneratorTab({
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start relative">
       {/* Gemini Proxy Config Modal */}
       {showConfigModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-200">
-          <div className="glass-panel border border-white/15 rounded-3xl max-w-md w-full p-6 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)] space-y-4">
-            <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-in fade-in duration-200">
+          <div className="glass-panel border border-cyan-400/30 rounded-3xl max-w-md w-full p-6 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)] space-y-4">
+            <div className="flex items-center justify-between border-b border-cyan-500/20 pb-3">
               <div className="flex items-center gap-2 text-white">
-                <div className="p-1.5 bg-indigo-500/20 text-indigo-300 rounded-lg">
+                <div className="p-1.5 bg-cyan-500/20 text-cyan-300 rounded-lg">
                   <Settings2 className="w-4 h-4" />
                 </div>
-                <h3 className="font-semibold text-base">AI Model &amp; Local Proxy Settings</h3>
+                <h3 className="font-bold text-base text-cyan-100">AI Model &amp; Local Proxy Settings</h3>
               </div>
               <button
                 type="button"
                 onClick={() => setShowConfigModal(false)}
-                className="w-7 h-7 rounded-full bg-white/[0.05] hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center text-xs transition-colors cursor-pointer"
+                className="w-7 h-7 rounded-full bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 hover:text-white flex items-center justify-center text-xs transition-colors cursor-pointer"
               >
                 ✕
               </button>
@@ -257,25 +257,25 @@ export function GeneratorTab({
 
             <div className="space-y-3.5 text-xs">
               {/* Quick Preset 8317 Trigger */}
-              <div className="p-3 bg-gradient-to-r from-indigo-950/60 to-purple-950/40 border border-indigo-500/30 rounded-2xl flex items-center justify-between gap-2 shadow-inner">
+              <div className="p-3 bg-gradient-to-r from-cyan-950/70 to-blue-950/50 border border-cyan-400/40 rounded-2xl flex items-center justify-between gap-2 shadow-inner">
                 <div>
-                  <div className="font-semibold text-indigo-200 flex items-center gap-1.5">
-                    <Zap className="w-3.5 h-3.5 text-indigo-400" />
+                  <div className="font-bold text-cyan-200 flex items-center gap-1.5">
+                    <Zap className="w-3.5 h-3.5 text-cyan-400" />
                     <span>Local 8317 Proxy Setup</span>
                   </div>
-                  <div className="text-[11px] text-slate-400 mt-0.5">Detected local CLI Proxy API running on port 8317</div>
+                  <div className="text-[11px] text-cyan-300/70 mt-0.5">Detected local CLI Proxy API on port 8317</div>
                 </div>
                 <button
                   type="button"
                   onClick={handleLoad8317Default}
-                  className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-medium cursor-pointer shrink-0 transition-all shadow-md active:scale-95"
+                  className="px-3 py-1.5 bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-bold rounded-xl cursor-pointer shrink-0 transition-all shadow-md shadow-cyan-400/25 active:scale-95"
                 >
                   Load 8317 Defaults
                 </button>
               </div>
 
               <div>
-                <label className="block text-slate-300 font-medium mb-1">
+                <label className="block text-cyan-200 font-semibold mb-1">
                   Proxy Base URL
                 </label>
                 <input
@@ -283,15 +283,15 @@ export function GeneratorTab({
                   value={geminiConfig.baseUrl}
                   onChange={(e) => setGeminiConfig({ ...geminiConfig, baseUrl: e.target.value })}
                   placeholder="http://127.0.0.1:8317"
-                  className="w-full px-3.5 py-2.5 bg-[#080b16] border border-white/10 rounded-xl text-slate-200 focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 font-mono text-xs transition-all"
+                  className="w-full px-3.5 py-2.5 bg-[#030a17] border border-cyan-500/30 rounded-xl text-cyan-100 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/25 font-mono text-xs transition-all"
                 />
-                <p className="text-[11px] text-slate-500 mt-1">
-                  Default address is <code className="text-indigo-400">http://127.0.0.1:8317</code>, routing to <code className="text-slate-400">/v1/images/generations</code>.
+                <p className="text-[11px] text-cyan-300/60 mt-1">
+                  Default address is <code className="text-cyan-400">http://127.0.0.1:8317</code>.
                 </p>
               </div>
 
               <div>
-                <label className="block text-slate-300 font-medium mb-1">
+                <label className="block text-cyan-200 font-semibold mb-1">
                   API Key / Bearer Token
                 </label>
                 <input
@@ -299,15 +299,15 @@ export function GeneratorTab({
                   value={geminiConfig.apiKey}
                   onChange={(e) => setGeminiConfig({ ...geminiConfig, apiKey: e.target.value })}
                   placeholder="Enter Authorization Bearer Token"
-                  className="w-full px-3.5 py-2.5 bg-[#080b16] border border-white/10 rounded-xl text-slate-200 focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 font-mono text-xs transition-all"
+                  className="w-full px-3.5 py-2.5 bg-[#030a17] border border-cyan-500/30 rounded-xl text-cyan-100 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/25 font-mono text-xs transition-all"
                 />
-                <p className="text-[11px] text-slate-500 mt-1">
+                <p className="text-[11px] text-cyan-300/60 mt-1">
                   Stored securely in your local browser storage.
                 </p>
               </div>
 
               <div>
-                <label className="block text-slate-300 font-medium mb-1">
+                <label className="block text-cyan-200 font-semibold mb-1">
                   Image Model Name
                 </label>
                 <input
@@ -315,19 +315,19 @@ export function GeneratorTab({
                   value={geminiConfig.model}
                   onChange={(e) => setGeminiConfig({ ...geminiConfig, model: e.target.value })}
                   placeholder="gpt-image-2.5"
-                  className="w-full px-3.5 py-2.5 bg-[#080b16] border border-white/10 rounded-xl text-slate-200 focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 font-mono text-xs transition-all"
+                  className="w-full px-3.5 py-2.5 bg-[#030a17] border border-cyan-500/30 rounded-xl text-cyan-100 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/25 font-mono text-xs transition-all"
                 />
                 <div className="flex flex-wrap items-center gap-1.5 mt-2">
-                  <span className="text-[10px] text-slate-500 font-medium">8317 Image Models:</span>
-                  {['gpt-image-2.5', 'gpt-image-2', 'gpt-image-1.5', 'gpt-image-2.5-flare', 'gpt-image-2.5-sunburst'].map((m) => (
+                  <span className="text-[10px] text-cyan-300/70 font-semibold">Models:</span>
+                  {['gpt-image-2.5', 'gpt-image-2', 'gpt-image-1.5', 'gpt-image-2.5-flare'].map((m) => (
                     <button
                       key={m}
                       type="button"
                       onClick={() => setGeminiConfig({ ...geminiConfig, model: m })}
                       className={`text-[10px] px-2 py-0.5 rounded-lg font-mono cursor-pointer transition-all ${
                         geminiConfig.model === m
-                          ? 'bg-indigo-600 text-white shadow-sm'
-                          : 'bg-white/[0.05] hover:bg-white/10 text-slate-300'
+                          ? 'bg-cyan-400 text-slate-950 font-bold shadow-sm shadow-cyan-400/30'
+                          : 'bg-cyan-950/60 hover:bg-cyan-900/60 text-cyan-300 border border-cyan-500/20'
                       }`}
                     >
                       {m}
@@ -341,8 +341,8 @@ export function GeneratorTab({
                 <div
                   className={`p-3 rounded-xl border text-xs flex items-center gap-2 ${
                     testConnResult.success
-                      ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
-                      : 'bg-red-500/10 border-red-500/30 text-red-300'
+                      ? 'bg-teal-500/15 border-teal-400/40 text-teal-300'
+                      : 'bg-red-500/15 border-red-500/40 text-red-300'
                   }`}
                 >
                   <span className="shrink-0">{testConnResult.success ? '✓' : '⚠'}</span>
@@ -351,12 +351,12 @@ export function GeneratorTab({
               )}
             </div>
 
-            <div className="flex items-center justify-between gap-2 pt-3 border-t border-white/[0.08]">
+            <div className="flex items-center justify-between gap-2 pt-3 border-t border-cyan-500/20">
               <button
                 type="button"
                 disabled={isTestingConn}
                 onClick={handleTestConnection}
-                className="px-3.5 py-2 bg-white/[0.05] hover:bg-white/10 text-slate-200 rounded-xl text-xs font-medium cursor-pointer disabled:opacity-50 transition-colors"
+                className="px-3.5 py-2 bg-cyan-950/60 hover:bg-cyan-900/60 border border-cyan-500/30 text-cyan-200 rounded-xl text-xs font-semibold cursor-pointer disabled:opacity-50 transition-colors"
               >
                 {isTestingConn ? 'Testing...' : 'Test Connection'}
               </button>
@@ -372,7 +372,7 @@ export function GeneratorTab({
                 <button
                   type="button"
                   onClick={handleSaveConfig}
-                  className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white rounded-xl text-xs font-semibold cursor-pointer flex items-center gap-1.5 shadow-lg shadow-indigo-500/25 active:scale-95 transition-all"
+                  className="px-4 py-2 bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 font-bold rounded-xl text-xs cursor-pointer flex items-center gap-1.5 shadow-lg shadow-cyan-400/25 active:scale-95 transition-all"
                 >
                   <Check className="w-3.5 h-3.5" />
                   <span>Save &amp; Apply</span>
@@ -384,37 +384,37 @@ export function GeneratorTab({
       )}
 
       {/* Left Column: Generation Controls Form */}
-      <div className="lg:col-span-5 space-y-6 glass-panel rounded-3xl p-6 relative overflow-hidden shadow-[0_12px_40px_rgba(0,0,0,0.5)]">
+      <div className="lg:col-span-5 space-y-6 glass-panel rounded-3xl p-6 relative overflow-hidden shadow-[0_16px_50px_rgba(0,0,0,0.6)]">
         {/* Subtle decorative glow */}
-        <div className="absolute top-0 right-0 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-0 right-0 w-52 h-52 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none" />
 
         <div className="flex items-center justify-between relative z-10">
           <div className="flex items-center gap-2.5">
-            <div className="p-2.5 bg-gradient-to-tr from-indigo-500 to-purple-600 rounded-2xl text-white shadow-lg shadow-indigo-500/30">
-              <Sparkles className="w-4 h-4" />
+            <div className="p-2.5 bg-gradient-to-tr from-cyan-400 via-teal-400 to-blue-600 rounded-2xl text-slate-950 shadow-lg shadow-cyan-400/30 font-black">
+              <Sparkles className="w-4 h-4 fill-current" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-white tracking-tight">AI 360° Generator</h2>
-              <p className="text-xs text-slate-400">Equirectangular VR &amp; Skybox Engine</p>
+              <h2 className="text-lg font-extrabold text-white tracking-tight">AI 360° Generator</h2>
+              <p className="text-xs text-cyan-300/70">Equirectangular VR &amp; Skybox Engine</p>
             </div>
           </div>
-          <span className="text-[10px] font-mono font-semibold px-2.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            2:1 RATIO
+          <span className="text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-cyan-400/15 border border-cyan-400/40 text-cyan-300 flex items-center gap-1.5 shadow-sm">
+            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_#00F2FE]" />
+            2:1 STANDARD
           </span>
         </div>
 
         {/* Engine Switcher */}
-        <div className="space-y-2 bg-[#080b18]/70 border border-white/[0.08] rounded-2xl p-3.5 shadow-inner relative z-10">
+        <div className="space-y-2 bg-[#030c1c]/80 border border-cyan-500/20 rounded-2xl p-3.5 shadow-inner relative z-10">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-              <Cpu className="w-3.5 h-3.5 text-indigo-400" />
+            <span className="text-xs font-bold text-cyan-100 flex items-center gap-1.5">
+              <Cpu className="w-3.5 h-3.5 text-cyan-400" />
               <span>Generation Engine</span>
             </span>
             <button
               type="button"
               onClick={() => setShowConfigModal(true)}
-              className="text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-1 transition-colors cursor-pointer font-medium"
+              className="text-xs text-cyan-400 hover:text-cyan-300 flex items-center gap-1 transition-colors cursor-pointer font-semibold"
             >
               <Settings2 className="w-3 h-3" />
               <span>Configure Proxy</span>
@@ -427,15 +427,15 @@ export function GeneratorTab({
               onClick={() => setEngineMode('procedural')}
               className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
                 engineMode === 'procedural'
-                  ? 'bg-indigo-600/20 border-indigo-500/80 text-white shadow-[0_0_20px_rgba(99,102,241,0.25)]'
-                  : 'bg-white/[0.02] border-white/[0.06] text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]'
+                  ? 'bg-cyan-500/20 border-cyan-400 text-white shadow-[0_0_20px_rgba(0,242,254,0.3)]'
+                  : 'bg-cyan-950/30 border-cyan-500/15 text-cyan-200/60 hover:text-white hover:bg-cyan-950/50'
               }`}
             >
-              <div className="text-xs font-semibold flex items-center gap-1.5">
-                <Cpu className="w-3.5 h-3.5 text-cyan-400" />
+              <div className="text-xs font-bold flex items-center gap-1.5">
+                <Cpu className="w-3.5 h-3.5 text-teal-300" />
                 <span>Instant Engine</span>
               </div>
-              <div className="text-[10px] text-slate-500 mt-0.5">Procedural render, 0s delay</div>
+              <div className="text-[10px] text-cyan-300/60 mt-0.5">Procedural render, 0s delay</div>
             </button>
 
             <button
@@ -443,30 +443,30 @@ export function GeneratorTab({
               onClick={() => setEngineMode('gemini')}
               className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
                 engineMode === 'gemini'
-                  ? 'bg-gradient-to-r from-indigo-900/40 to-purple-900/40 border-purple-500/80 text-white shadow-[0_0_20px_rgba(168,85,247,0.25)]'
-                  : 'bg-white/[0.02] border-white/[0.06] text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]'
+                  ? 'bg-gradient-to-r from-cyan-900/50 to-blue-900/50 border-cyan-400 text-white shadow-[0_0_20px_rgba(0,242,254,0.3)]'
+                  : 'bg-cyan-950/30 border-cyan-500/15 text-cyan-200/60 hover:text-white hover:bg-cyan-950/50'
               }`}
             >
-              <div className="text-xs font-semibold flex items-center gap-1.5">
-                <Bot className="w-3.5 h-3.5 text-purple-400" />
+              <div className="text-xs font-bold flex items-center gap-1.5">
+                <Bot className="w-3.5 h-3.5 text-cyan-300" />
                 <span>AI Model (8317)</span>
               </div>
-              <div className="text-[10px] text-slate-400 truncate mt-0.5">
+              <div className="text-[10px] text-cyan-300/80 truncate mt-0.5 font-mono">
                 {geminiConfig.model}
               </div>
             </button>
           </div>
 
           {engineMode === 'gemini' && (
-            <div className="px-3 py-1.5 bg-purple-950/40 border border-purple-500/20 rounded-xl flex items-center justify-between text-[11px] text-purple-200">
+            <div className="px-3 py-1.5 bg-cyan-950/50 border border-cyan-400/30 rounded-xl flex items-center justify-between text-[11px] text-cyan-200">
               <span className="flex items-center gap-1.5 truncate">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_6px_#00F2FE]" />
                 <span className="truncate">Connected: {geminiConfig.baseUrl}</span>
               </span>
               <button
                 type="button"
                 onClick={() => setShowConfigModal(true)}
-                className="text-purple-300 hover:text-white underline shrink-0 ml-2 cursor-pointer font-medium"
+                className="text-cyan-400 hover:text-cyan-200 underline shrink-0 ml-2 cursor-pointer font-semibold"
               >
                 Settings
               </button>
@@ -474,7 +474,7 @@ export function GeneratorTab({
           )}
 
           {configSavedToast && (
-            <p className="text-[11px] text-emerald-400 flex items-center gap-1">
+            <p className="text-[11px] text-teal-300 flex items-center gap-1 font-semibold">
               <Check className="w-3 h-3" /> Proxy configuration saved!
             </p>
           )}
@@ -483,13 +483,13 @@ export function GeneratorTab({
         {/* Prompt Input */}
         <div className="space-y-2 relative z-10">
           <div className="flex items-center justify-between">
-            <label htmlFor="prompt-input" className="text-xs font-semibold text-slate-300">
+            <label htmlFor="prompt-input" className="text-xs font-bold text-cyan-100">
               Prompt Description
             </label>
             <button
               type="button"
               onClick={handleRandomPrompt}
-              className="text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-1.5 transition-colors cursor-pointer font-medium hover:scale-105 active:scale-95"
+              className="text-xs text-cyan-400 hover:text-cyan-300 flex items-center gap-1.5 transition-all cursor-pointer font-bold hover:scale-105 active:scale-95"
             >
               <RefreshCw className="w-3 h-3" />
               <span>Surprise Me</span>
@@ -501,13 +501,13 @@ export function GeneratorTab({
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             placeholder="Describe the 360° environment you want to generate (e.g. Cyberpunk neon streets at rainy night, futuristic space station, tropical sunset island)..."
-            className="w-full px-4 py-3 bg-[#080b18]/80 border border-white/10 rounded-2xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-400 focus:ring-4 focus:ring-indigo-500/15 transition-all resize-none shadow-inner"
+            className="w-full px-4 py-3 bg-[#030c1c]/90 border border-cyan-500/25 rounded-2xl text-sm text-cyan-100 placeholder-cyan-500/40 focus:outline-none focus:border-cyan-400 focus:ring-4 focus:ring-cyan-400/20 transition-all resize-none shadow-inner"
           />
         </div>
 
         {/* Style Presets */}
         <div className="space-y-2.5 relative z-10">
-          <label className="text-xs font-semibold text-slate-300">Environment Style Preset</label>
+          <label className="text-xs font-bold text-cyan-100">Environment Style Preset</label>
           <div className="grid grid-cols-2 gap-2">
             {STYLE_PRESETS.map((style) => (
               <button
@@ -516,17 +516,17 @@ export function GeneratorTab({
                 onClick={() => setSelectedStyle(style.id)}
                 className={`p-3 rounded-2xl border text-left transition-all cursor-pointer relative overflow-hidden group ${
                   selectedStyle === style.id
-                    ? 'bg-indigo-600/15 border-indigo-500/80 text-white shadow-[0_0_20px_rgba(99,102,241,0.2)]'
-                    : 'bg-[#080b18]/60 border-white/[0.06] text-slate-400 hover:border-white/15 hover:text-slate-200'
+                    ? 'bg-cyan-500/20 border-cyan-400 text-white shadow-[0_0_25px_rgba(0,242,254,0.35)]'
+                    : 'bg-[#030c1c]/60 border-cyan-500/15 text-cyan-200/60 hover:border-cyan-400/40 hover:text-cyan-100'
                 }`}
               >
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs font-semibold">{style.name}</span>
+                  <span className="text-xs font-bold">{style.name}</span>
                   <div
-                    className={`w-3 h-3 rounded-full bg-gradient-to-r ${style.previewColor} shadow-sm group-hover:scale-110 transition-transform`}
+                    className={`w-3 h-3 rounded-full bg-gradient-to-r ${style.previewColor} shadow-sm group-hover:scale-110 transition-transform shadow-[0_0_8px_rgba(0,242,254,0.4)]`}
                   />
                 </div>
-                <p className="text-[10px] text-slate-500 truncate">{style.description}</p>
+                <p className="text-[10px] text-cyan-300/60 truncate">{style.description}</p>
               </button>
             ))}
           </div>
@@ -535,17 +535,17 @@ export function GeneratorTab({
         {/* Resolution Tier & Seam Correction */}
         <div className="grid grid-cols-2 gap-3 pt-1 relative z-10">
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-300">Output Resolution</label>
-            <div className="flex items-center gap-1 bg-[#080b18] p-1 border border-white/10 rounded-xl">
+            <label className="text-xs font-bold text-cyan-100">Output Resolution</label>
+            <div className="flex items-center gap-1 bg-[#030c1c] p-1 border border-cyan-500/20 rounded-xl">
               {(['1K', '2K', '4K'] as ResolutionTier[]).map((res) => (
                 <button
                   key={res}
                   type="button"
                   onClick={() => setResolution(res)}
-                  className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                  className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                     resolution === res
-                      ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-md font-semibold'
-                      : 'text-slate-400 hover:text-slate-200'
+                      ? 'bg-gradient-to-r from-cyan-400 to-blue-600 text-slate-950 shadow-md shadow-cyan-400/30'
+                      : 'text-cyan-300/60 hover:text-white'
                   }`}
                 >
                   {res}
@@ -555,28 +555,28 @@ export function GeneratorTab({
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-300">360° Seam Alignment</label>
+            <label className="text-xs font-bold text-cyan-100">360° Seam Alignment</label>
             <button
               type="button"
               onClick={() => setSeamCorrection((prev) => !prev)}
-              className={`w-full py-2 px-3.5 rounded-xl border text-xs font-medium flex items-center justify-between transition-all cursor-pointer ${
+              className={`w-full py-2 px-3.5 rounded-xl border text-xs font-bold flex items-center justify-between transition-all cursor-pointer ${
                 seamCorrection
-                  ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.15)]'
-                  : 'bg-[#080b18] border-white/10 text-slate-400 hover:text-slate-300'
+                  ? 'bg-teal-500/15 border-teal-400/60 text-teal-300 shadow-[0_0_20px_rgba(13,242,201,0.25)]'
+                  : 'bg-[#030c1c] border-cyan-500/20 text-cyan-400/60 hover:text-cyan-200'
               }`}
             >
               <span>Seamless Wrap</span>
-              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+              <CheckCircle2 className="w-4 h-4 text-teal-300" />
             </button>
           </div>
         </div>
 
         {/* API Error Box */}
         {apiError && (
-          <div className="p-3.5 bg-red-950/40 border border-red-800/80 rounded-2xl text-xs text-red-200 flex items-start gap-2.5">
+          <div className="p-3.5 bg-red-950/50 border border-red-500/50 rounded-2xl text-xs text-red-200 flex items-start gap-2.5">
             <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
             <div>
-              <p className="font-semibold">API Generation Error:</p>
+              <p className="font-bold">API Generation Error:</p>
               <p className="text-[11px] text-red-300 break-all">{apiError}</p>
               <button
                 type="button"
@@ -595,11 +595,11 @@ export function GeneratorTab({
             type="button"
             disabled={isGenerating}
             onClick={handleGenerate}
-            className="shimmer-btn w-full py-4 bg-gradient-to-r from-indigo-500 via-purple-600 to-pink-500 hover:from-indigo-400 hover:to-pink-400 text-white font-bold text-sm rounded-2xl shadow-xl shadow-indigo-500/30 hover:shadow-indigo-500/50 hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer"
+            className="shimmer-btn w-full py-4 bg-gradient-to-r from-cyan-400 via-teal-300 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 font-black text-sm rounded-2xl shadow-xl shadow-cyan-400/35 hover:shadow-cyan-400/60 hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer tracking-wide"
           >
             {isGenerating ? (
               <>
-                <RefreshCw className="w-4 h-4 animate-spin" />
+                <RefreshCw className="w-4 h-4 animate-spin text-slate-950" />
                 <span>
                   {engineMode === 'gemini'
                     ? `Generating 360° skybox via ${geminiConfig.model}... (${generationProgress}%)`
@@ -608,7 +608,7 @@ export function GeneratorTab({
               </>
             ) : (
               <>
-                <Sparkles className="w-4 h-4 fill-current" />
+                <Sparkles className="w-4 h-4 fill-current text-slate-950" />
                 <span>
                   {engineMode === 'gemini' ? 'Generate 360° VR Panorama (AI)' : 'Generate 360° Panorama (Instant)'}
                 </span>
@@ -618,8 +618,8 @@ export function GeneratorTab({
         </div>
 
         {/* Quick Benchmark Presets */}
-        <div className="pt-3 border-t border-white/[0.08] relative z-10">
-          <span className="text-[10px] text-slate-500 uppercase tracking-wider font-mono font-semibold">
+        <div className="pt-3 border-t border-cyan-500/20 relative z-10">
+          <span className="text-[10px] text-cyan-400/80 uppercase tracking-wider font-mono font-bold">
             Quick Benchmark Presets:
           </span>
           <div className="flex flex-wrap gap-1.5 mt-2">
@@ -633,7 +633,7 @@ export function GeneratorTab({
                   const canvas = generateProceduralPanorama(p.id, p.prompt, 2048, 1024);
                   onPanoramaChange(canvas.toDataURL('image/png'));
                 }}
-                className="px-2.5 py-1 bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.08] hover:border-indigo-400/30 rounded-xl text-xs text-slate-300 hover:text-white transition-all cursor-pointer"
+                className="px-2.5 py-1 bg-cyan-950/40 hover:bg-cyan-900/60 border border-cyan-500/20 hover:border-cyan-400/50 rounded-xl text-xs text-cyan-200 hover:text-white transition-all cursor-pointer font-medium"
               >
                 {p.title}
               </button>
@@ -645,20 +645,20 @@ export function GeneratorTab({
       {/* Right Column: Interactive 360 WebGL Viewport & Export Matrix */}
       <div className="lg:col-span-7 space-y-4">
         {/* WebGL 3D Sphere Container with cinematic frame */}
-        <div className="glass-panel border border-white/[0.1] rounded-3xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.6)]">
-          <div className="px-5 py-3.5 bg-[#080b18]/90 border-b border-white/[0.08] flex items-center justify-between text-xs text-slate-300">
+        <div className="glass-panel border border-cyan-500/30 rounded-3xl overflow-hidden shadow-[0_25px_60px_rgba(0,10,30,0.8)]">
+          <div className="px-5 py-3.5 bg-[#030e20]/90 border-b border-cyan-500/20 flex items-center justify-between text-xs text-cyan-200">
             <div className="flex items-center gap-2.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="font-semibold text-white tracking-wide">Live 360° Viewport</span>
-              <span className="text-slate-500 hidden sm:inline">| Drag or swipe to look around</span>
+              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_#00F2FE]" />
+              <span className="font-bold text-white tracking-wide">Live 360° Viewport</span>
+              <span className="text-cyan-400/60 hidden sm:inline">| Drag or swipe to look around</span>
             </div>
-            <div className="flex items-center gap-2 text-[11px] text-slate-400 bg-white/[0.04] px-2.5 py-1 rounded-full border border-white/[0.06]">
-              <Sliders className="w-3.5 h-3.5 text-indigo-400" />
+            <div className="flex items-center gap-2 text-[11px] text-cyan-300 bg-cyan-950/60 px-2.5 py-1 rounded-full border border-cyan-500/30">
+              <Sliders className="w-3.5 h-3.5 text-cyan-400" />
               <span>FOV: 75° (Interactive)</span>
             </div>
           </div>
 
-          <div className="h-[480px] w-full relative">
+          <div className="h-[480px] w-full relative bg-[#020712]">
             <SphereViewer textureUrl={currentPanoramaUrl} className="w-full h-full" />
           </div>
         </div>
@@ -670,16 +670,16 @@ export function GeneratorTab({
             onClick={handleDownloadPng}
             className="glass-card p-3.5 rounded-2xl text-left cursor-pointer group"
           >
-            <div className="flex items-center justify-between mb-2 text-indigo-400 group-hover:text-indigo-300">
-              <div className="p-1.5 bg-indigo-500/15 rounded-lg group-hover:scale-110 transition-transform">
+            <div className="flex items-center justify-between mb-2 text-cyan-400 group-hover:text-cyan-300">
+              <div className="p-1.5 bg-cyan-500/15 rounded-lg group-hover:scale-110 transition-transform">
                 <Download className="w-4 h-4" />
               </div>
-              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/[0.06] text-slate-400 font-semibold">
+              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-cyan-950/60 text-cyan-300 font-bold border border-cyan-500/20">
                 PNG
               </span>
             </div>
-            <div className="text-xs font-semibold text-white">Download PNG</div>
-            <div className="text-[10px] text-slate-400 mt-0.5">2:1 Equirectangular</div>
+            <div className="text-xs font-bold text-white">Download PNG</div>
+            <div className="text-[10px] text-cyan-300/60 mt-0.5">2:1 Equirectangular</div>
           </button>
 
           <button
@@ -691,12 +691,12 @@ export function GeneratorTab({
               <div className="p-1.5 bg-amber-500/15 rounded-lg group-hover:scale-110 transition-transform">
                 <FileCode2 className="w-4 h-4" />
               </div>
-              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/[0.06] text-slate-400 font-semibold">
+              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-950/60 text-amber-300 font-bold border border-amber-500/20">
                 .HDR
               </span>
             </div>
-            <div className="text-xs font-semibold text-white">Export Radiance</div>
-            <div className="text-[10px] text-slate-400 mt-0.5">Blender / Unreal Ready</div>
+            <div className="text-xs font-bold text-white">Export Radiance</div>
+            <div className="text-[10px] text-cyan-300/60 mt-0.5">Blender / Unreal Ready</div>
           </button>
 
           <button
@@ -704,16 +704,16 @@ export function GeneratorTab({
             onClick={() => onNavigateTab('cubemap')}
             className="glass-card p-3.5 rounded-2xl text-left cursor-pointer group"
           >
-            <div className="flex items-center justify-between mb-2 text-cyan-400 group-hover:text-cyan-300">
-              <div className="p-1.5 bg-cyan-500/15 rounded-lg group-hover:scale-110 transition-transform">
+            <div className="flex items-center justify-between mb-2 text-teal-400 group-hover:text-teal-300">
+              <div className="p-1.5 bg-teal-500/15 rounded-lg group-hover:scale-110 transition-transform">
                 <Box className="w-4 h-4" />
               </div>
-              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/[0.06] text-slate-400 font-semibold">
+              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-teal-950/60 text-teal-300 font-bold border border-teal-500/20">
                 6 FACES
               </span>
             </div>
-            <div className="text-xs font-semibold text-white">Slice Cubemap</div>
-            <div className="text-[10px] text-slate-400 mt-0.5">Unity / Game Skybox</div>
+            <div className="text-xs font-bold text-white">Slice Cubemap</div>
+            <div className="text-[10px] text-cyan-300/60 mt-0.5">Unity / Game Skybox</div>
           </button>
 
           <button
@@ -725,12 +725,12 @@ export function GeneratorTab({
               <div className="p-1.5 bg-emerald-500/15 rounded-lg group-hover:scale-110 transition-transform">
                 <Globe2 className="w-4 h-4" />
               </div>
-              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/[0.06] text-slate-400 font-semibold">
+              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-950/60 text-emerald-300 font-bold border border-emerald-500/20">
                 3D
               </span>
             </div>
-            <div className="text-xs font-semibold text-white">Project to Globe</div>
-            <div className="text-[10px] text-slate-400 mt-0.5">Orbital 3D View</div>
+            <div className="text-xs font-bold text-white">Project to Globe</div>
+            <div className="text-[10px] text-cyan-300/60 mt-0.5">Orbital 3D View</div>
           </button>
         </div>
       </div>

@@ -75,9 +75,9 @@ export function GlobeTab({ currentPanoramaUrl }: GlobeTabProps) {
         <button
           type="button"
           onClick={() => setActiveGlobeTexture(currentPanoramaUrl)}
-          className="px-4 py-2 bg-white/[0.06] hover:bg-white/10 border border-white/10 hover:border-indigo-400/30 text-white text-xs font-semibold rounded-xl transition-all cursor-pointer flex items-center gap-1.5 active:scale-95 shadow-sm"
+          className="px-4 py-2 bg-white/[0.06] hover:bg-white/10 border border-white/10 hover:border-cyan-400/40 text-white text-xs font-semibold rounded-xl transition-all cursor-pointer flex items-center gap-1.5 active:scale-95 shadow-sm"
         >
-          <RotateCcw className="w-3.5 h-3.5 text-indigo-400" />
+          <RotateCcw className="w-3.5 h-3.5 text-cyan-400" />
           <span>Sync with Active 360 Panorama</span>
         </button>
       </div>

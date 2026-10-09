@@ -636,7 +636,7 @@ export function SphereViewer({
         <div className="absolute inset-0 pointer-events-none z-10 flex">
           <div className="w-1/2 border-r border-slate-700/60" />
           <div className="w-1/2" />
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-slate-900/90 text-[10px] px-3 py-1 rounded-full text-indigo-300 border border-slate-700">
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-slate-900/90 text-[10px] px-3 py-1 rounded-full text-cyan-300 border border-slate-700">
             Cardboard VR Stereoscopic Mode
           </div>
         </div>
@@ -644,13 +644,13 @@ export function SphereViewer({
 
       {/* Adding Hotspot Overlay Guide */}
       {isAddingHotspotMode && (
-        <div className="absolute top-16 left-1/2 -translate-x-1/2 z-30 px-4 py-2 bg-indigo-600/95 border border-indigo-400 text-white rounded-xl shadow-2xl text-xs flex items-center gap-2 animate-bounce">
-          <MapPin className="w-4 h-4 text-amber-300" />
+        <div className="absolute top-16 left-1/2 -translate-x-1/2 z-30 px-4 py-2 bg-gradient-to-r from-cyan-400 to-teal-300 text-slate-950 font-bold border border-cyan-200 rounded-xl shadow-2xl text-xs flex items-center gap-2 animate-bounce">
+          <MapPin className="w-4 h-4 text-slate-950" />
           <span>Pan camera and click canvas to drop hotspot marker</span>
           <button
             type="button"
             onClick={() => setIsAddingHotspotMode(false)}
-            className="p-1 hover:bg-indigo-700 rounded-lg ml-1"
+            className="p-1 hover:bg-black/10 rounded-lg ml-1"
           >
             <X className="w-3.5 h-3.5" />
           </button>
@@ -664,7 +664,7 @@ export function SphereViewer({
           onClick={() => setActiveMode('sphere')}
           className={`px-2.5 py-1 rounded-lg font-medium flex items-center gap-1 transition-all cursor-pointer ${
             activeMode === 'sphere'
-              ? 'bg-indigo-600 text-white shadow-sm'
+              ? 'bg-gradient-to-r from-cyan-400 to-blue-600 text-slate-950 font-bold shadow-sm shadow-cyan-500/30'
               : 'text-slate-400 hover:text-slate-200'
           }`}
           title="360° Spherical Panoramic Mode"
@@ -692,7 +692,7 @@ export function SphereViewer({
           onClick={() => setActiveMode('little-planet')}
           className={`px-2.5 py-1 rounded-lg font-medium flex items-center gap-1 transition-all cursor-pointer ${
             activeMode === 'little-planet'
-              ? 'bg-purple-600 text-white shadow-sm'
+              ? 'bg-teal-400 text-slate-950 font-bold shadow-sm shadow-teal-400/30'
               : 'text-slate-400 hover:text-slate-200'
           }`}
           title="Little Planet Stereographic Fisheye"
@@ -739,7 +739,7 @@ export function SphereViewer({
             onClick={() => setIsAddingHotspotMode((p) => !p)}
             className={`p-2 backdrop-blur-md border rounded-xl transition-colors cursor-pointer ${
               isAddingHotspotMode
-                ? 'bg-indigo-600 border-indigo-400 text-white'
+                ? 'bg-cyan-500 border-cyan-400 text-slate-950 font-bold'
                 : 'bg-slate-900/80 border-slate-800 text-slate-400 hover:text-white'
             }`}
             title="Add Hotspot Tour Marker in 360 Scene"
@@ -781,7 +781,7 @@ export function SphereViewer({
               setActiveHotspot(spot);
             }}
           >
-            <div className="p-2 bg-indigo-600/90 text-white rounded-full shadow-lg border-2 border-white group-hover:scale-125 transition-transform animate-pulse">
+            <div className="p-2 bg-gradient-to-tr from-cyan-400 to-teal-400 text-slate-950 rounded-full shadow-[0_0_15px_rgba(0,242,254,0.6)] border-2 border-white group-hover:scale-125 transition-transform animate-pulse">
               <MapPin className="w-3.5 h-3.5" />
             </div>
             <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-0.5 bg-slate-950/90 border border-slate-700 text-white text-[10px] rounded whitespace-nowrap shadow-md opacity-0 group-hover:opacity-100 transition-opacity">
@@ -796,7 +796,7 @@ export function SphereViewer({
         <div className="absolute bottom-16 left-1/2 -translate-x-1/2 z-30 p-4 bg-slate-900/95 border border-slate-700 rounded-2xl shadow-2xl max-w-sm w-full text-xs text-slate-200 space-y-2 animate-fadeIn">
           <div className="flex items-center justify-between">
             <span className="font-bold text-white flex items-center gap-1.5 text-sm">
-              <MapPin className="w-4 h-4 text-indigo-400" />
+              <MapPin className="w-4 h-4 text-cyan-400" />
               {activeHotspot.title}
             </span>
             <button
@@ -834,7 +834,7 @@ export function SphereViewer({
           >
             <div className="flex items-center justify-between border-b border-slate-800 pb-2">
               <span className="font-semibold text-white flex items-center gap-1.5">
-                <MapPin className="w-4 h-4 text-indigo-400" />
+                <MapPin className="w-4 h-4 text-cyan-400" />
                 New 360° Tour Hotspot
               </span>
               <button
@@ -879,7 +879,7 @@ export function SphereViewer({
               </button>
               <button
                 type="submit"
-                className="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-medium cursor-pointer"
+                className="px-4 py-1.5 bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 font-bold rounded-lg cursor-pointer shadow-lg shadow-cyan-500/20"
               >
                 Confirm Add
               </button>
@@ -937,7 +937,7 @@ export function SphereViewer({
             type="button"
             onClick={() => setIsAutoRotating((prev) => !prev)}
             className={`p-2 rounded-full transition-all cursor-pointer ${
-              isAutoRotating ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-md shadow-indigo-500/30' : 'hover:bg-white/10 text-slate-300'
+              isAutoRotating ? 'bg-gradient-to-r from-cyan-400 to-teal-300 text-slate-950 font-bold shadow-md shadow-cyan-500/40' : 'hover:bg-white/10 text-slate-300'
             }`}
             title={isAutoRotating ? 'Pause Auto-Rotation (Space)' : 'Start Auto-Rotation (Space)'}
           >
@@ -987,7 +987,7 @@ export function SphereViewer({
             type="button"
             onClick={() => setShowSettingsDrawer((p) => !p)}
             className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
-              showSettingsDrawer ? 'bg-indigo-600 text-white shadow-md' : 'hover:bg-white/10 text-slate-300'
+              showSettingsDrawer ? 'bg-cyan-400 text-slate-950 font-bold shadow-md shadow-cyan-500/30' : 'hover:bg-white/10 text-slate-300'
             }`}
             title="Color Grading, Exposure & Soundscape"
           >
@@ -1019,10 +1019,10 @@ export function SphereViewer({
 
       {/* Real-time Quality & Lighting & Audio Tuning Drawer */}
       {showSettingsDrawer && (
-        <div className="absolute top-16 right-4 z-30 p-5 glass-panel border border-white/15 rounded-3xl shadow-2xl text-xs space-y-4 w-72 text-slate-200 animate-in fade-in duration-200">
+        <div className="absolute top-16 right-4 z-30 p-5 glass-panel border border-cyan-500/20 rounded-3xl shadow-2xl text-xs space-y-4 w-72 text-slate-200 animate-in fade-in duration-200">
           <div className="flex items-center justify-between pb-2.5 border-b border-white/[0.08]">
             <span className="font-bold text-white flex items-center gap-2">
-              <Sliders className="w-4 h-4 text-indigo-400" />
+              <Sliders className="w-4 h-4 text-cyan-400" />
               Visual Tuning &amp; Audio
             </span>
             <button
@@ -1050,7 +1050,7 @@ export function SphereViewer({
               step="0.05"
               value={exposure}
               onChange={(e) => setExposure(parseFloat(e.target.value))}
-              className="w-full accent-indigo-500 cursor-pointer"
+              className="w-full accent-cyan-400 cursor-pointer"
             />
           </div>
 
@@ -1067,7 +1067,7 @@ export function SphereViewer({
               step="2"
               value={contrast}
               onChange={(e) => setContrast(parseInt(e.target.value, 10))}
-              className="w-full accent-indigo-500 cursor-pointer"
+              className="w-full accent-cyan-400 cursor-pointer"
             />
           </div>
 
@@ -1084,7 +1084,7 @@ export function SphereViewer({
               step="5"
               value={saturation}
               onChange={(e) => setSaturation(parseInt(e.target.value, 10))}
-              className="w-full accent-indigo-500 cursor-pointer"
+              className="w-full accent-cyan-400 cursor-pointer"
             />
           </div>
 

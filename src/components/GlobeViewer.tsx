@@ -187,7 +187,7 @@ export function GlobeViewer({ textureUrl, className = '' }: GlobeViewerProps) {
           type="button"
           onClick={() => setWireframe((p) => !p)}
           className={`px-2.5 py-1 rounded-full text-xs font-medium flex items-center gap-1 transition-colors ${
-            wireframe ? 'bg-indigo-600 text-white' : 'hover:bg-slate-800 text-slate-300'
+            wireframe ? 'bg-cyan-400 text-slate-950 font-bold shadow-md shadow-cyan-500/30' : 'hover:bg-slate-800 text-slate-300'
           }`}
           title="Toggle Wireframe Mesh"
         >

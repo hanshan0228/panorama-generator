@@ -119,7 +119,7 @@ export function CubemapTab({ currentPanoramaUrl }: CubemapTabProps) {
           type="button"
           onClick={handleDownloadAllZip}
           disabled={isSlicing || faces.length === 0}
-          className="shimmer-btn px-6 py-3 bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-cyan-500/25 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50 active:scale-95"
+          className="shimmer-btn px-6 py-3 bg-gradient-to-r from-cyan-400 via-teal-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 font-extrabold text-xs rounded-xl shadow-lg shadow-cyan-500/30 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50 active:scale-95"
         >
           {downloadSuccess ? (
             <>

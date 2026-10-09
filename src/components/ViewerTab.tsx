@@ -330,10 +330,10 @@ export function ViewerTab({
             <button
               type="button"
               onClick={() => setActiveProjection('curved')}
-              className={`px-3.5 py-2 rounded-xl font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+              className={`px-3.5 py-2 rounded-xl font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
                 activeProjection === 'curved'
-                  ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-600/30'
-                  : 'bg-white/[0.05] border border-amber-500/30 text-amber-200 hover:bg-white/10'
+                  ? 'bg-cyan-400 text-slate-950 shadow-lg shadow-cyan-400/30 font-extrabold'
+                  : 'bg-cyan-950/40 border border-amber-500/30 text-amber-200 hover:bg-cyan-900/40'
               }`}
             >
               <Tv className="w-4 h-4 text-cyan-300" />
@@ -343,7 +343,7 @@ export function ViewerTab({
             <button
               type="button"
               onClick={handleAutoFitToEquirectangular}
-              className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white rounded-xl font-semibold flex items-center gap-1.5 shadow-lg shadow-indigo-500/25 transition-all cursor-pointer"
+              className="px-4 py-2 bg-gradient-to-r from-cyan-400 to-blue-600 hover:from-cyan-300 hover:to-blue-500 text-slate-950 rounded-xl font-extrabold flex items-center gap-1.5 shadow-lg shadow-cyan-400/25 transition-all cursor-pointer"
             >
               <Wand2 className="w-4 h-4" />
               <span>Smart Convert to 2:1</span>
@@ -353,21 +353,21 @@ export function ViewerTab({
       )}
 
       {/* Main Interactive Stage */}
-      <div className="glass-panel border border-white/10 rounded-3xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.6)]">
+      <div className="glass-panel border border-cyan-500/25 rounded-3xl overflow-hidden shadow-[0_20px_60px_rgba(0,10,30,0.7)]">
         {/* Top Control Strip */}
-        <div className="px-5 py-3.5 bg-[#080b18]/90 border-b border-white/[0.08] flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div className="px-5 py-3.5 bg-[#030e20]/90 border-b border-cyan-500/20 flex flex-wrap items-center justify-between gap-3 text-xs">
           <div className="flex items-center gap-3">
-            <span className="font-semibold text-white flex items-center gap-2 tracking-wide">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="font-bold text-white flex items-center gap-2 tracking-wide">
+              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_#00F2FE]" />
               Interactive Panorama Canvas
             </span>
-            <div className="hidden sm:flex items-center gap-2 text-slate-400 font-mono text-[11px]">
-              <span className="px-2 py-0.5 bg-white/[0.04] rounded-md border border-white/[0.06]">{imageMetadata.width} × {imageMetadata.height}px</span>
+            <div className="hidden sm:flex items-center gap-2 text-cyan-300/70 font-mono text-[11px]">
+              <span className="px-2 py-0.5 bg-cyan-950/60 rounded-md border border-cyan-500/20">{imageMetadata.width} × {imageMetadata.height}px</span>
               <span>•</span>
               <span className={`px-2 py-0.5 rounded-md border ${
                 imageMetadata.is2to1
-                  ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-300'
-                  : 'bg-amber-500/10 border-amber-500/20 text-amber-300 font-semibold'
+                  ? 'bg-teal-500/15 border-teal-400/30 text-teal-300 font-bold'
+                  : 'bg-amber-500/15 border-amber-500/30 text-amber-300 font-bold'
               }`}>
                 Ratio: {imageMetadata.aspectRatio}
               </span>
@@ -380,7 +380,7 @@ export function ViewerTab({
               <button
                 type="button"
                 onClick={handleRestoreOriginal}
-                className="px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/50 text-amber-200 rounded-xl cursor-pointer flex items-center gap-1.5 font-medium transition-colors shadow-sm"
+                className="px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/50 text-amber-200 rounded-xl cursor-pointer flex items-center gap-1.5 font-bold transition-colors shadow-sm"
                 title="Revert modifications and restore your original uploaded photo"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
@@ -392,17 +392,17 @@ export function ViewerTab({
               type="button"
               disabled={isUpscaling}
               onClick={handleUpscaleEnhance}
-              className="px-3.5 py-1.5 bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white rounded-xl cursor-pointer flex items-center gap-1.5 font-semibold transition-all shadow-md shadow-cyan-600/20 disabled:opacity-60 active:scale-95"
+              className="px-3.5 py-1.5 bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 rounded-xl cursor-pointer flex items-center gap-1.5 font-extrabold transition-all shadow-md shadow-cyan-400/25 disabled:opacity-60 active:scale-95"
               title="Sharpen and upscale resolution up to 4K using unsharp masking"
             >
               {isUpscaling ? (
                 <>
-                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin text-slate-950" />
                   <span>Upscaling to 4K...</span>
                 </>
               ) : (
                 <>
-                  <Zap className="w-3.5 h-3.5 text-amber-300 fill-current" />
+                  <Zap className="w-3.5 h-3.5 text-slate-950 fill-current" />
                   <span>4K Upscale</span>
                 </>
               )}
@@ -411,10 +411,10 @@ export function ViewerTab({
             <button
               type="button"
               onClick={handleHealSeam}
-              className="px-3 py-1.5 bg-white/[0.05] hover:bg-white/10 border border-white/[0.08] text-slate-200 rounded-xl cursor-pointer flex items-center gap-1.5 font-medium transition-all"
+              className="px-3 py-1.5 bg-cyan-950/50 hover:bg-cyan-900/60 border border-cyan-500/25 text-cyan-200 rounded-xl cursor-pointer flex items-center gap-1.5 font-bold transition-all"
               title="Heal vertical boundary seam for smooth horizontal 360 rotation"
             >
-              <Sparkles className="w-3.5 h-3.5 text-pink-400" />
+              <Sparkles className="w-3.5 h-3.5 text-cyan-300" />
               <span>Heal Seam</span>
             </button>
 
@@ -424,7 +424,7 @@ export function ViewerTab({
                 type="button"
                 disabled={isRepairingPoles}
                 onClick={() => handleRepairPoles(false)}
-                className="px-3 py-1.5 bg-white/[0.05] hover:bg-white/10 border border-white/[0.08] text-slate-200 rounded-xl cursor-pointer flex items-center gap-1.5 font-medium transition-all disabled:opacity-60"
+                className="px-3 py-1.5 bg-cyan-950/50 hover:bg-cyan-900/60 border border-cyan-500/25 text-cyan-200 rounded-xl cursor-pointer flex items-center gap-1.5 font-bold transition-all disabled:opacity-60"
                 title="Inpaint tripod hole at nadir (-90°) and zenith sun hole (+90°)"
               >
                 {isRepairingPoles ? (
@@ -439,11 +439,11 @@ export function ViewerTab({
                   </>
                 )}
               </button>
-              <div className="hidden group-hover/pole:block absolute top-full right-0 mt-1.5 z-30 glass-panel border border-white/15 rounded-2xl p-2 shadow-2xl min-w-[220px]">
+              <div className="hidden group-hover/pole:block absolute top-full right-0 mt-1.5 z-30 glass-panel border border-cyan-500/30 rounded-2xl p-2 shadow-2xl min-w-[220px]">
                 <button
                   type="button"
                   onClick={() => handleRepairPoles(false)}
-                  className="w-full text-left px-3 py-2 hover:bg-white/10 rounded-xl text-xs text-slate-200 flex items-center gap-2 cursor-pointer transition-colors"
+                  className="w-full text-left px-3 py-2 hover:bg-cyan-500/15 rounded-xl text-xs text-cyan-200 flex items-center gap-2 cursor-pointer transition-colors"
                 >
                   <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
                   <span>Inpaint Nadir &amp; Zenith</span>
@@ -451,16 +451,16 @@ export function ViewerTab({
                 <button
                   type="button"
                   onClick={() => handleRepairPoles(true)}
-                  className="w-full text-left px-3 py-2 hover:bg-white/10 rounded-xl text-xs text-slate-200 flex items-center gap-2 cursor-pointer border-t border-white/[0.08] mt-1 transition-colors"
+                  className="w-full text-left px-3 py-2 hover:bg-cyan-500/15 rounded-xl text-xs text-cyan-200 flex items-center gap-2 cursor-pointer border-t border-cyan-500/20 mt-1 transition-colors"
                 >
-                  <Disc className="w-3.5 h-3.5 text-indigo-400" />
+                  <Disc className="w-3.5 h-3.5 text-teal-400" />
                   <span>Apply 360° Nadir Cap Disc</span>
                 </button>
               </div>
             </div>
 
-            <label className="shimmer-btn px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl cursor-pointer flex items-center gap-1.5 font-semibold transition-all shadow-md shadow-indigo-600/30 active:scale-95">
-              <Upload className="w-3.5 h-3.5" />
+            <label className="shimmer-btn px-4 py-1.5 bg-cyan-400 hover:bg-cyan-300 text-slate-950 rounded-xl cursor-pointer flex items-center gap-1.5 font-extrabold transition-all shadow-md shadow-cyan-400/30 active:scale-95">
+              <Upload className="w-3.5 h-3.5 stroke-[2.5]" />
               <span>Open Local File</span>
               <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
             </label>
@@ -469,14 +469,14 @@ export function ViewerTab({
 
         {/* Success toast notification */}
         {enhanceSuccessMsg && (
-          <div className="px-5 py-2.5 bg-emerald-500/10 border-b border-emerald-500/20 text-emerald-300 text-xs flex items-center gap-2 animate-fadeIn font-medium">
-            <Check className="w-4 h-4 text-emerald-400 shrink-0" />
+          <div className="px-5 py-2.5 bg-teal-500/15 border-b border-teal-400/30 text-teal-300 text-xs flex items-center gap-2 animate-fadeIn font-bold">
+            <Check className="w-4 h-4 text-teal-400 shrink-0" />
             <span>{enhanceSuccessMsg}</span>
           </div>
         )}
 
         {/* 360 WebGL Canvas */}
-        <div className="h-[520px] w-full bg-[#05070e] relative">
+        <div className="h-[520px] w-full bg-[#020712] relative">
           <SphereViewer
             textureUrl={currentPanoramaUrl}
             projectionMode={activeProjection}
@@ -489,7 +489,7 @@ export function ViewerTab({
 
         {/* Restore Original Image Status Footer */}
         {originalUploadedUrl && originalUploadedUrl !== currentPanoramaUrl && (
-          <div className="px-5 py-3 bg-[#080b18]/95 border-t border-white/[0.08] flex flex-wrap items-center justify-between gap-3 text-xs text-slate-300">
+          <div className="px-5 py-3 bg-[#030e20]/95 border-t border-cyan-500/20 flex flex-wrap items-center justify-between gap-3 text-xs text-cyan-200">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
               <span>Displaying enhanced/reconstructed texture.</span>
@@ -497,7 +497,7 @@ export function ViewerTab({
             <button
               type="button"
               onClick={handleRestoreOriginal}
-              className="px-3.5 py-1.5 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-300 rounded-xl font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
+              className="px-3.5 py-1.5 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-300 rounded-xl font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span>Revert to Original Upload</span>
@@ -507,20 +507,20 @@ export function ViewerTab({
       </div>
 
       {/* Interactive Hotspots Tour Management Panel */}
-      <div className="glass-panel border border-white/10 rounded-3xl p-6 space-y-4 shadow-xl">
+      <div className="glass-panel border border-cyan-500/25 rounded-3xl p-6 space-y-4 shadow-xl">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-indigo-500/15 text-indigo-400 rounded-2xl">
+            <div className="p-2.5 bg-cyan-500/15 text-cyan-400 rounded-2xl border border-cyan-500/30">
               <MapPin className="w-4 h-4" />
             </div>
             <div>
-              <div className="text-sm font-bold text-white flex items-center gap-2">
+              <div className="text-sm font-black text-white flex items-center gap-2">
                 <span>Interactive Tour Hotspots</span>
-                <span className="text-[10px] font-mono font-semibold px-2.5 py-0.5 bg-indigo-500/20 text-indigo-300 rounded-full border border-indigo-500/30">
+                <span className="text-[10px] font-mono font-bold px-2.5 py-0.5 bg-cyan-400/20 text-cyan-300 rounded-full border border-cyan-400/40">
                   {hotspots.length} {hotspots.length === 1 ? 'Point' : 'Points'}
                 </span>
               </div>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className="text-xs text-cyan-300/70 mt-0.5">
                 Place spatial annotations, info cards, and navigation pins in 360° space. Click the Pin button on the top-right of the viewer to add points.
               </p>
             </div>
@@ -530,16 +530,16 @@ export function ViewerTab({
             <button
               type="button"
               onClick={() => setShowAddHotspotModal(true)}
-              className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-md shadow-indigo-500/20 active:scale-95"
+              className="px-4 py-2 bg-gradient-to-r from-cyan-400 to-blue-600 hover:from-cyan-300 hover:to-blue-500 text-slate-950 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer shadow-md shadow-cyan-400/25 active:scale-95"
             >
-              <Plus className="w-3.5 h-3.5" />
+              <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
               <span>Add Hotspot</span>
             </button>
             {hotspots.length > 0 && (
               <button
                 type="button"
                 onClick={() => setHotspots([])}
-                className="p-2 bg-white/[0.04] hover:bg-red-500/20 border border-white/[0.08] hover:border-red-500/40 text-slate-400 hover:text-red-300 rounded-xl text-xs transition-colors cursor-pointer"
+                className="p-2 bg-cyan-950/40 hover:bg-red-500/20 border border-cyan-500/20 hover:border-red-500/40 text-cyan-300/70 hover:text-red-300 rounded-xl text-xs transition-colors cursor-pointer"
                 title="Clear all hotspots"
               >
                 <Trash2 className="w-4 h-4" />
@@ -550,7 +550,7 @@ export function ViewerTab({
 
         {/* Hotspots Grid Cards */}
         {hotspots.length === 0 ? (
-          <div className="py-8 text-center border border-dashed border-white/10 rounded-2xl text-slate-400 text-xs">
+          <div className="py-8 text-center border border-dashed border-cyan-500/20 rounded-2xl text-cyan-400/60 text-xs">
             No hotspots added yet. Click &quot;Add Hotspot&quot; above or use the Pin icon on the 360° viewer to annotate the scene.
           </div>
         ) : (
@@ -561,19 +561,19 @@ export function ViewerTab({
                 className="glass-card p-3.5 rounded-2xl flex items-start justify-between gap-2.5 text-xs group"
               >
                 <div className="space-y-1 overflow-hidden">
-                  <div className="font-semibold text-slate-100 flex items-center gap-1.5 truncate">
-                    <MapPin className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                  <div className="font-bold text-cyan-100 flex items-center gap-1.5 truncate">
+                    <MapPin className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
                     <span className="truncate">{spot.title}</span>
                   </div>
-                  <p className="text-[11px] text-slate-400 line-clamp-2">{spot.description}</p>
-                  <div className="text-[10px] text-slate-500 font-mono">
+                  <p className="text-[11px] text-cyan-300/70 line-clamp-2">{spot.description}</p>
+                  <div className="text-[10px] text-cyan-400/60 font-mono">
                     Lon: {spot.lon.toFixed(1)}° • Lat: {spot.lat.toFixed(1)}°
                   </div>
                 </div>
                 <button
                   type="button"
                   onClick={() => setHotspots((prev) => prev.filter((h) => h.id !== spot.id))}
-                  className="p-1.5 text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-colors cursor-pointer shrink-0"
+                  className="p-1.5 text-cyan-400/50 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-colors cursor-pointer shrink-0"
                   title="Delete hotspot"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
@@ -586,17 +586,17 @@ export function ViewerTab({
 
       {/* Add Hotspot Modal */}
       {showAddHotspotModal && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="glass-panel border border-white/15 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
-              <div className="font-semibold text-white text-sm flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-indigo-400" />
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="glass-panel border border-cyan-400/30 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-cyan-500/20 pb-3">
+              <div className="font-bold text-white text-sm flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-cyan-400" />
                 <span>Add Scene Hotspot</span>
               </div>
               <button
                 type="button"
                 onClick={() => setShowAddHotspotModal(false)}
-                className="w-7 h-7 rounded-full bg-white/[0.05] hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center text-xs transition-colors cursor-pointer"
+                className="w-7 h-7 rounded-full bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 hover:text-white flex items-center justify-center text-xs transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -604,31 +604,31 @@ export function ViewerTab({
 
             <form onSubmit={handleManualAddHotspot} className="space-y-3.5 text-xs">
               <div>
-                <label className="block text-slate-300 font-medium mb-1">Hotspot Title</label>
+                <label className="block text-cyan-200 font-semibold mb-1">Hotspot Title</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. Master Bedroom, Main Entrance, Balcony View"
                   value={newSpotForm.title}
                   onChange={(e) => setNewSpotForm((p) => ({ ...p, title: e.target.value }))}
-                  className="w-full px-3.5 py-2.5 bg-[#080b16] border border-white/10 rounded-xl text-slate-100 focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 transition-all"
+                  className="w-full px-3.5 py-2.5 bg-[#030a17] border border-cyan-500/30 rounded-xl text-cyan-100 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all"
                 />
               </div>
 
               <div>
-                <label className="block text-slate-300 font-medium mb-1">Description &amp; Navigation Notes</label>
+                <label className="block text-cyan-200 font-semibold mb-1">Description &amp; Navigation Notes</label>
                 <textarea
                   rows={2}
                   placeholder="Enter annotations, spatial context, or audio/tour notes..."
                   value={newSpotForm.description}
                   onChange={(e) => setNewSpotForm((p) => ({ ...p, description: e.target.value }))}
-                  className="w-full px-3.5 py-2.5 bg-[#080b16] border border-white/10 rounded-xl text-slate-100 focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 transition-all resize-none"
+                  className="w-full px-3.5 py-2.5 bg-[#030a17] border border-cyan-500/30 rounded-xl text-cyan-100 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all resize-none"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-slate-400 mb-1">Yaw / Longitude (-180° ~ 180°)</label>
+                  <label className="block text-cyan-300/80 mb-1 font-medium">Yaw / Longitude (-180° ~ 180°)</label>
                   <input
                     type="number"
                     min={-180}
@@ -636,11 +636,11 @@ export function ViewerTab({
                     step={1}
                     value={newSpotForm.lon}
                     onChange={(e) => setNewSpotForm((p) => ({ ...p, lon: Number(e.target.value) }))}
-                    className="w-full px-3.5 py-2 bg-[#080b16] border border-white/10 rounded-xl text-slate-100 focus:outline-none focus:border-indigo-400 font-mono"
+                    className="w-full px-3.5 py-2 bg-[#030a17] border border-cyan-500/30 rounded-xl text-cyan-100 focus:outline-none focus:border-cyan-400 font-mono"
                   />
                 </div>
                 <div>
-                  <label className="block text-slate-400 mb-1">Pitch / Latitude (-90° ~ 90°)</label>
+                  <label className="block text-cyan-300/80 mb-1 font-medium">Pitch / Latitude (-90° ~ 90°)</label>
                   <input
                     type="number"
                     min={-90}
@@ -648,12 +648,12 @@ export function ViewerTab({
                     step={1}
                     value={newSpotForm.lat}
                     onChange={(e) => setNewSpotForm((p) => ({ ...p, lat: Number(e.target.value) }))}
-                    className="w-full px-3.5 py-2 bg-[#080b16] border border-white/10 rounded-xl text-slate-100 focus:outline-none focus:border-indigo-400 font-mono"
+                    className="w-full px-3.5 py-2 bg-[#030a17] border border-cyan-500/30 rounded-xl text-cyan-100 focus:outline-none focus:border-cyan-400 font-mono"
                   />
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-white/[0.08]">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-cyan-500/20">
                 <button
                   type="button"
                   onClick={() => setShowAddHotspotModal(false)}
@@ -663,7 +663,7 @@ export function ViewerTab({
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-500/25 cursor-pointer active:scale-95 transition-all"
+                  className="px-5 py-2 bg-gradient-to-r from-cyan-400 to-blue-600 hover:from-cyan-300 hover:to-blue-500 text-slate-950 font-black rounded-xl shadow-lg shadow-cyan-400/25 cursor-pointer active:scale-95 transition-all"
                 >
                   Save Hotspot
                 </button>
@@ -679,33 +679,33 @@ export function ViewerTab({
         <div
           onDragOver={(e) => e.preventDefault()}
           onDrop={handleDrop}
-          className="md:col-span-7 glass-panel border-2 border-dashed border-white/15 hover:border-indigo-400/60 rounded-3xl p-8 text-center transition-all flex flex-col items-center justify-center space-y-3.5 cursor-pointer group shadow-xl hover:shadow-[0_0_30px_rgba(99,102,241,0.2)]"
+          className="md:col-span-7 glass-panel border-2 border-dashed border-cyan-400/30 hover:border-cyan-400 rounded-3xl p-8 text-center transition-all flex flex-col items-center justify-center space-y-3.5 cursor-pointer group shadow-xl hover:shadow-[0_0_40px_rgba(0,242,254,0.25)]"
         >
           <label className="cursor-pointer flex flex-col items-center space-y-2.5">
-            <div className="p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 group-hover:scale-110 group-hover:bg-indigo-500/20 transition-all duration-300">
-              <Upload className="w-7 h-7" />
+            <div className="p-4 rounded-2xl bg-cyan-500/15 border border-cyan-400/30 text-cyan-400 group-hover:scale-110 group-hover:bg-cyan-500/25 transition-all duration-300 shadow-[0_0_20px_rgba(0,242,254,0.2)]">
+              <Upload className="w-7 h-7 stroke-[2.2]" />
             </div>
-            <div className="text-base font-bold text-white tracking-tight">
-              Drag &amp; Drop 360° Photo Here, or <span className="text-indigo-400 underline decoration-indigo-400/50 underline-offset-4">Browse Files</span>
+            <div className="text-base font-extrabold text-white tracking-tight">
+              Drag &amp; Drop 360° Photo Here, or <span className="text-cyan-400 underline decoration-cyan-400/50 underline-offset-4">Browse Files</span>
             </div>
-            <p className="text-xs text-slate-400">Supports standard 2:1 Equirectangular JPG, PNG, WebP, HDR</p>
+            <p className="text-xs text-cyan-200/70">Supports standard 2:1 Equirectangular JPG, PNG, WebP, HDR</p>
             <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
           </label>
 
-          <div className="flex items-center gap-2 px-3.5 py-1.5 bg-[#080b18] border border-white/10 rounded-full text-[11px] text-slate-300 shadow-inner">
+          <div className="flex items-center gap-2 px-3.5 py-1.5 bg-[#030d1e] border border-cyan-500/25 rounded-full text-[11px] text-cyan-200 shadow-inner">
             <ClipboardPaste className="w-3.5 h-3.5 text-cyan-400" />
-            <span>Pro Tip: Press <kbd className="px-2 py-0.5 bg-white/10 rounded text-white font-mono font-semibold shadow-sm">Ctrl + V</kbd> to paste directly from clipboard</span>
+            <span>Pro Tip: Press <kbd className="px-2 py-0.5 bg-cyan-950 border border-cyan-500/40 rounded text-cyan-300 font-mono font-bold shadow-sm">Ctrl + V</kbd> to paste directly from clipboard</span>
           </div>
         </div>
 
         {/* Preset Sample Gallery */}
-        <div className="md:col-span-5 glass-panel border border-white/10 rounded-3xl p-6 space-y-3.5 shadow-xl">
+        <div className="md:col-span-5 glass-panel border border-cyan-500/25 rounded-3xl p-6 space-y-3.5 shadow-xl">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-white flex items-center gap-2">
-              <ImageIcon className="w-4 h-4 text-indigo-400" />
+              <ImageIcon className="w-4 h-4 text-cyan-400" />
               Try Ready-Made 360° Panoramas
             </span>
-            <span className="text-[10px] text-slate-400 font-mono font-semibold px-2 py-0.5 rounded-full bg-white/[0.05] border border-white/[0.08]">
+            <span className="text-[10px] text-cyan-300 font-mono font-bold px-2.5 py-0.5 rounded-full bg-cyan-950/80 border border-cyan-500/30">
               1-CLICK LOAD
             </span>
           </div>
@@ -722,14 +722,14 @@ export function ViewerTab({
                 className="w-full px-3.5 py-2.5 glass-card rounded-2xl text-left transition-all flex items-center justify-between group cursor-pointer"
               >
                 <div>
-                  <div className="text-xs font-semibold text-slate-200 group-hover:text-indigo-300 transition-colors">
+                  <div className="text-xs font-bold text-cyan-100 group-hover:text-cyan-300 transition-colors">
                     {preset.title}
                   </div>
-                  <div className="text-[10px] text-slate-400 truncate max-w-[220px]">
+                  <div className="text-[10px] text-cyan-300/60 truncate max-w-[220px]">
                     {preset.description}
                   </div>
                 </div>
-                <span className="text-xs font-semibold text-slate-400 group-hover:text-indigo-400 group-hover:translate-x-0.5 transition-all">
+                <span className="text-xs font-bold text-cyan-400/60 group-hover:text-cyan-300 group-hover:translate-x-0.5 transition-all">
                   Load →
                 </span>
               </button>
@@ -739,13 +739,13 @@ export function ViewerTab({
       </div>
 
       {/* Lead Magnet Call-to-Action */}
-      <div className="glass-panel relative overflow-hidden bg-gradient-to-r from-indigo-950/60 via-purple-950/40 to-slate-900 border border-indigo-500/30 rounded-3xl p-6 flex flex-col sm:flex-row items-center justify-between gap-5 shadow-[0_15px_40px_rgba(99,102,241,0.15)]">
+      <div className="glass-panel relative overflow-hidden bg-gradient-to-r from-cyan-950/80 via-[#0a2347] to-[#041026] border border-cyan-400/40 rounded-3xl p-6 flex flex-col sm:flex-row items-center justify-between gap-5 shadow-[0_20px_50px_rgba(0,242,254,0.18)]">
         <div className="space-y-1.5 text-center sm:text-left relative z-10">
           <div className="flex items-center justify-center sm:justify-start gap-2">
-            <Sparkles className="w-4 h-4 text-pink-400" />
-            <h2 className="text-base font-bold text-white tracking-tight">Need new 360° environments or custom skyboxes?</h2>
+            <Sparkles className="w-4 h-4 text-cyan-400 fill-current" />
+            <h2 className="text-base font-black text-white tracking-tight">Need new 360° environments or custom skyboxes?</h2>
           </div>
-          <p className="text-xs text-slate-300">
+          <p className="text-xs text-cyan-200/80">
             Use our AI Panorama Studio to generate seamless VR environments from simple text prompts in 30 seconds.
           </p>
         </div>
@@ -753,7 +753,7 @@ export function ViewerTab({
         <button
           type="button"
           onClick={() => onNavigateTab('generator')}
-          className="shimmer-btn px-5 py-3 bg-gradient-to-r from-indigo-500 via-purple-600 to-pink-500 hover:from-indigo-400 hover:to-pink-400 text-white font-bold text-xs rounded-xl shadow-lg shadow-indigo-500/30 transition-all shrink-0 cursor-pointer active:scale-95"
+          className="shimmer-btn px-6 py-3 bg-gradient-to-r from-cyan-400 via-teal-300 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 font-black text-xs rounded-xl shadow-lg shadow-cyan-400/35 transition-all shrink-0 cursor-pointer active:scale-95 tracking-wide"
         >
           Generate with AI Now
         </button>
