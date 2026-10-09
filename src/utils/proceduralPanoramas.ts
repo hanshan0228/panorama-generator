@@ -70,6 +70,9 @@ export function generateProceduralPanorama(
     case 'interior':
       drawInteriorScene(ctx, width, height);
       break;
+    case 'anime':
+      drawNatureSunsetScene(ctx, width, height);
+      break;
     case 'fantasy':
     default:
       drawFantasyTempleScene(ctx, width, height);

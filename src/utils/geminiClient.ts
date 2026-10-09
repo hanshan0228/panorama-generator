@@ -104,15 +104,53 @@ export async function testProxyConnection(config: GeminiConfig): Promise<{
 }
 
 /**
+ * Known artist / trademark keywords that trigger OpenAI DALL-E safety moderation blocks
+ * (Code 400: "Your request was rejected by the safety system / moderation_blocked").
+ * We automatically replace them with rich, safe, evocative artistic descriptors!
+ */
+const SAFETY_REPLACEMENTS: Array<{ pattern: RegExp; replacement: string }> = [
+  {
+    pattern: /宫崎骏(风格)?|吉卜力(工作室)?|hayao\s*miyazaki|studio\s*ghibli/gi,
+    replacement: '经典日系治愈水彩手绘动漫风，唯美夏日天空与自然光影 (Japanese anime hand-drawn watercolor aesthetic, nostalgic summer breeze, lush green grass, fluffy white clouds, warm natural sunlight)',
+  },
+  {
+    pattern: /新海诚(风格)?|makoto\s*shinkai/gi,
+    replacement: '超精细唯美光影动漫风，璀璨天空与壮丽云彩 (vibrant atmospheric anime cinematic lighting, detailed cumulus clouds, high-contrast emotional sky)',
+  },
+  {
+    pattern: /迪士尼(风格)?|disney(\s*animation)?/gi,
+    replacement: '经典3D奇幻动画电影质感 (3D stylized animation cinematic render, magical atmosphere)',
+  },
+  {
+    pattern: /皮克斯(风格)?|pixar(\s*animation)?/gi,
+    replacement: '3D卡通CG动画电影质感 (3D animated feature film render, soft subsurface scattering)',
+  },
+];
+
+export function sanitizePromptForSafety(rawPrompt: string): { sanitized: string; replaced: boolean } {
+  let text = rawPrompt;
+  let replaced = false;
+
+  for (const item of SAFETY_REPLACEMENTS) {
+    if (item.pattern.test(text)) {
+      text = text.replace(item.pattern, item.replacement);
+      replaced = true;
+    }
+  }
+
+  return { sanitized: text, replaced };
+}
+
+/**
  * Builds a 360 VR Equirectangular skybox prompt with rigorous topological constraints.
  * Ensures the AI generates a full-bleed panoramic environment rather than a framed picture.
  */
 export function buildPanoramaPrompt(userPrompt: string, styleSuffix = ''): string {
-  const base = userPrompt.trim();
+  const { sanitized } = sanitizePromptForSafety(userPrompt.trim());
   const suffix = styleSuffix ? `, ${styleSuffix}` : '';
   // Equirectangular 360 panoramic magic tokens:
   // Forbids borders, frames, vignettes, and circular fisheyes so the AI generates a true full-bleed 360 environment!
-  return `${base}${suffix}, full 360 degree equirectangular projection panorama, 360 spherical VR skybox, 2:1 ratio texture map, seamless horizontal wrap, highly detailed, photorealistic 8k environment, full frame edge to edge, no borders, no circular lens, no black frame, no vignettes`;
+  return `${sanitized}${suffix}, full 360 degree equirectangular projection panorama, 360 spherical VR skybox, 2:1 ratio texture map, seamless horizontal wrap, highly detailed, photorealistic 8k environment, full frame edge to edge, no borders, no circular lens, no black frame, no vignettes`;
 }
 
 /**
@@ -196,12 +234,27 @@ export async function generateWithGemini(
     if (!res.ok) {
       const errText = await res.text();
       let parsedMsg = errText;
+      let isSafetyBlock = false;
       try {
         const json = JSON.parse(errText);
         parsedMsg = json.error?.message || json.message || errText;
+        if (json.error?.code === 'moderation_blocked' || parsedMsg.toLowerCase().includes('safety system')) {
+          isSafetyBlock = true;
+        }
       } catch {
-        // use raw
+        if (errText.toLowerCase().includes('safety system')) {
+          isSafetyBlock = true;
+        }
       }
+
+      if (isSafetyBlock) {
+        throw new Error(
+          `提示词触发了 AI 平台的版权与内容安全审核 (Rejected by safety system) [HTTP 400]：\n\n` +
+          `AI 模型（OpenAI）禁止在提示词中直接使用特定著名艺术家姓名（如“宫崎骏”、“吉卜力”）或商业 IP。\n\n` +
+          `💡 解决建议：请避免直接写“宫崎骏”，系统已支持自动别名转换，或请手动改用画风描述（如“日系治愈水彩手绘风、夏日蓝天白云大海”，或直接选择“日系治愈动漫”预设）即可完美生成！`
+        );
+      }
+
       throw new Error(`Proxy error [HTTP ${res.status}]: ${parsedMsg}`);
     }
 

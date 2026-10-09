@@ -4,7 +4,8 @@ export type StylePresetId =
   | 'interior'
   | 'fantasy'
   | 'space'
-  | 'anime';
+  | 'anime'
+  | 'custom';
 
 export interface StylePreset {
   id: StylePresetId;

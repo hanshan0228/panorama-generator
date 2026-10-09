@@ -66,15 +66,30 @@ const STYLE_PRESETS: StylePreset[] = [
     previewColor: 'from-teal-500 to-sky-700',
   },
   {
+    id: 'anime',
+    name: 'Anime Ghibli',
+    description: '日系治愈水彩手绘动漫，蓝天白云、沿海公路与温暖海风',
+    promptSuffix: 'Japanese anime hand-drawn watercolor aesthetic, gentle coastal breeze, lush green summer grass, fluffy white clouds, warm natural sunlight, nostalgic peaceful anime scenery',
+    previewColor: 'from-sky-400 via-teal-300 to-emerald-400',
+  },
+  {
     id: 'fantasy',
     name: 'Celestial Ruins',
     description: 'Floating ancient temple, enchanted glowing runes, aurora borealis sky',
     promptSuffix: 'ancient fantasy temple ruins, floating celestial stones, glowing magical runes, aurora sky',
     previewColor: 'from-emerald-400 to-teal-600',
   },
+  {
+    id: 'custom',
+    name: 'Pure Custom',
+    description: '纯净输入模式，不追加任何风格后缀，完全遵循自定义提示词',
+    promptSuffix: '',
+    previewColor: 'from-slate-500 to-slate-700',
+  },
 ];
 
 const PROMPT_SUGGESTIONS = [
+  '日系治愈手绘水彩动漫风，一个红衣小女孩骑着自行车吹着海风，一边是蔚蓝大海和沿海公路，阳光明媚，满天蓬松白云',
   'Futuristic neon-lit cyberpunk street with flying vehicles and rainy ground reflections',
   'Enchanted fairy forest at twilight with glowing giant mushrooms and mystical fireflies',
   'Luxury glass penthouse apartment with panoramic sunset view over Manhattan skyline',
