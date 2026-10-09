@@ -932,26 +932,26 @@ export function SphereViewer({
 
       {/* Main Floating Controls Bar */}
       {showControlsBar && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1 px-3 py-1.5 bg-slate-900/85 backdrop-blur-md border border-slate-700/60 rounded-full shadow-2xl z-20 text-xs text-slate-200">
+        <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex items-center gap-1 px-3.5 py-1.5 glass-dock rounded-full shadow-[0_16px_40px_rgba(0,0,0,0.7)] z-20 text-xs text-slate-200">
           <button
             type="button"
             onClick={() => setIsAutoRotating((prev) => !prev)}
-            className={`p-2 rounded-full transition-colors cursor-pointer ${
-              isAutoRotating ? 'bg-indigo-600 text-white' : 'hover:bg-slate-800 text-slate-300'
+            className={`p-2 rounded-full transition-all cursor-pointer ${
+              isAutoRotating ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-md shadow-indigo-500/30' : 'hover:bg-white/10 text-slate-300'
             }`}
             title={isAutoRotating ? 'Pause Auto-Rotation (Space)' : 'Start Auto-Rotation (Space)'}
           >
-            {isAutoRotating ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+            {isAutoRotating ? <Pause className="w-3.5 h-3.5 fill-current" /> : <Play className="w-3.5 h-3.5 fill-current" />}
           </button>
 
-          <div className="w-[1px] h-4 bg-slate-700 mx-1" />
+          <div className="w-[1px] h-4 bg-white/15 mx-1" />
 
           {/* Minimap toggle button */}
           <button
             type="button"
             onClick={() => setShowMinimap((p) => !p)}
-            className={`p-2 rounded-full transition-colors cursor-pointer ${
-              showMinimap ? 'text-cyan-400 bg-cyan-500/10' : 'text-slate-400 hover:bg-slate-800'
+            className={`p-2 rounded-full transition-all cursor-pointer ${
+              showMinimap ? 'text-cyan-300 bg-cyan-500/20' : 'text-slate-400 hover:bg-white/10'
             }`}
             title={showMinimap ? 'Hide Radar Minimap' : 'Show Radar Minimap'}
           >
@@ -963,7 +963,7 @@ export function SphereViewer({
             onClick={() => {
               targetFovRef.current = Math.max(35, targetFovRef.current - 10);
             }}
-            className="p-2 hover:bg-slate-800 rounded-full text-slate-300 hover:text-white transition-colors cursor-pointer"
+            className="p-2 hover:bg-white/10 rounded-full text-slate-300 hover:text-white transition-colors cursor-pointer"
             title="Zoom In (FOV)"
           >
             <ZoomIn className="w-3.5 h-3.5" />
@@ -974,33 +974,33 @@ export function SphereViewer({
             onClick={() => {
               targetFovRef.current = Math.min(100, targetFovRef.current + 10);
             }}
-            className="p-2 hover:bg-slate-800 rounded-full text-slate-300 hover:text-white transition-colors cursor-pointer"
+            className="p-2 hover:bg-white/10 rounded-full text-slate-300 hover:text-white transition-colors cursor-pointer"
             title="Zoom Out (FOV)"
           >
             <ZoomOut className="w-3.5 h-3.5" />
           </button>
 
-          <div className="w-[1px] h-4 bg-slate-700 mx-1" />
+          <div className="w-[1px] h-4 bg-white/15 mx-1" />
 
           {/* Quality tuning toggle */}
           <button
             type="button"
             onClick={() => setShowSettingsDrawer((p) => !p)}
-            className={`px-2.5 py-1 rounded-full text-xs font-medium flex items-center gap-1 transition-colors cursor-pointer ${
-              showSettingsDrawer ? 'bg-slate-800 text-indigo-400' : 'hover:bg-slate-800 text-slate-300'
+            className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+              showSettingsDrawer ? 'bg-indigo-600 text-white shadow-md' : 'hover:bg-white/10 text-slate-300'
             }`}
             title="Color Grading, Exposure & Soundscape"
           >
             <Sliders className="w-3.5 h-3.5" />
-            <span>Effects/Audio</span>
+            <span>FX/Audio</span>
           </button>
 
-          <div className="w-[1px] h-4 bg-slate-700 mx-1" />
+          <div className="w-[1px] h-4 bg-white/15 mx-1" />
 
           <button
             type="button"
             onClick={handleTakeSnapshot}
-            className="p-2 hover:bg-slate-800 rounded-full text-slate-300 hover:text-white transition-colors cursor-pointer"
+            className="p-2 hover:bg-white/10 rounded-full text-slate-300 hover:text-white transition-colors cursor-pointer"
             title="Capture Viewport Snapshot (PNG)"
           >
             <Camera className="w-3.5 h-3.5" />
@@ -1009,7 +1009,7 @@ export function SphereViewer({
           <button
             type="button"
             onClick={handleToggleFullscreen}
-            className="p-2 hover:bg-slate-800 rounded-full text-slate-300 hover:text-white transition-colors cursor-pointer"
+            className="p-2 hover:bg-white/10 rounded-full text-slate-300 hover:text-white transition-colors cursor-pointer"
             title="Toggle Fullscreen View"
           >
             {isFullscreen ? <Minimize className="w-3.5 h-3.5" /> : <Maximize className="w-3.5 h-3.5" />}
@@ -1019,18 +1019,18 @@ export function SphereViewer({
 
       {/* Real-time Quality & Lighting & Audio Tuning Drawer */}
       {showSettingsDrawer && (
-        <div className="absolute top-16 right-4 z-30 p-4 bg-slate-900/90 backdrop-blur-xl border border-slate-700/80 rounded-2xl shadow-2xl text-xs space-y-3.5 w-72 text-slate-200">
-          <div className="flex items-center justify-between pb-2 border-b border-slate-800">
-            <span className="font-semibold text-white flex items-center gap-1.5">
-              <Sliders className="w-3.5 h-3.5 text-indigo-400" />
+        <div className="absolute top-16 right-4 z-30 p-5 glass-panel border border-white/15 rounded-3xl shadow-2xl text-xs space-y-4 w-72 text-slate-200 animate-in fade-in duration-200">
+          <div className="flex items-center justify-between pb-2.5 border-b border-white/[0.08]">
+            <span className="font-bold text-white flex items-center gap-2">
+              <Sliders className="w-4 h-4 text-indigo-400" />
               Visual Tuning &amp; Audio
             </span>
             <button
               type="button"
               onClick={() => setShowSettingsDrawer(false)}
-              className="text-slate-500 hover:text-slate-300 text-sm font-bold cursor-pointer"
+              className="w-6 h-6 rounded-full bg-white/[0.05] hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center text-xs cursor-pointer transition-colors"
             >
-              ×
+              ✕
             </button>
           </div>
 

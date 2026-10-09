@@ -80,10 +80,13 @@ export function CubemapTab({ currentPanoramaUrl }: CubemapTabProps) {
   return (
     <div className="space-y-8">
       {/* Title Header */}
-      <div className="text-center max-w-2xl mx-auto space-y-2">
-        <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight flex items-center justify-center gap-2.5">
-          <Box className="w-7 h-7 text-cyan-400" />
-          <span>Equirectangular to Cubemap Generator</span>
+      <div className="text-center max-w-2xl mx-auto space-y-2.5">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-mono font-medium mb-1">
+          <Box className="w-3.5 h-3.5" />
+          <span>RAY-CASTING 3D UNWRAP ENGINE</span>
+        </div>
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
+          Equirectangular to Cubemap Generator
         </h1>
         <p className="text-sm text-slate-400">
           Transform seamless 2:1 panoramic images into standard 6-sided cubemaps (+X, -X, +Y, -Y, +Z, -Z) for Unity, Unreal Engine, and WebGL game skyboxes.
@@ -91,17 +94,19 @@ export function CubemapTab({ currentPanoramaUrl }: CubemapTabProps) {
       </div>
 
       {/* Main Controls & Batch Download Bar */}
-      <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-800 rounded-2xl p-5 flex flex-wrap items-center justify-between gap-4 shadow-xl">
+      <div className="glass-panel border border-white/10 rounded-3xl p-6 flex flex-wrap items-center justify-between gap-4 shadow-xl">
         <div className="flex items-center gap-4">
-          <span className="text-xs font-semibold text-slate-300">Face Resolution:</span>
-          <div className="flex items-center gap-1.5 bg-slate-950 p-1 border border-slate-800 rounded-xl text-xs">
+          <span className="text-xs font-bold text-slate-200">Face Resolution:</span>
+          <div className="flex items-center gap-1 bg-[#080b18] p-1 border border-white/10 rounded-xl text-xs">
             {[256, 512, 1024].map((sz) => (
               <button
                 key={sz}
                 type="button"
                 onClick={() => setFaceSize(sz)}
-                className={`px-3 py-1 rounded-lg font-medium transition-colors ${
-                  faceSize === sz ? 'bg-cyan-600 text-white' : 'text-slate-400 hover:text-slate-200'
+                className={`px-3 py-1.5 rounded-lg font-medium transition-all cursor-pointer ${
+                  faceSize === sz
+                    ? 'bg-cyan-600 text-white font-semibold shadow-md shadow-cyan-600/30'
+                    : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
                 {sz} × {sz}
@@ -114,7 +119,7 @@ export function CubemapTab({ currentPanoramaUrl }: CubemapTabProps) {
           type="button"
           onClick={handleDownloadAllZip}
           disabled={isSlicing || faces.length === 0}
-          className="px-5 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-medium text-xs rounded-xl shadow-lg shadow-cyan-500/20 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+          className="shimmer-btn px-6 py-3 bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-cyan-500/25 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50 active:scale-95"
         >
           {downloadSuccess ? (
             <>
@@ -136,17 +141,18 @@ export function CubemapTab({ currentPanoramaUrl }: CubemapTabProps) {
       </div>
 
       {/* Unfolded Cube Cross (T-Cross) Preview Layout */}
-      <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 space-y-4">
+      <div className="glass-panel border border-white/10 rounded-3xl p-6 space-y-4 shadow-xl">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold text-slate-200 uppercase tracking-wider font-mono">
+          <span className="text-xs font-bold text-slate-200 uppercase tracking-wider font-mono flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
             Unfolded T-Cross Layout Preview
           </span>
-          <span className="text-[11px] text-slate-500">Industry Standard Cubemap Mapping</span>
+          <span className="text-[11px] text-slate-400 font-mono">Standard 3D Cubemap Topology</span>
         </div>
 
         {/* Cross Grid */}
-        <div className="max-w-md mx-auto py-4">
-          <div className="grid grid-cols-4 gap-2">
+        <div className="max-w-md mx-auto py-6">
+          <div className="grid grid-cols-4 gap-2.5">
             {/* Row 1: Top (+Y) centered above Front */}
             <div className="col-start-2">
               <FaceThumbnail face={getFaceByName('posy')} onDownload={handleDownloadFace} />
@@ -166,7 +172,7 @@ export function CubemapTab({ currentPanoramaUrl }: CubemapTabProps) {
               <FaceThumbnail face={getFaceByName('negz')} onDownload={handleDownloadFace} />
             </div>
 
-            {/* Row 3: Bottom (-Y) under Front */}
+            {/* Row 3: Bottom (-Y) centered below Front */}
             <div className="col-start-2 row-start-3">
               <FaceThumbnail face={getFaceByName('negy')} onDownload={handleDownloadFace} />
             </div>
@@ -174,29 +180,26 @@ export function CubemapTab({ currentPanoramaUrl }: CubemapTabProps) {
         </div>
       </div>
 
-      {/* Individual Face Cards Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        {faces.map((face) => (
+      {/* Six Faces Quick Individual Download Bar */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+        {faces.map((f) => (
           <div
-            key={face.name}
-            className="bg-slate-900/60 border border-slate-800 rounded-xl p-3 space-y-2 flex flex-col justify-between"
+            key={f.name}
+            className="glass-card p-3 rounded-2xl flex flex-col items-center justify-between gap-2 text-center group"
           >
-            <div>
-              <div className="aspect-square w-full rounded-lg overflow-hidden bg-slate-950 border border-slate-800">
-                <img src={face.dataUrl} alt={face.label} className="w-full h-full object-cover" />
-              </div>
-              <div className="mt-2">
-                <div className="text-xs font-semibold text-white">{face.label}</div>
-                <div className="text-[10px] text-slate-500 font-mono">{face.name}.png</div>
-              </div>
+            <div className="w-full aspect-square rounded-xl overflow-hidden border border-white/10 relative">
+              <img src={f.dataUrl} alt={f.label} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
             </div>
-
+            <div>
+              <div className="text-xs font-bold text-white">{f.label}</div>
+              <div className="text-[10px] text-slate-400 font-mono">{f.name}.png</div>
+            </div>
             <button
               type="button"
-              onClick={() => handleDownloadFace(face)}
-              className="w-full py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-[11px] font-medium flex items-center justify-center gap-1.5 transition-colors"
+              onClick={() => handleDownloadFace(f)}
+              className="w-full py-1.5 px-2 bg-white/[0.05] hover:bg-cyan-600 hover:text-white border border-white/10 hover:border-cyan-500 rounded-xl text-[11px] font-medium text-slate-300 flex items-center justify-center gap-1 transition-all cursor-pointer shadow-sm"
             >
-              <Download className="w-3 h-3 text-cyan-400" />
+              <Download className="w-3 h-3" />
               <span>PNG</span>
             </button>
           </div>
@@ -204,13 +207,13 @@ export function CubemapTab({ currentPanoramaUrl }: CubemapTabProps) {
       </div>
 
       {/* Game Engine Import Instructions */}
-      <div className="border-t border-slate-800/80 pt-6 space-y-4">
-        <h3 className="text-sm font-semibold text-slate-300 flex items-center gap-2">
+      <div className="border-t border-white/[0.08] pt-6 space-y-4">
+        <h3 className="text-sm font-bold text-slate-200 flex items-center gap-2">
           <Info className="w-4 h-4 text-cyan-400" />
           How to Import Cubemaps into Game Engines
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-slate-400">
-          <div className="p-4 bg-slate-900/40 border border-slate-800 rounded-xl space-y-1.5">
+          <div className="glass-card p-4 rounded-2xl space-y-1.5">
             <div className="font-semibold text-slate-200">Unity Skybox Import</div>
             <p className="text-[11px] leading-relaxed">
               1. Download the 6 faces ZIP and extract it to your Unity `Assets` folder.<br />
@@ -218,7 +221,7 @@ export function CubemapTab({ currentPanoramaUrl }: CubemapTabProps) {
               3. Assign the extracted textures to Front (+Z), Back (-Z), Left (-X), Right (+X), Up (+Y), and Down (-Y).
             </p>
           </div>
-          <div className="p-4 bg-slate-900/40 border border-slate-800 rounded-xl space-y-1.5">
+          <div className="glass-card p-4 rounded-2xl space-y-1.5">
             <div className="font-semibold text-slate-200">Unreal Engine &amp; Godot</div>
             <p className="text-[11px] leading-relaxed">
               1. In Unreal Engine, import the images and create a `Cube Texture`.<br />
@@ -240,21 +243,21 @@ function FaceThumbnail({
   onDownload: (face: CubemapFace) => void;
 }) {
   if (!face) {
-    return <div className="aspect-square bg-slate-950/40 border border-slate-800/40 rounded-lg" />;
+    return <div className="aspect-square bg-[#080b18] border border-white/[0.06] rounded-xl" />;
   }
 
   return (
     <div
       onClick={() => onDownload(face)}
-      className="aspect-square bg-slate-950 border border-slate-700/80 hover:border-cyan-500 rounded-lg overflow-hidden relative group cursor-pointer transition-all shadow-md"
+      className="aspect-square bg-[#080b18] border border-white/10 hover:border-cyan-400 rounded-xl overflow-hidden relative group cursor-pointer transition-all shadow-md hover:shadow-[0_0_20px_rgba(34,211,238,0.25)]"
       title={`Click to download ${face.label}`}
     >
-      <img src={face.dataUrl} alt={face.label} className="w-full h-full object-cover" />
-      <div className="absolute inset-0 bg-slate-950/70 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1 text-white">
+      <img src={face.dataUrl} alt={face.label} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+      <div className="absolute inset-0 bg-[#060812]/75 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1 text-white">
         <span className="text-[10px] font-bold">{face.label}</span>
         <Download className="w-3.5 h-3.5 text-cyan-400" />
       </div>
-      <div className="absolute bottom-1 right-1 text-[9px] font-mono px-1 rounded bg-slate-900/80 text-slate-300 pointer-events-none">
+      <div className="absolute bottom-1 right-1 text-[9px] font-mono px-1 rounded bg-[#060812]/80 text-slate-300 pointer-events-none border border-white/10">
         {face.name}
       </div>
     </div>
