@@ -274,7 +274,7 @@ export async function generateWithGemini(
           // Fill 100% full-frame 360 degree sphere without any empty background borders!
           ctx.drawImage(img, 0, 0, targetW, targetH);
           // Heal the 360° horizontal wrap boundary so left and right seam connects seamlessly
-          const healedCanvas = healPanoramaSeam(canvas, 100);
+          const healedCanvas = healPanoramaSeam(canvas, 140);
           resolve(healedCanvas.toDataURL('image/png'));
         } else {
           resolve(rawImageUrl as string);

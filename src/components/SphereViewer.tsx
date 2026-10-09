@@ -223,6 +223,8 @@ export function SphereViewer({
     const textureLoader = new THREE.TextureLoader();
     const texture = textureLoader.load(textureUrl);
     texture.colorSpace = THREE.SRGBColorSpace;
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.ClampToEdgeWrapping;
     texture.generateMipmaps = true;
     texture.minFilter = THREE.LinearMipmapLinearFilter;
     texture.magFilter = THREE.LinearFilter;

@@ -77,7 +77,7 @@ export function generateProceduralPanorama(
   }
 
   // Apply benchmark seam-healing algorithm so the 360 wrapping has zero visible cut
-  return healPanoramaSeam(canvas, 80);
+  return healPanoramaSeam(canvas, 140);
 }
 
 function drawCyberpunkScene(ctx: CanvasRenderingContext2D, w: number, h: number, _prompt: string): void {
@@ -105,13 +105,14 @@ function drawCyberpunkScene(ctx: CanvasRenderingContext2D, w: number, h: number,
   ctx.fillStyle = horizonGlow;
   ctx.fillRect(0, h * 0.5, w, h * 0.15);
 
-  // Distant skyscrapers (repeating across 360 span)
+  // Distant skyscrapers (repeating across 360 span seamlessly)
   const numBuildings = 48;
   const buildingWidth = w / numBuildings;
 
   for (let i = 0; i < numBuildings; i++) {
     const x = i * buildingWidth;
-    const bHeight = 150 + Math.sin(i * 1.5) * 80 + (i % 5) * 45;
+    const theta = (i / numBuildings) * Math.PI * 2;
+    const bHeight = 150 + Math.sin(theta * 3) * 65 + Math.cos(theta * 5) * 35;
     const y = h * 0.6 - bHeight;
 
     // Building body
@@ -293,10 +294,13 @@ function drawInteriorScene(ctx: CanvasRenderingContext2D, w: number, h: number):
   ctx.fillStyle = floor;
   ctx.fillRect(0, h * 0.7, w, h * 0.3);
 
-  // Floor plank lines
+  // Floor plank lines (32 repeating planks across 360 degrees)
   ctx.strokeStyle = 'rgba(0, 0, 0, 0.4)';
   ctx.lineWidth = 2;
-  for (let x = 0; x < w; x += 60) {
+  const numPlanks = 32;
+  const plankStep = w / numPlanks;
+  for (let i = 0; i < numPlanks; i++) {
+    const x = i * plankStep;
     ctx.beginPath();
     ctx.moveTo(x, h * 0.7);
     ctx.lineTo(x, h);
@@ -311,15 +315,19 @@ function drawInteriorScene(ctx: CanvasRenderingContext2D, w: number, h: number):
   ctx.fillStyle = skyWindow;
   ctx.fillRect(0, h * 0.3, w, h * 0.4);
 
-  // Window frame mullions (vertical bars every 120px)
+  // Window frame mullions (16 evenly spaced bars across 360 degrees)
   ctx.fillStyle = '#0f172a';
-  for (let x = 0; x < w; x += 160) {
+  const numMullions = 16;
+  const mullionStep = w / numMullions;
+  for (let i = 0; i < numMullions; i++) {
+    const x = i * mullionStep;
     ctx.fillRect(x, h * 0.3, 14, h * 0.4);
   }
 
-  // Recessed ambient ceiling lights
+  // Recessed ambient ceiling lights (16 evenly spaced recessed spotlights)
   ctx.fillStyle = 'rgba(254, 240, 138, 0.7)';
-  for (let x = 40; x < w; x += 120) {
+  for (let i = 0; i < numMullions; i++) {
+    const x = (i + 0.5) * mullionStep;
     ctx.beginPath();
     ctx.arc(x, h * 0.15, 12, 0, Math.PI * 2);
     ctx.fill();
@@ -336,7 +344,7 @@ function drawFantasyTempleScene(ctx: CanvasRenderingContext2D, w: number, h: num
   ctx.fillStyle = sky;
   ctx.fillRect(0, 0, w, h * 0.6);
 
-  // Aurora curtains
+  // Aurora curtains (strictly periodic across 360 wrap)
   for (let a = 0; a < 4; a++) {
     const wave = ctx.createLinearGradient(0, 50, 0, h * 0.55);
     wave.addColorStop(0, 'rgba(16, 185, 129, 0)');
@@ -345,8 +353,11 @@ function drawFantasyTempleScene(ctx: CanvasRenderingContext2D, w: number, h: num
     ctx.fillStyle = wave;
     ctx.beginPath();
     ctx.moveTo(0, 100);
-    for (let x = 0; x <= w; x += 40) {
-      const y = 140 + Math.sin(x * 0.008 + a * 1.5) * 70;
+    const waveSteps = 64;
+    for (let s = 0; s <= waveSteps; s++) {
+      const x = (s / waveSteps) * w;
+      const angle = (s / waveSteps) * Math.PI * 2 * 3; // 3 full sine waves
+      const y = 140 + Math.sin(angle + a * 1.5) * 70;
       ctx.lineTo(x, y);
     }
     ctx.lineTo(w, h * 0.6);
@@ -362,10 +373,12 @@ function drawFantasyTempleScene(ctx: CanvasRenderingContext2D, w: number, h: num
   ctx.fillStyle = ground;
   ctx.fillRect(0, h * 0.6, w, h * 0.4);
 
-  // Ancient Monolith Pillars
-  for (let p = 0; p < 16; p++) {
-    const px = (p * (w / 16)) + 30;
-    const pHeight = 220 + (p % 3) * 60;
+  // Ancient Monolith Pillars (periodic 16 pillars around the sphere)
+  const numPillars = 16;
+  for (let p = 0; p < numPillars; p++) {
+    const px = (p * (w / numPillars)) + 30;
+    const pAngle = (p / numPillars) * Math.PI * 2;
+    const pHeight = 220 + Math.round(Math.sin(pAngle * 2) * 40 + Math.cos(pAngle * 4) * 20);
     const py = h * 0.6 - pHeight;
 
     ctx.fillStyle = '#292524';

@@ -207,8 +207,10 @@ export function ViewerTab({
       const ctx = canvas.getContext('2d');
       if (ctx) {
         ctx.drawImage(img, 0, 0);
-        const healed = healPanoramaSeam(canvas, 80);
+        const healed = healPanoramaSeam(canvas, 140);
         onPanoramaChange(healed.toDataURL('image/png'));
+        setEnhanceSuccessMsg('360° 接缝已消除：左右边界像素与色调已实现无缝融合！');
+        setTimeout(() => setEnhanceSuccessMsg(null), 3500);
       }
     };
     img.src = currentPanoramaUrl;
