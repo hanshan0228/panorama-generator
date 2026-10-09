@@ -1,5 +1,6 @@
 # PanoramaAI Studio — AI 360° Panorama Generator & VR Skybox Engine
 
+> **在线演示 (Live Demo)**：[https://hanshan0228.github.io/panorama-generator/](https://hanshan0228.github.io/panorama-generator/)  
 > **对标站点**：[panoramagenerator.com](https://panoramagenerator.com/)  
 > **设计哲学**：融合 `panoramagenerator.com` 的 AI 全景生成能力、`360photocam.com` 的 `Ctrl+V` 极速查看体验，以及 `renderstuff.com` 级别的工业级 WebGL 3D 渲染表现。
 
