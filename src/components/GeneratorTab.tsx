@@ -21,6 +21,7 @@ import {
   Wand2,
   Star,
   ShieldCheck,
+  RotateCcw,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import type { ActiveTab, StylePreset, StylePresetId, ResolutionTier } from '../types/panorama';
@@ -185,6 +186,9 @@ export function GeneratorTab({
   const [isTestingConn, setIsTestingConn] = useState(false);
   const [testConnResult, setTestConnResult] = useState<{ success: boolean; message: string } | null>(null);
   const [isUpscalingClarity, setIsUpscalingClarity] = useState(false);
+  const [originalRawUrl, setOriginalRawUrl] = useState<string | null>(null);
+  const [enhanced4kUrl, setEnhanced4kUrl] = useState<string | null>(null);
+  const [feedbackNotice, setFeedbackNotice] = useState<string | null>(null);
 
   const creditsCost = resolution === '4K' ? 12 : resolution === '2K' ? 6 : 3;
 
@@ -318,6 +322,7 @@ export function GeneratorTab({
 
         // Call Gemini local proxy / direct endpoint
         const rawGenUrl = await generateWithGemini(fullPrompt, geminiConfig);
+        setOriginalRawUrl(rawGenUrl);
 
         // Client-side super-resolution, sharpening & seam healing
         let finalDataUrl = rawGenUrl;
@@ -357,6 +362,12 @@ export function GeneratorTab({
           finalDataUrl = rawGenUrl;
         }
 
+        if (finalDataUrl !== rawGenUrl) {
+          setEnhanced4kUrl(finalDataUrl);
+        } else {
+          setEnhanced4kUrl(null);
+        }
+
         clearInterval(progressTimer);
         setGenerationProgress(95);
 
@@ -389,6 +400,8 @@ export function GeneratorTab({
 
       const canvas = generateProceduralPanorama(selectedStyle, prompt, width, height);
       const dataUrl = canvas.toDataURL('image/png');
+      setOriginalRawUrl(dataUrl);
+      setEnhanced4kUrl(null);
 
       onPanoramaChange(dataUrl);
       setIsGenerating(false);
@@ -481,6 +494,9 @@ export function GeneratorTab({
   };
 
   const handleManualHealSeam = () => {
+    if (!originalRawUrl) {
+      setOriginalRawUrl(currentPanoramaUrl);
+    }
     const img = new Image();
     img.crossOrigin = 'anonymous';
     img.onload = () => {
@@ -492,13 +508,26 @@ export function GeneratorTab({
         ctx.drawImage(img, 0, 0);
         const healed = healPanoramaSeam(canvas, 160);
         onPanoramaChange(healed.toDataURL('image/png'));
+        setFeedbackNotice('360° boundary seam healed successfully! Click "Restore Original" anytime to undo.');
         confetti({ particleCount: 35, spread: 55, origin: { y: 0.7 } });
+        setTimeout(() => setFeedbackNotice(null), 3500);
       }
     };
     img.src = currentPanoramaUrl;
   };
 
   const handleEnhanceClarity = () => {
+    // If enhanced version is already cached and user is viewing the original, instant toggle!
+    if (enhanced4kUrl && currentPanoramaUrl === originalRawUrl) {
+      onPanoramaChange(enhanced4kUrl);
+      setFeedbackNotice('Switched back to 4K Ultra clarity version.');
+      setTimeout(() => setFeedbackNotice(null), 3000);
+      return;
+    }
+
+    if (!originalRawUrl) {
+      setOriginalRawUrl(currentPanoramaUrl);
+    }
     setIsUpscalingClarity(true);
     setTimeout(() => {
       const img = new Image();
@@ -510,13 +539,25 @@ export function GeneratorTab({
           contrastBoost: 1.1,
         });
         const healed = healPanoramaSeam(enhancedCanvas, 160);
-        onPanoramaChange(healed.toDataURL('image/png'));
+        const enhancedDataUrl = healed.toDataURL('image/png');
+        setEnhanced4kUrl(enhancedDataUrl);
+        onPanoramaChange(enhancedDataUrl);
         setIsUpscalingClarity(false);
+        setFeedbackNotice('4K Super-Resolution clarity enhancement applied! Click "Restore Original" anytime to undo.');
         confetti({ particleCount: 45, spread: 60, origin: { y: 0.7 } });
+        setTimeout(() => setFeedbackNotice(null), 4000);
       };
       img.onerror = () => setIsUpscalingClarity(false);
       img.src = currentPanoramaUrl;
     }, 80);
+  };
+
+  const handleRestoreOriginal = () => {
+    if (originalRawUrl) {
+      onPanoramaChange(originalRawUrl);
+      setFeedbackNotice('Restored to original pre-enhancement panorama.');
+      setTimeout(() => setFeedbackNotice(null), 3500);
+    }
   };
 
   return (
@@ -1104,13 +1145,34 @@ export function GeneratorTab({
         <div className="lg:col-span-7 space-y-4">
           {/* WebGL 3D Sphere Container with cinematic frame */}
           <div className="glass-panel border border-cyan-500/30 rounded-3xl overflow-hidden shadow-[0_25px_60px_rgba(0,10,30,0.8)]">
-            <div className="px-5 py-3.5 bg-[#030e20]/90 border-b border-cyan-500/20 flex items-center justify-between text-xs text-cyan-200">
+            <div className="px-5 py-3.5 bg-[#030e20]/90 border-b border-cyan-500/20 flex flex-wrap items-center justify-between gap-2 text-xs text-cyan-200">
               <div className="flex items-center gap-2.5">
                 <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_#00F2FE]" />
                 <span className="font-bold text-white tracking-wide">Live 360° Sphere Viewport</span>
                 <span className="text-cyan-400/60 hidden sm:inline">| Drag to look around, scroll to zoom</span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
+                {/* Restore Original Button */}
+                {originalRawUrl && originalRawUrl !== currentPanoramaUrl && (
+                  <button
+                    type="button"
+                    onClick={handleRestoreOriginal}
+                    className="flex items-center gap-1.5 text-[11px] text-amber-300 hover:text-white bg-amber-500/15 hover:bg-amber-500/25 px-2.5 py-1 rounded-full border border-amber-500/35 transition-all cursor-pointer font-bold active:scale-95 shadow-sm animate-in fade-in"
+                    title="Revert enhancements and restore original pre-4K panorama"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Restore Original</span>
+                  </button>
+                )}
+
+                {/* 4K Enhanced Badge */}
+                {enhanced4kUrl && currentPanoramaUrl === enhanced4kUrl && (
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-400/20 text-cyan-200 border border-cyan-400/40 font-mono font-bold flex items-center gap-1">
+                    <Sparkles className="w-3 h-3 text-cyan-300" />
+                    <span>4K Ultra</span>
+                  </span>
+                )}
+
                 <button
                   type="button"
                   disabled={isUpscalingClarity}
@@ -1119,7 +1181,13 @@ export function GeneratorTab({
                   title="Apply 4K super-resolution reconstruction and unsharp mask sharpening"
                 >
                   <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-                  <span>{isUpscalingClarity ? 'Enhancing...' : 'Enhance 4K Clarity'}</span>
+                  <span>
+                    {isUpscalingClarity
+                      ? 'Enhancing...'
+                      : enhanced4kUrl && currentPanoramaUrl === originalRawUrl
+                      ? 'Apply 4K Enhanced'
+                      : 'Enhance 4K Clarity'}
+                  </span>
                 </button>
                 <button
                   type="button"
@@ -1136,6 +1204,23 @@ export function GeneratorTab({
                 </div>
               </div>
             </div>
+
+            {/* Feedback notification toast */}
+            {feedbackNotice && (
+              <div className="px-5 py-2 bg-gradient-to-r from-cyan-950/90 via-blue-950/90 to-cyan-950/90 border-b border-cyan-500/30 flex items-center justify-between text-xs text-cyan-200 animate-in fade-in duration-150">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-teal-400 shrink-0" />
+                  <span className="font-medium text-white">{feedbackNotice}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setFeedbackNotice(null)}
+                  className="text-cyan-400 hover:text-white text-xs px-1 cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
 
             <div className="h-[490px] w-full relative bg-[#020712]">
               <SphereViewer textureUrl={currentPanoramaUrl} className="w-full h-full" />

@@ -198,6 +198,9 @@ export function ViewerTab({
 
   // Seam healing on demand for uploaded images
   const handleHealSeam = () => {
+    if (!originalUploadedUrl) {
+      setOriginalUploadedUrl(currentPanoramaUrl);
+    }
     const img = new Image();
     img.crossOrigin = 'anonymous';
     img.onload = () => {
@@ -218,6 +221,9 @@ export function ViewerTab({
 
   // 4K Clarity Upscaling and Sharpening on demand
   const handleUpscaleEnhance = () => {
+    if (!originalUploadedUrl) {
+      setOriginalUploadedUrl(currentPanoramaUrl);
+    }
     setIsUpscaling(true);
     setTimeout(() => {
       const img = new Image();
