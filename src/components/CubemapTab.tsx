@@ -83,20 +83,20 @@ export function CubemapTab({ currentPanoramaUrl }: CubemapTabProps) {
       <div className="text-center max-w-2xl mx-auto space-y-2.5">
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-mono font-medium mb-1">
           <Box className="w-3.5 h-3.5" />
-          <span>光线投射 3D 展开引擎</span>
+          <span>Raycasting 3D Unfolding Engine</span>
         </div>
         <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
-          等距圆柱全景转立方体天空盒切片
+          Equirectangular to Cubemap Skybox Slicer
         </h1>
         <p className="text-sm text-slate-400">
-          将 2:1 等距圆柱全景图快速解构成标准 6 面体立方体贴图 (+X, -X, +Y, -Y, +Z, -Z)，原生适配 Unity、虚幻引擎 (UE5) 与 WebGL 游戏天空盒。
+          Quickly extract 2:1 equirectangular panoramas into standard 6-sided cubemaps (+X, -X, +Y, -Y, +Z, -Z), natively ready for Unity, Unreal Engine 5, Godot, and WebGL skyboxes.
         </p>
       </div>
 
       {/* Main Controls & Batch Download Bar */}
       <div className="glass-panel border border-white/10 rounded-3xl p-6 flex flex-wrap items-center justify-between gap-4 shadow-xl">
         <div className="flex items-center gap-4">
-          <span className="text-xs font-bold text-slate-200">单面切片分辨率：</span>
+          <span className="text-xs font-bold text-slate-200">Face Resolution:</span>
           <div className="flex items-center gap-1 bg-[#080b18] p-1 border border-white/10 rounded-xl text-xs">
             {[256, 512, 1024].map((sz) => (
               <button
@@ -124,17 +124,17 @@ export function CubemapTab({ currentPanoramaUrl }: CubemapTabProps) {
           {downloadSuccess ? (
             <>
               <Check className="w-4 h-4 text-white" />
-              <span>ZIP 打包下载完成！</span>
+              <span>ZIP Download Ready!</span>
             </>
           ) : isSlicing ? (
             <>
               <RefreshCw className="w-4 h-4 animate-spin" />
-              <span>光线投射切片中...</span>
+              <span>Raycasting Slices...</span>
             </>
           ) : (
             <>
               <Archive className="w-4 h-4" />
-              <span>打包下载 6 面切片 (ZIP)</span>
+              <span>Download All 6 Faces (ZIP)</span>
             </>
           )}
         </button>
@@ -145,9 +145,9 @@ export function CubemapTab({ currentPanoramaUrl }: CubemapTabProps) {
         <div className="flex items-center justify-between">
           <span className="text-xs font-bold text-slate-200 uppercase tracking-wider font-mono flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-            十字展开图 (T-Cross) 拓扑预览
+            Unfolded T-Cross Topology Preview
           </span>
-          <span className="text-[11px] text-slate-400 font-mono">标准 3D 立方体贴图拓扑</span>
+          <span className="text-[11px] text-slate-400 font-mono">Standard 3D Cubemap Layout</span>
         </div>
 
         {/* Cross Grid */}
@@ -200,7 +200,7 @@ export function CubemapTab({ currentPanoramaUrl }: CubemapTabProps) {
               className="w-full py-1.5 px-2 bg-white/[0.05] hover:bg-cyan-600 hover:text-white border border-white/10 hover:border-cyan-500 rounded-xl text-[11px] font-medium text-slate-300 flex items-center justify-center gap-1 transition-all cursor-pointer shadow-sm"
             >
               <Download className="w-3 h-3" />
-              <span>下载 PNG</span>
+              <span>Download PNG</span>
             </button>
           </div>
         ))}
@@ -210,23 +210,23 @@ export function CubemapTab({ currentPanoramaUrl }: CubemapTabProps) {
       <div className="border-t border-white/[0.08] pt-6 space-y-4">
         <h3 className="text-sm font-bold text-slate-200 flex items-center gap-2">
           <Info className="w-4 h-4 text-cyan-400" />
-          如何将立方体贴图导入游戏引擎
+          How to Import Cubemaps into Game Engines
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-slate-400">
           <div className="glass-card p-4 rounded-2xl space-y-1.5">
-            <div className="font-semibold text-slate-200">Unity 天空盒导入步骤</div>
+            <div className="font-semibold text-slate-200">Unity Skybox Import Guide</div>
             <p className="text-[11px] leading-relaxed">
-              1. 下载 6 面切片 ZIP 压缩包并解压到 Unity 项目的 Assets 目录。<br />
-              2. 在 Unity 中新建 Material 材质球，Shader 选择 `Skybox/6 Sided`。<br />
-              3. 分别将解压的 6 张贴图拖入 Front (+Z)、Back (-Z)、Left (-X)、Right (+X)、Up (+Y) 和 Down (-Y)。
+              1. Download and extract the 6-face ZIP into your Unity Assets folder.<br />
+              2. Create a new Material and set its Shader to `Skybox/6 Sided`.<br />
+              3. Assign the textures to Front (+Z), Back (-Z), Left (-X), Right (+X), Up (+Y), and Down (-Y).
             </p>
           </div>
           <div className="glass-card p-4 rounded-2xl space-y-1.5">
-            <div className="font-semibold text-slate-200">虚幻引擎 (Unreal Engine) 与 Godot</div>
+            <div className="font-semibold text-slate-200">Unreal Engine & Godot 4</div>
             <p className="text-[11px] leading-relaxed">
-              1. 在虚幻引擎中，导入 6 张贴图并新建 `Cube Texture` 立方体纹理资产。<br />
-              2. 指定给场景中的 Post Process 后期处理卷体或 Sky Light 天光。<br />
-              3. 在 Godot 4 中，添加 `PanoramaSkyMaterial` 或直接指定给 `Sky` 资源。
+              1. In Unreal Engine, import the textures and create a `Cube Texture` asset.<br />
+              2. Assign it to a Post Process Volume or Sky Light in your scene.<br />
+              3. In Godot 4, use a `PanoramaSkyMaterial` or assign directly to a `Sky` resource.
             </p>
           </div>
         </div>
@@ -250,7 +250,7 @@ function FaceThumbnail({
     <div
       onClick={() => onDownload(face)}
       className="aspect-square bg-[#080b18] border border-white/10 hover:border-cyan-400 rounded-xl overflow-hidden relative group cursor-pointer transition-all shadow-md hover:shadow-[0_0_20px_rgba(34,211,238,0.25)]"
-      title={`点击下载 ${face.label}`}
+      title={`Click to download ${face.label}`}
     >
       <img src={face.dataUrl} alt={face.label} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
       <div className="absolute inset-0 bg-[#060812]/75 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1 text-white">

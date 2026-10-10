@@ -639,7 +639,7 @@ export function SphereViewer({
           <div className="w-1/2 border-r border-slate-700/60" />
           <div className="w-1/2" />
           <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-slate-900/90 text-[10px] px-3 py-1 rounded-full text-cyan-300 border border-slate-700">
-            VR 左右双目立体分屏模式
+            VR Cardboard Stereoscopic Split-Screen
           </div>
         </div>
       )}
@@ -648,7 +648,7 @@ export function SphereViewer({
       {isAddingHotspotMode && (
         <div className="absolute top-16 left-1/2 -translate-x-1/2 z-30 px-4 py-2 bg-gradient-to-r from-cyan-400 to-teal-300 text-slate-950 font-bold border border-cyan-200 rounded-xl shadow-2xl text-xs flex items-center gap-2 animate-bounce">
           <MapPin className="w-4 h-4 text-slate-950" />
-          <span>旋转视角并点击画面放置漫游热点标记</span>
+          <span>Rotate view & click canvas to place spatial hotspot</span>
           <button
             type="button"
             onClick={() => setIsAddingHotspotMode(false)}
@@ -669,10 +669,10 @@ export function SphereViewer({
               ? 'bg-gradient-to-r from-cyan-400 to-blue-600 text-slate-950 font-bold shadow-sm shadow-cyan-500/30'
               : 'text-slate-400 hover:text-slate-200'
           }`}
-          title="360° 球面全景沉浸漫游"
+          title="360° Spherical Panoramic Mode"
         >
           <Globe2 className="w-3.5 h-3.5" />
-          <span>360° 全景球</span>
+          <span>360° Sphere</span>
         </button>
 
         <button
@@ -683,10 +683,10 @@ export function SphereViewer({
               ? 'bg-cyan-600 text-white shadow-sm'
               : 'text-slate-400 hover:text-slate-200'
           }`}
-          title="180° IMAX 巨幕弧形模式"
+          title="180° IMAX Curved Screen Mode"
         >
           <Tv className="w-3.5 h-3.5" />
-          <span>180° 环幕</span>
+          <span>180° Curved</span>
         </button>
 
         <button
@@ -697,10 +697,10 @@ export function SphereViewer({
               ? 'bg-teal-400 text-slate-950 font-bold shadow-sm shadow-teal-400/30'
               : 'text-slate-400 hover:text-slate-200'
           }`}
-          title="小行星立体极投影鱼眼模式"
+          title="Little Planet Stereographic Fisheye"
         >
           <Eye className="w-3.5 h-3.5" />
-          <span>小行星鱼眼</span>
+          <span>Little Planet</span>
         </button>
 
         <button
@@ -711,10 +711,10 @@ export function SphereViewer({
               ? 'bg-pink-600 text-white shadow-sm'
               : 'text-slate-400 hover:text-slate-200'
           }`}
-          title="VR 左右双目立体分屏漫游"
+          title="VR Stereoscopic Cardboard Mode"
         >
           <Glasses className="w-3.5 h-3.5" />
-          <span>VR 分屏</span>
+          <span>VR Split</span>
         </button>
       </div>
 
@@ -729,7 +729,7 @@ export function SphereViewer({
                 ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-300 animate-pulse'
                 : 'bg-slate-900/80 border-slate-800 text-slate-400 hover:text-white'
             }`}
-            title={isGyroActive ? '关闭移动端陀螺仪追踪' : '开启移动端陀螺仪体感追踪'}
+            title={isGyroActive ? 'Disable mobile gyroscope tracking' : 'Enable mobile gyroscope orientation'}
           >
             <Smartphone className="w-4 h-4" />
           </button>
@@ -744,7 +744,7 @@ export function SphereViewer({
                 ? 'bg-cyan-500 border-cyan-400 text-slate-950 font-bold'
                 : 'bg-slate-900/80 border-slate-800 text-slate-400 hover:text-white'
             }`}
-            title="在 360° 场景中添加漫游热点标记"
+            title="Add spatial tour hotspot to 360° scene"
           >
             <MapPin className="w-4 h-4" />
           </button>
@@ -754,7 +754,7 @@ export function SphereViewer({
           type="button"
           onClick={resetOrientation}
           className="p-2 bg-slate-900/80 backdrop-blur-md border border-slate-800 rounded-xl text-slate-300 hover:text-white transition-colors cursor-pointer"
-          title="重置视角至正前方中心"
+          title="Reset view to front-facing center"
         >
           <Compass className="w-4 h-4 text-cyan-400" />
         </button>
@@ -809,7 +809,7 @@ export function SphereViewer({
               <X className="w-4 h-4" />
             </button>
           </div>
-          <p className="text-slate-300 leading-relaxed text-[11px]">{activeHotspot.description || '暂无详细描述'}</p>
+          <p className="text-slate-300 leading-relaxed text-[11px]">{activeHotspot.description || 'No detailed description provided'}</p>
           {onRemoveHotspot && (
             <div className="flex justify-end pt-1">
               <button
@@ -820,7 +820,7 @@ export function SphereViewer({
                 }}
                 className="text-[10px] text-red-400 hover:text-red-300 cursor-pointer"
               >
-                删除标记
+                Delete Hotspot
               </button>
             </div>
           )}
@@ -837,7 +837,7 @@ export function SphereViewer({
             <div className="flex items-center justify-between border-b border-slate-800 pb-2">
               <span className="font-semibold text-white flex items-center gap-1.5">
                 <MapPin className="w-4 h-4 text-cyan-400" />
-                新建 360° 漫游热点
+                New 360° Tour Hotspot
               </span>
               <button
                 type="button"
@@ -849,24 +849,24 @@ export function SphereViewer({
             </div>
 
             <div>
-              <label className="block text-slate-400 mb-1">热点标题</label>
+              <label className="block text-slate-400 mb-1">Hotspot Title</label>
               <input
                 type="text"
                 required
                 value={newHotspotTitle}
                 onChange={(e) => setNewHotspotTitle(e.target.value)}
-                placeholder="例如：主卧景观、露台全景、核心大厅..."
+                placeholder="e.g. Master Bedroom, Terrace View, Grand Lobby..."
                 className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-white"
               />
             </div>
 
             <div>
-              <label className="block text-slate-400 mb-1">详细说明</label>
+              <label className="block text-slate-400 mb-1">Detailed Description</label>
               <textarea
                 rows={3}
                 value={newHotspotDesc}
                 onChange={(e) => setNewHotspotDesc(e.target.value)}
-                placeholder="输入场景介绍、空间导览或交互说明..."
+                placeholder="Enter scene overview, spatial guide, or interactive notes..."
                 className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-white resize-none"
               />
             </div>
@@ -877,13 +877,13 @@ export function SphereViewer({
                 onClick={() => setPendingHotspotCoords(null)}
                 className="px-3 py-1.5 bg-slate-800 text-slate-300 rounded-lg cursor-pointer"
               >
-                取消
+                Cancel
               </button>
               <button
                 type="submit"
                 className="px-4 py-1.5 bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 font-bold rounded-lg cursor-pointer shadow-lg shadow-cyan-500/20"
               >
-                确认添加
+                Confirm & Add
               </button>
             </div>
           </form>
@@ -901,10 +901,10 @@ export function SphereViewer({
           <div className="flex items-center justify-between px-2.5 pt-2 font-mono text-[9px] uppercase tracking-wider text-slate-300">
             <span className="flex items-center gap-1 font-semibold text-slate-400">
               <Compass className="w-3 h-3 text-cyan-400" />
-              <span>全局雷达</span>
+              <span>Spatial Radar</span>
             </span>
             <span ref={minimapHeadingRef} className="text-cyan-300 font-bold">
-              北 · 0°
+              N · 0°
             </span>
           </div>
 
@@ -912,11 +912,11 @@ export function SphereViewer({
           <div
             onClick={handleMinimapClick}
             className="relative mx-2 mb-2 mt-1.5 aspect-[2/1] overflow-hidden rounded-lg cursor-crosshair border border-slate-700/80 bg-slate-950 group/minimap"
-            title="点击小地图快速定向视角方位"
+            title="Click minimap to orient viewpoint heading"
           >
             <img
               src={textureUrl}
-              alt="全景雷达缩略图"
+              alt="Panorama radar minimap"
               className="h-full w-full object-cover opacity-85 group-hover/minimap:opacity-100 transition-opacity"
             />
             {/* Viewport Frustum Wireframe Boxes (Supports 360 boundary wrapping) */}
@@ -941,7 +941,7 @@ export function SphereViewer({
             className={`p-2 rounded-full transition-all cursor-pointer ${
               isAutoRotating ? 'bg-gradient-to-r from-cyan-400 to-teal-300 text-slate-950 font-bold shadow-md shadow-cyan-500/40' : 'hover:bg-white/10 text-slate-300'
             }`}
-            title={isAutoRotating ? '暂停自动旋转 (空格键)' : '开启自动旋转 (空格键)'}
+            title={isAutoRotating ? 'Pause auto-rotation (Spacebar)' : 'Start auto-rotation (Spacebar)'}
           >
             {isAutoRotating ? <Pause className="w-3.5 h-3.5 fill-current" /> : <Play className="w-3.5 h-3.5 fill-current" />}
           </button>
@@ -955,7 +955,7 @@ export function SphereViewer({
             className={`p-2 rounded-full transition-all cursor-pointer ${
               showMinimap ? 'text-cyan-300 bg-cyan-500/20' : 'text-slate-400 hover:bg-white/10'
             }`}
-            title={showMinimap ? '隐藏雷达小地图' : '显示雷达小地图'}
+            title={showMinimap ? 'Hide radar minimap' : 'Show radar minimap'}
           >
             <Compass className="w-3.5 h-3.5" />
           </button>
@@ -966,7 +966,7 @@ export function SphereViewer({
               targetFovRef.current = Math.max(35, targetFovRef.current - 10);
             }}
             className="p-2 hover:bg-white/10 rounded-full text-slate-300 hover:text-white transition-colors cursor-pointer"
-            title="放大视角 (拉近)"
+            title="Zoom in (Narrow FOV)"
           >
             <ZoomIn className="w-3.5 h-3.5" />
           </button>
@@ -977,7 +977,7 @@ export function SphereViewer({
               targetFovRef.current = Math.min(100, targetFovRef.current + 10);
             }}
             className="p-2 hover:bg-white/10 rounded-full text-slate-300 hover:text-white transition-colors cursor-pointer"
-            title="缩小视角 (拉远)"
+            title="Zoom out (Widen FOV)"
           >
             <ZoomOut className="w-3.5 h-3.5" />
           </button>
@@ -991,10 +991,10 @@ export function SphereViewer({
             className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
               showSettingsDrawer ? 'bg-cyan-400 text-slate-950 font-bold shadow-md shadow-cyan-500/30' : 'hover:bg-white/10 text-slate-300'
             }`}
-            title="画面微调、曝光补偿与空间音频"
+            title="Tone adjustments, exposure & ambient audio"
           >
             <Sliders className="w-3.5 h-3.5" />
-            <span>画质与音频</span>
+            <span>Tone & Audio</span>
           </button>
 
           <div className="w-[1px] h-4 bg-white/15 mx-1" />
@@ -1003,7 +1003,7 @@ export function SphereViewer({
             type="button"
             onClick={handleTakeSnapshot}
             className="p-2 hover:bg-white/10 rounded-full text-slate-300 hover:text-white transition-colors cursor-pointer"
-            title="截取当前视口高清快照 (PNG)"
+            title="Capture high-resolution viewport snapshot (PNG)"
           >
             <Camera className="w-3.5 h-3.5" />
           </button>
@@ -1012,7 +1012,7 @@ export function SphereViewer({
             type="button"
             onClick={handleToggleFullscreen}
             className="p-2 hover:bg-white/10 rounded-full text-slate-300 hover:text-white transition-colors cursor-pointer"
-            title="切换全屏沉浸视口"
+            title="Toggle fullscreen immersive viewport"
           >
             {isFullscreen ? <Minimize className="w-3.5 h-3.5" /> : <Maximize className="w-3.5 h-3.5" />}
           </button>
@@ -1025,7 +1025,7 @@ export function SphereViewer({
           <div className="flex items-center justify-between pb-2.5 border-b border-white/[0.08]">
             <span className="font-bold text-white flex items-center gap-2">
               <Sliders className="w-4 h-4 text-cyan-400" />
-              画面微调与空间音频
+              Tone & Ambient Audio
             </span>
             <button
               type="button"
@@ -1040,8 +1040,8 @@ export function SphereViewer({
           <div className="space-y-1">
             <div className="flex items-center justify-between text-[11px] text-slate-400">
               <span className="flex items-center gap-1">
-                <Sun className="w-3 h-3 text-amber-400" />
-                ACES 曝光补偿
+                <Sun className="w-3.5 h-3.5 text-amber-400" />
+                ACES Exposure
               </span>
               <span className="font-mono text-slate-300">{exposure.toFixed(2)}x</span>
             </div>
@@ -1059,7 +1059,7 @@ export function SphereViewer({
           {/* Contrast Slider */}
           <div className="space-y-1">
             <div className="flex items-center justify-between text-[11px] text-slate-400">
-              <span>对比度</span>
+              <span>Contrast</span>
               <span className="font-mono text-slate-300">{contrast}%</span>
             </div>
             <input
@@ -1076,7 +1076,7 @@ export function SphereViewer({
           {/* Saturation Slider */}
           <div className="space-y-1">
             <div className="flex items-center justify-between text-[11px] text-slate-400">
-              <span>色彩饱和度</span>
+              <span>Saturation</span>
               <span className="font-mono text-slate-300">{saturation}%</span>
             </div>
             <input
@@ -1095,28 +1095,28 @@ export function SphereViewer({
             <div className="flex items-center justify-between text-[11px] text-slate-400">
               <span className="flex items-center gap-1 font-medium text-slate-300">
                 {isMuted || ambientSound === 'none' ? (
-                  <VolumeX className="w-3 h-3 text-slate-500" />
+                  <VolumeX className="w-3.5 h-3.5 text-slate-500" />
                 ) : (
-                  <Volume2 className="w-3 h-3 text-pink-400" />
+                  <Volume2 className="w-3.5 h-3.5 text-pink-400" />
                 )}
-                空间环境音频 (Web Audio)
+                Spatial Ambient Audio (Web Audio)
               </span>
               <button
                 type="button"
                 onClick={() => setIsMuted((p) => !p)}
                 className="text-[10px] text-slate-400 hover:text-slate-200 cursor-pointer underline"
               >
-                {isMuted ? '取消静音' : '静音'}
+                {isMuted ? 'Unmute' : 'Mute'}
               </button>
             </div>
 
             <div className="grid grid-cols-2 gap-1.5 pt-0.5">
               {[
-                { id: 'none', label: '关闭' },
-                { id: 'ocean', label: '🌊 海浪潮汐' },
-                { id: 'cyberpunk', label: '🌆 赛博都市' },
-                { id: 'breeze', label: '🍃 微风林动' },
-                { id: 'space', label: '🌌 太空深空' },
+                { id: 'none', label: 'Off' },
+                { id: 'ocean', label: '🌊 Ocean Waves' },
+                { id: 'cyberpunk', label: '🌆 Cyber City' },
+                { id: 'breeze', label: '🍃 Forest Breeze' },
+                { id: 'space', label: '🌌 Deep Space' },
               ].map((sound) => (
                 <button
                   key={sound.id}

@@ -33,13 +33,13 @@ export function GlobeTab({ currentPanoramaUrl }: GlobeTabProps) {
       <div className="text-center max-w-2xl mx-auto space-y-2.5">
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono font-medium mb-1">
           <Globe2 className="w-3.5 h-3.5" />
-          <span>菲涅尔大气辉光着色器</span>
+          <span>Fresnel Atmospheric Glow Shader</span>
         </div>
         <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
-          交互式 3D 全景行星地球仪
+          Interactive 3D Planetary Globe
         </h1>
         <p className="text-sm text-slate-400">
-          将任意 2:1 等距圆柱全景、照片或世界地图贴附在带轨道自转与大气散射的 3D 行星球体上。
+          Wrap any 2:1 equirectangular panorama, world map, or orbital imagery onto an interactive 3D sphere with orbital rotation and atmospheric scattering.
         </p>
       </div>
 
@@ -48,12 +48,12 @@ export function GlobeTab({ currentPanoramaUrl }: GlobeTabProps) {
         <div className="px-5 py-3.5 bg-[#080b18]/90 border-b border-white/[0.08] flex flex-wrap items-center justify-between gap-3 text-xs">
           <span className="font-bold text-white flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-            3D 行星自转与轨道模拟器
+            3D Planetary Orbit & Rotation Simulator
           </span>
 
           <label className="shimmer-btn px-4 py-1.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white rounded-xl cursor-pointer flex items-center gap-1.5 font-semibold transition-all shadow-md shadow-cyan-600/20 active:scale-95">
             <Upload className="w-3.5 h-3.5" />
-            <span>加载自定义地图贴图</span>
+            <span>Upload Custom Map Texture</span>
             <input type="file" accept="image/*" onChange={handleCustomUpload} className="hidden" />
           </label>
         </div>
@@ -66,9 +66,9 @@ export function GlobeTab({ currentPanoramaUrl }: GlobeTabProps) {
       {/* Quick Texture Switcher Bar */}
       <div className="glass-panel border border-white/10 rounded-3xl p-6 flex flex-wrap items-center justify-between gap-4 shadow-xl">
         <div className="space-y-1">
-          <div className="text-sm font-bold text-white">当前球体贴图源</div>
+          <div className="text-sm font-bold text-white">Current Sphere Texture Source</div>
           <div className="text-xs text-slate-400">
-            点击“同步当前 360° 全景图”将最新 AI 生成或查看的全景直接映射到 3D 地球仪。
+            Click "Sync Current 360° Panorama" to map the latest generated or viewed panorama directly onto the 3D globe.
           </div>
         </div>
 
@@ -78,7 +78,7 @@ export function GlobeTab({ currentPanoramaUrl }: GlobeTabProps) {
           className="px-4 py-2 bg-white/[0.06] hover:bg-white/10 border border-white/10 hover:border-cyan-400/40 text-white text-xs font-semibold rounded-xl transition-all cursor-pointer flex items-center gap-1.5 active:scale-95 shadow-sm"
         >
           <RotateCcw className="w-3.5 h-3.5 text-cyan-400" />
-          <span>同步当前 360° 全景图</span>
+          <span>Sync Current 360° Panorama</span>
         </button>
       </div>
 
@@ -86,19 +86,19 @@ export function GlobeTab({ currentPanoramaUrl }: GlobeTabProps) {
       <div className="border-t border-white/[0.08] pt-6 space-y-4">
         <h3 className="text-sm font-bold text-slate-200 flex items-center gap-2">
           <Info className="w-4 h-4 text-emerald-400" />
-          制图投影与球面 UV 映射原理
+          Cartographic Projection & Spherical UV Mapping
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-slate-400">
           <div className="glass-card p-4 rounded-2xl space-y-1.5">
-            <div className="font-semibold text-slate-200">等距柱状 UV 纹理映射</div>
+            <div className="font-semibold text-slate-200">Equirectangular UV Texture Mapping</div>
             <p className="text-[11px] leading-relaxed">
-              标准圆柱投影将经度直接映射到 X 轴（0° ~ 360°），纬度映射到 Y 轴（-90° ~ +90°）。完美适配架空世界地图、天文科普教学与科幻世界观构建。
+              Standard equirectangular projection maps longitude to X (0° ~ 360°) and latitude to Y (-90° ~ +90°). Perfect for fantasy world maps, planetary exploration, and sci-fi worldbuilding.
             </p>
           </div>
           <div className="glass-card p-4 rounded-2xl space-y-1.5">
-            <div className="font-semibold text-slate-200">轨道大气层菲涅尔散射</div>
+            <div className="font-semibold text-slate-200">Orbital Atmospheric Fresnel Scattering</div>
             <p className="text-[11px] leading-relaxed">
-              内置模拟菲涅尔大气边缘辉光与瑞利散射，在球体边缘呈现深邃的行星光晕，效果比肩高规格实时太空渲染。
+              Simulates Fresnel limb glow and Rayleigh scattering to produce deep atmospheric halos around the planetary silhouette, matching real-time space visualization standards.
             </p>
           </div>
         </div>

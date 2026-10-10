@@ -73,7 +73,7 @@ export async function testProxyConnection(config: GeminiConfig): Promise<{
     if (!apiKey) {
       return {
         success: false,
-        message: 'Google 官方直连模式需要提供 API Key。请前往 https://aistudio.google.com/ 创建并填写。',
+        message: 'Google AI Studio direct mode requires an API Key. Please obtain one at https://aistudio.google.com/.',
       };
     }
     const googleEndpoint = `${normalizedBase}/v1beta/models?key=${encodeURIComponent(apiKey)}`;
@@ -100,12 +100,12 @@ export async function testProxyConnection(config: GeminiConfig): Promise<{
       return {
         success: true,
         models,
-        message: `成功连接 Google AI Studio！已检测到 ${models.length} 个模型（生图推荐：imagen-3.0-generate-002）。`,
+        message: `Successfully connected to Google AI Studio! Detected ${models.length} models (Recommended for imaging: imagen-3.0-generate-002).`,
       };
     } catch (err: unknown) {
       return {
         success: false,
-        message: `无法连接 Google 官方接口 (${err instanceof Error ? err.message : String(err)})。请确保网络具备海外直连/代理访问条件。`,
+        message: `Unable to connect to Google official endpoint (${err instanceof Error ? err.message : String(err)}). Please ensure network connectivity to Google services.`,
       };
     }
   }
@@ -165,19 +165,19 @@ export async function testProxyConnection(config: GeminiConfig): Promise<{
 const SAFETY_REPLACEMENTS: Array<{ pattern: RegExp; replacement: string }> = [
   {
     pattern: /宫崎骏(风格)?|吉卜力(工作室)?|hayao\s*miyazaki|studio\s*ghibli/gi,
-    replacement: '经典日系治愈水彩手绘动漫风，唯美夏日天空与自然光影 (Japanese anime hand-drawn watercolor aesthetic, nostalgic summer breeze, lush green grass, fluffy white clouds, warm natural sunlight)',
+    replacement: 'Japanese anime hand-drawn watercolor aesthetic, nostalgic summer breeze, lush green grass, fluffy white clouds, warm natural sunlight',
   },
   {
     pattern: /新海诚(风格)?|makoto\s*shinkai/gi,
-    replacement: '超精细唯美光影动漫风，璀璨天空与壮丽云彩 (vibrant atmospheric anime cinematic lighting, detailed cumulus clouds, high-contrast emotional sky)',
+    replacement: 'vibrant atmospheric anime cinematic lighting, detailed cumulus clouds, high-contrast emotional sky',
   },
   {
     pattern: /迪士尼(风格)?|disney(\s*animation)?/gi,
-    replacement: '经典3D奇幻动画电影质感 (3D stylized animation cinematic render, magical atmosphere)',
+    replacement: '3D stylized animation cinematic render, magical atmosphere, rich volumetric light',
   },
   {
     pattern: /皮克斯(风格)?|pixar(\s*animation)?/gi,
-    replacement: '3D卡通CG动画电影质感 (3D animated feature film render, soft subsurface scattering)',
+    replacement: '3D animated feature film render, soft subsurface scattering, vibrant colors',
   },
 ];
 
@@ -265,8 +265,8 @@ export async function generateWithGemini(
         const isAbort = err instanceof Error && err.name === 'AbortError';
         throw new Error(
           isAbort
-            ? 'Gemini 图像生成请求超时 (90s)，模型计算时间过长，请稍后重试。'
-            : `无法连接到代理端点 [${chatEndpoint}]: ${err instanceof Error ? err.message : String(err)}`
+            ? 'Gemini image generation timed out (90s). The model computation took too long, please try again.'
+            : `Unable to connect to proxy endpoint [${chatEndpoint}]: ${err instanceof Error ? err.message : String(err)}`
         );
       } finally {
         clearTimeout(timeoutId);
@@ -301,7 +301,7 @@ export async function generateWithGemini(
       }
 
       if (!rawImageUrl) {
-        throw new Error(`8317 代理返回的 Gemini 消息中未包含图片数据: ${JSON.stringify(msg).slice(0, 200)}`);
+        throw new Error(`Proxy Gemini response did not contain image data: ${JSON.stringify(msg).slice(0, 200)}`);
       }
     } else {
       // 1. Standard OpenAI-compatible /v1/images/generations (used by 8317 cli-proxy-api, One-API, etc.)
@@ -382,9 +382,9 @@ export async function generateWithGemini(
 
       if (isSafetyBlock) {
         throw new Error(
-          `提示词触发了 AI 平台的版权与内容安全审核 (Rejected by safety system) [HTTP 400]：\n\n` +
-          `AI 模型（OpenAI）禁止在提示词中直接使用特定著名艺术家姓名（如“宫崎骏”、“吉卜力”）或商业 IP。\n\n` +
-          `💡 解决建议：请避免直接写“宫崎骏”，系统已支持自动别名转换，或请手动改用画风描述（如“日系治愈水彩手绘风、夏日蓝天白云大海”，或直接选择“日系治愈动漫”预设）即可完美生成！`
+          `Your prompt triggered the AI platform's copyright or content safety filter [HTTP 400 - Rejected by safety system].\n\n` +
+          `AI models (OpenAI) prohibit direct references to specific protected artist names (such as "Hayao Miyazaki" or "Studio Ghibli") or commercial trademarks.\n\n` +
+          `Tip: Please describe the visual style instead (e.g. "Japanese anime hand-drawn watercolor aesthetic, lush clouds and summer breeze", or choose the "Ghibli Anime" preset) to generate seamlessly.`
         );
       }
 
@@ -440,12 +440,12 @@ export async function generateWithGemini(
       if (res.status === 400 || res.status === 403) {
         if (readableMsg.includes('API_KEY_INVALID') || readableMsg.toLowerCase().includes('api key')) {
           throw new Error(
-            `Google API Key 无效或未生效 [HTTP ${res.status}]：\n` +
-            `请检查设置中的 API Key。可前往 https://aistudio.google.com/ 免费创建并复制以 AIzaSy 开头的 Key。`
+            `Invalid or expired Google API Key [HTTP ${res.status}]:\n` +
+            `Please verify your API Key in Settings. You can create a free key starting with AIzaSy at https://aistudio.google.com/.`
           );
         }
       }
-      throw new Error(`Google 官方 Imagen 3 API 请求失败 [HTTP ${res.status}]: ${readableMsg}`);
+      throw new Error(`Google Imagen 3 API request failed [HTTP ${res.status}]: ${readableMsg}`);
     }
 
     const data = await res.json();
