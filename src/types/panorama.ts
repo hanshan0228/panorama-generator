@@ -55,7 +55,27 @@ export interface CubemapFace {
   canvas: HTMLCanvasElement;
 }
 
-export type ActiveTab = 'generator' | 'viewer' | 'cubemap' | 'globe' | 'pricing' | 'admin';
+export interface ReferenceImage {
+  id: string;
+  url: string;
+  name: string;
+  preview: string;
+}
+
+export interface ShowcaseItem {
+  id: string;
+  title: string;
+  category: string;
+  prompt: string;
+  style: StylePresetId;
+  author: string;
+  views: number;
+  likes: number;
+  resolution: string;
+  tags: string[];
+}
+
+export type ActiveTab = 'generator' | 'viewer' | 'cubemap' | 'globe' | 'showcase' | 'pricing' | 'admin';
 
 export interface ModelEndpointConfig {
   id: string;
