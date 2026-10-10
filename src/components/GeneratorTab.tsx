@@ -14,6 +14,7 @@ import {
   AlertCircle,
   Check,
   Zap,
+  ExternalLink,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import type { ActiveTab, StylePreset, StylePresetId, ResolutionTier } from '../types/panorama';
@@ -27,6 +28,7 @@ import {
   buildPanoramaPrompt,
   testProxyConnection,
   DEFAULT_GEMINI_CONFIG,
+  GOOGLE_OFFICIAL_CONFIG,
   type GeminiConfig,
 } from '../utils/geminiClient';
 
@@ -133,7 +135,20 @@ export function GeneratorTab({
     saveStoredGeminiConfig(DEFAULT_GEMINI_CONFIG);
     setTestConnResult({
       success: true,
-      message: 'Loaded local 8317 proxy recommended configuration (gpt-image-2.5)!',
+      message: '已载入本地 8317 代理推荐配置 (gpt-image-2.5)！',
+    });
+  };
+
+  const handleLoadGoogleOfficial = () => {
+    const isAlreadyGoogle = geminiConfig.baseUrl.includes('googleapis.com');
+    const newCfg: GeminiConfig = {
+      ...GOOGLE_OFFICIAL_CONFIG,
+      apiKey: isAlreadyGoogle ? geminiConfig.apiKey : '',
+    };
+    setGeminiConfig(newCfg);
+    setTestConnResult({
+      success: true,
+      message: '已切换为 Google AI Studio 官方直连模式！请在下方填入以 AIzaSy 开头的 API Key。',
     });
   };
 
@@ -271,53 +286,107 @@ export function GeneratorTab({
             </div>
 
             <div className="space-y-3.5 text-xs">
-              {/* Quick Preset 8317 Trigger */}
-              <div className="p-3 bg-gradient-to-r from-cyan-950/70 to-blue-950/50 border border-cyan-400/40 rounded-2xl flex items-center justify-between gap-2 shadow-inner">
-                <div>
-                  <div className="font-bold text-cyan-200 flex items-center gap-1.5">
-                    <Zap className="w-3.5 h-3.5 text-cyan-400" />
-                    <span>Local 8317 Proxy Setup</span>
+              {/* Dual Preset Switcher */}
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={handleLoadGoogleOfficial}
+                  className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                    geminiConfig.baseUrl.includes('googleapis.com')
+                      ? 'bg-gradient-to-br from-teal-950/80 to-blue-950/80 border-teal-400/60 shadow-[0_0_15px_rgba(20,184,166,0.2)]'
+                      : 'bg-[#030d1d] border-cyan-500/20 hover:border-cyan-400/40 opacity-75 hover:opacity-100'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-bold text-teal-300 flex items-center gap-1">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      Google 官方直连
+                    </span>
+                    <span className="text-[10px] px-1.5 py-0.2 bg-teal-400/20 text-teal-200 rounded font-mono font-bold">
+                      Imagen 3
+                    </span>
                   </div>
-                  <div className="text-[11px] text-cyan-300/70 mt-0.5">Detected local CLI Proxy API on port 8317</div>
-                </div>
+                  <div className="text-[10.5px] text-teal-200/70">
+                    原生 Google AI Studio 直连，画质顶级
+                  </div>
+                </button>
+
                 <button
                   type="button"
                   onClick={handleLoad8317Default}
-                  className="px-3 py-1.5 bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-bold rounded-xl cursor-pointer shrink-0 transition-all shadow-md shadow-cyan-400/25 active:scale-95"
+                  className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                    geminiConfig.baseUrl.includes('8317')
+                      ? 'bg-gradient-to-br from-cyan-950/80 to-blue-950/80 border-cyan-400/60 shadow-[0_0_15px_rgba(6,182,212,0.2)]'
+                      : 'bg-[#030d1d] border-cyan-500/20 hover:border-cyan-400/40 opacity-75 hover:opacity-100'
+                  }`}
                 >
-                  Load 8317 Defaults
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-bold text-cyan-300 flex items-center gap-1">
+                      <Zap className="w-3.5 h-3.5" />
+                      本地 8317 代理
+                    </span>
+                    <span className="text-[10px] px-1.5 py-0.2 bg-cyan-400/20 text-cyan-200 rounded font-mono font-bold">
+                      CLI Proxy
+                    </span>
+                  </div>
+                  <div className="text-[10.5px] text-cyan-200/70">
+                    调用本地 8317 端口转接 ChatGPT 绘图
+                  </div>
                 </button>
               </div>
 
               <div>
                 <label className="block text-cyan-200 font-semibold mb-1">
-                  Proxy Base URL
+                  API Base URL
                 </label>
                 <input
                   type="text"
                   value={geminiConfig.baseUrl}
                   onChange={(e) => setGeminiConfig({ ...geminiConfig, baseUrl: e.target.value })}
-                  placeholder="http://127.0.0.1:8317"
+                  placeholder="https://generativelanguage.googleapis.com 或 http://127.0.0.1:8317"
                   className="w-full px-3.5 py-2.5 bg-[#030a17] border border-cyan-500/30 rounded-xl text-cyan-100 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/25 font-mono text-xs transition-all"
                 />
                 <p className="text-[11px] text-cyan-300/60 mt-1">
-                  Default address is <code className="text-cyan-400">http://127.0.0.1:8317</code>.
+                  {geminiConfig.baseUrl.includes('googleapis.com') ? (
+                    <span className="text-teal-300 flex items-center gap-1">
+                      <span>✓ 官方直连模式 (无需本地代理软件)</span>
+                    </span>
+                  ) : (
+                    <span>本地或第三方 OpenAI 兼容反向代理地址</span>
+                  )}
                 </p>
               </div>
 
               <div>
-                <label className="block text-cyan-200 font-semibold mb-1">
-                  API Key / Bearer Token
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-cyan-200 font-semibold">
+                    API Key / Bearer Token
+                  </label>
+                  {geminiConfig.baseUrl.includes('googleapis.com') && (
+                    <a
+                      href="https://aistudio.google.com/app/apikey"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[11px] text-teal-300 hover:text-teal-100 flex items-center gap-0.5 underline"
+                    >
+                      <span>免费获取 Google Key</span>
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  )}
+                </div>
                 <input
                   type="password"
                   value={geminiConfig.apiKey}
                   onChange={(e) => setGeminiConfig({ ...geminiConfig, apiKey: e.target.value })}
-                  placeholder="Enter Authorization Bearer Token"
+                  placeholder={
+                    geminiConfig.baseUrl.includes('googleapis.com')
+                      ? '输入 Google AI Studio API Key (AIzaSy...)'
+                      : '输入 8317 Proxy Authorization Bearer Token'
+                  }
                   className="w-full px-3.5 py-2.5 bg-[#030a17] border border-cyan-500/30 rounded-xl text-cyan-100 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/25 font-mono text-xs transition-all"
                 />
                 <p className="text-[11px] text-cyan-300/60 mt-1">
-                  Stored securely in your local browser storage.
+                  Key 仅保存在您当前浏览器的本地 LocalStorage，不上传任何第三方。
                 </p>
               </div>
 
@@ -329,19 +398,26 @@ export function GeneratorTab({
                   type="text"
                   value={geminiConfig.model}
                   onChange={(e) => setGeminiConfig({ ...geminiConfig, model: e.target.value })}
-                  placeholder="gpt-image-2.5"
+                  placeholder={
+                    geminiConfig.baseUrl.includes('googleapis.com')
+                      ? 'imagen-3.0-generate-002'
+                      : 'gpt-image-2.5'
+                  }
                   className="w-full px-3.5 py-2.5 bg-[#030a17] border border-cyan-500/30 rounded-xl text-cyan-100 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/25 font-mono text-xs transition-all"
                 />
                 <div className="flex flex-wrap items-center gap-1.5 mt-2">
-                  <span className="text-[10px] text-cyan-300/70 font-semibold">Models:</span>
-                  {['gpt-image-2.5', 'gpt-image-2', 'gpt-image-1.5', 'gpt-image-2.5-flare'].map((m) => (
+                  <span className="text-[10px] text-cyan-300/70 font-semibold">推荐模型:</span>
+                  {(geminiConfig.baseUrl.includes('googleapis.com')
+                    ? ['imagen-3.0-generate-002', 'imagen-3.0-fast-generate-001']
+                    : ['gpt-image-2.5', 'gpt-image-2', 'grok-imagine-image-2.0']
+                  ).map((m) => (
                     <button
                       key={m}
                       type="button"
                       onClick={() => setGeminiConfig({ ...geminiConfig, model: m })}
                       className={`text-[10px] px-2 py-0.5 rounded-lg font-mono cursor-pointer transition-all ${
                         geminiConfig.model === m
-                          ? 'bg-cyan-400 text-slate-950 font-bold shadow-sm shadow-cyan-400/30'
+                          ? 'bg-gradient-to-r from-teal-400 to-cyan-400 text-slate-950 font-bold shadow-sm shadow-cyan-400/30'
                           : 'bg-cyan-950/60 hover:bg-cyan-900/60 text-cyan-300 border border-cyan-500/20'
                       }`}
                     >

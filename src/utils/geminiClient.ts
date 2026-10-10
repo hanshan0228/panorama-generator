@@ -12,6 +12,12 @@ export const DEFAULT_GEMINI_CONFIG: GeminiConfig = {
   model: 'gpt-image-2.5',
 };
 
+export const GOOGLE_OFFICIAL_CONFIG: GeminiConfig = {
+  apiKey: '',
+  baseUrl: 'https://generativelanguage.googleapis.com',
+  model: 'imagen-3.0-generate-002',
+};
+
 const GEMINI_CONFIG_STORAGE_KEY = 'panorama_gemini_config';
 
 export function getStoredGeminiConfig(): GeminiConfig {
@@ -19,16 +25,21 @@ export function getStoredGeminiConfig(): GeminiConfig {
     const raw = localStorage.getItem(GEMINI_CONFIG_STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      // Automatically migrate from old placeholder 8045 or non-existent models to live 8317
-      if (
-        !parsed.baseUrl ||
-        parsed.baseUrl.includes('8045') ||
-        parsed.model === 'gemini-3-flash' ||
-        parsed.model === 'imagen-3.0-generate-002'
-      ) {
+      // Migrate from old dead port 8045
+      if (!parsed.baseUrl || parsed.baseUrl.includes('8045')) {
         return {
           ...DEFAULT_GEMINI_CONFIG,
           apiKey: parsed.apiKey || DEFAULT_GEMINI_CONFIG.apiKey,
+        };
+      }
+      // If using local 8317 proxy but invalid model was left, fix to gpt-image-2.5
+      if (
+        parsed.baseUrl.includes('8317') &&
+        (parsed.model?.includes('gemini') || parsed.model?.includes('imagen'))
+      ) {
+        return {
+          ...parsed,
+          model: 'gpt-image-2.5',
         };
       }
       return { ...DEFAULT_GEMINI_CONFIG, ...parsed };
@@ -48,7 +59,7 @@ export function saveStoredGeminiConfig(config: GeminiConfig): void {
 }
 
 /**
- * Test connectivity with local or remote proxy.
+ * Test connectivity with local or remote proxy, or Google official API.
  */
 export async function testProxyConnection(config: GeminiConfig): Promise<{
   success: boolean;
@@ -57,6 +68,50 @@ export async function testProxyConnection(config: GeminiConfig): Promise<{
 }> {
   const normalizedBase = (config.baseUrl || 'http://127.0.0.1:8317').replace(/\/+$/, '');
   const apiKey = config.apiKey.trim();
+  const isGoogle = normalizedBase.includes('googleapis.com');
+
+  if (isGoogle) {
+    if (!apiKey) {
+      return {
+        success: false,
+        message: 'Google 官方直连模式需要提供 API Key。请前往 https://aistudio.google.com/ 创建并填写。',
+      };
+    }
+    const googleEndpoint = `${normalizedBase}/v1beta/models?key=${encodeURIComponent(apiKey)}`;
+    try {
+      const res = await fetch(googleEndpoint, { method: 'GET' });
+      if (!res.ok) {
+        const errText = await res.text();
+        let errMsg = errText;
+        try {
+          const json = JSON.parse(errText);
+          errMsg = json.error?.message || errText;
+        } catch {
+          // ignore
+        }
+        return {
+          success: false,
+          message: `Google AI Studio HTTP ${res.status}: ${errMsg.slice(0, 160)}`,
+        };
+      }
+      const data = await res.json();
+      const models: string[] = Array.isArray(data.models)
+        ? data.models.map((m: { name: string }) => m.name.replace(/^models\//, ''))
+        : [];
+      return {
+        success: true,
+        models,
+        message: `成功连接 Google AI Studio！已检测到 ${models.length} 个模型（生图推荐：imagen-3.0-generate-002）。`,
+      };
+    } catch (err: unknown) {
+      return {
+        success: false,
+        message: `无法连接 Google 官方接口 (${err instanceof Error ? err.message : String(err)})。请确保网络具备海外直连/代理访问条件。`,
+      };
+    }
+  }
+
+  // Standard OpenAI-compatible local proxy check
   const endpoint = normalizedBase.endsWith('/v1')
     ? `${normalizedBase}/models`
     : `${normalizedBase}/v1/models`;
@@ -296,7 +351,22 @@ export async function generateWithGemini(
 
     if (!res.ok) {
       const errText = await res.text();
-      throw new Error(`Google native API request failed [HTTP ${res.status}]: ${errText.slice(0, 200)}`);
+      let readableMsg = errText;
+      try {
+        const json = JSON.parse(errText);
+        readableMsg = json.error?.message || errText;
+      } catch {
+        // ignore
+      }
+      if (res.status === 400 || res.status === 403) {
+        if (readableMsg.includes('API_KEY_INVALID') || readableMsg.toLowerCase().includes('api key')) {
+          throw new Error(
+            `Google API Key 无效或未生效 [HTTP ${res.status}]：\n` +
+            `请检查设置中的 API Key。可前往 https://aistudio.google.com/ 免费创建并复制以 AIzaSy 开头的 Key。`
+          );
+        }
+      }
+      throw new Error(`Google 官方 Imagen 3 API 请求失败 [HTTP ${res.status}]: ${readableMsg}`);
     }
 
     const data = await res.json();
