@@ -225,10 +225,9 @@ export function SphereViewer({
     texture.colorSpace = THREE.SRGBColorSpace;
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.ClampToEdgeWrapping;
-    texture.generateMipmaps = true;
-    texture.minFilter = THREE.LinearMipmapLinearFilter;
+    texture.generateMipmaps = false;
+    texture.minFilter = THREE.LinearFilter;
     texture.magFilter = THREE.LinearFilter;
-    texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
 
     let geometry: THREE.BufferGeometry;
     let material: THREE.Material;

@@ -80,7 +80,7 @@ export function generateProceduralPanorama(
   }
 
   // Apply benchmark seam-healing algorithm so the 360 wrapping has zero visible cut
-  return healPanoramaSeam(canvas, 140);
+  return healPanoramaSeam(canvas, 160);
 }
 
 function drawCyberpunkScene(ctx: CanvasRenderingContext2D, w: number, h: number, _prompt: string): void {
@@ -355,7 +355,8 @@ function drawFantasyTempleScene(ctx: CanvasRenderingContext2D, w: number, h: num
     wave.addColorStop(1, 'rgba(147, 51, 234, 0)');
     ctx.fillStyle = wave;
     ctx.beginPath();
-    ctx.moveTo(0, 100);
+    const startY = 140 + Math.sin(a * 1.5) * 70;
+    ctx.moveTo(0, startY);
     const waveSteps = 64;
     for (let s = 0; s <= waveSteps; s++) {
       const x = (s / waveSteps) * w;
@@ -379,7 +380,7 @@ function drawFantasyTempleScene(ctx: CanvasRenderingContext2D, w: number, h: num
   // Ancient Monolith Pillars (periodic 16 pillars around the sphere)
   const numPillars = 16;
   for (let p = 0; p < numPillars; p++) {
-    const px = (p * (w / numPillars)) + 30;
+    const px = p * (w / numPillars);
     const pAngle = (p / numPillars) * Math.PI * 2;
     const pHeight = 220 + Math.round(Math.sin(pAngle * 2) * 40 + Math.cos(pAngle * 4) * 20);
     const py = h * 0.6 - pHeight;

@@ -1,13 +1,14 @@
 /**
- * Advanced Multi-Scale Seam & Boundary Healing for 360° Equirectangular Panoramas.
+ * Advanced Multi-Band Seam & Boundary Healing for 360° Equirectangular Panoramas.
  * 
  * Completely eliminates the vertical stitch/split seam line when viewing 360° panoramas:
- * 1. Harmonic Poisson / Laplacian Gradient Offset Correction:
- *    Calculates the boundary step difference between column 0 and column (width - 1) for every row,
- *    and smoothly dissolves it across an S-curve cosine window into both sides.
- * 2. Symmetric Cross-Fade for Structural Textures:
- *    Cross-fades fine geometric features across the seam so continuous horizons, clouds,
- *    and buildings connect without hard cuts.
+ * 1. Wide Harmonic Poisson / Gradient Harmonization (Low Frequency):
+ *    Calculates the boundary step difference between the left and right boundary for every row,
+ *    and smoothly dissolves it across a wide cosine taper (up to 15% of width) so the overall
+ *    illumination, exposure, and color temperature match with zero perceptible banding.
+ * 2. True Symmetric S-Curve Cross-Fade (Mid & High Frequency Texture Alignment):
+ *    Across a blend zone K (e.g. 140-180 pixels), blends the left-side texture and right-side texture
+ *    symmetrically so continuous horizons, clouds, mountains, and structures connect smoothly.
  * 3. Exact 100% Boundary Matching:
  *    Guarantees column 0 and column (width - 1) have bit-for-bit identical colors,
  *    eliminating all possible edge sampling artifacts in WebGL.
@@ -16,7 +17,7 @@
  */
 export function healPanoramaSeam(
   sourceCanvas: HTMLCanvasElement,
-  blendWidth = 140
+  blendWidth = 160
 ): HTMLCanvasElement {
   const width = sourceCanvas.width;
   const height = sourceCanvas.height;
@@ -39,26 +40,28 @@ export function healPanoramaSeam(
   // Clone original buffer so we sample pristine pixels while writing
   const src = new Uint8ClampedArray(data);
 
-  // Proportional blend width: default ~7-10% of width, minimum 32, max width / 4
-  const safeBlend = Math.max(32, Math.min(blendWidth || Math.floor(width * 0.08), Math.floor(width / 4)));
+  // Blend width for structural cross-fade: default ~8% of width, min 48, max width / 4
+  const safeBlend = Math.max(48, Math.min(blendWidth || Math.floor(width * 0.08), Math.floor(width / 4)));
 
-  // Precompute Cosine S-curve weights
-  // Harmonic window: 1.0 at d=0 (seam), 0.0 at d=safeBlend
-  const wHarm = new Float32Array(safeBlend);
-  for (let d = 0; d < safeBlend; d++) {
-    const t = d / safeBlend;
-    wHarm[d] = 0.5 * (1 + Math.cos(Math.PI * t));
+  // Wide harmonic window for global illumination and exposure alignment (12-16% of width)
+  const harmDist = Math.max(safeBlend * 1.5, Math.min(Math.floor(width * 0.14), Math.floor(width / 3)));
+
+  // Precompute Cosine S-curve weights for harmonic gradient
+  const wHarm = new Float32Array(harmDist);
+  for (let d = 0; d < harmDist; d++) {
+    const t = d / harmDist;
+    wHarm[d] = 0.5 * (1 + Math.cos(Math.PI * t)); // 1.0 at d=0, 0.0 at d=harmDist
   }
 
-  // Core texture crossfade window: 0.0 at d=0 (50/50 blend), 1.0 at d=coreBlend (100% local)
-  const coreBlend = Math.min(safeBlend, Math.max(20, Math.floor(safeBlend * 0.35)));
-  const wCross = new Float32Array(coreBlend);
-  for (let d = 0; d < coreBlend; d++) {
-    const t = d / coreBlend;
+  // Precompute Cosine S-curve weights for texture cross-fade
+  const wCross = new Float32Array(safeBlend);
+  for (let d = 0; d < safeBlend; d++) {
+    const t = d / safeBlend;
+    // 0.0 at d=0 (50/50 target), 1.0 at d=safeBlend (100% original texture)
     wCross[d] = 0.5 * (1 - Math.cos(Math.PI * t));
   }
 
-  const sampleCount = Math.min(4, safeBlend);
+  const sampleCount = Math.min(8, Math.floor(safeBlend * 0.2));
 
   // Process horizontal seam for every row
   for (let y = 0; y < height; y++) {
@@ -94,62 +97,64 @@ export function healPanoramaSeam(
     const deltaG = avgRG - avgLG;
     const deltaB = avgRB - avgLB;
 
-    // Baseline 50/50 seam color
-    const seamPixelL = rowOffset * 4;
-    const seamPixelR = (rowOffset + (width - 1)) * 4;
-    const seamR = 0.5 * (src[seamPixelL] + src[seamPixelR]);
-    const seamG = 0.5 * (src[seamPixelL + 1] + src[seamPixelR + 1]);
-    const seamB = 0.5 * (src[seamPixelL + 2] + src[seamPixelR + 2]);
+    // First pass: Wide harmonic illumination harmonization
+    for (let d = 0; d < harmDist; d++) {
+      const leftIdx = (rowOffset + d) * 4;
+      const rightIdx = (rowOffset + (width - 1 - d)) * 4;
+      const hWeight = wHarm[d];
 
-    // 2. Harmonize transition zone on both left and right sides
+      const leftOffsetR = 0.5 * deltaR * hWeight;
+      const leftOffsetG = 0.5 * deltaG * hWeight;
+      const leftOffsetB = 0.5 * deltaB * hWeight;
+
+      const rightOffsetR = -0.5 * deltaR * hWeight;
+      const rightOffsetG = -0.5 * deltaG * hWeight;
+      const rightOffsetB = -0.5 * deltaB * hWeight;
+
+      data[leftIdx] = Math.min(255, Math.max(0, Math.round(src[leftIdx] + leftOffsetR)));
+      data[leftIdx + 1] = Math.min(255, Math.max(0, Math.round(src[leftIdx + 1] + leftOffsetG)));
+      data[leftIdx + 2] = Math.min(255, Math.max(0, Math.round(src[leftIdx + 2] + leftOffsetB)));
+
+      data[rightIdx] = Math.min(255, Math.max(0, Math.round(src[rightIdx] + rightOffsetR)));
+      data[rightIdx + 1] = Math.min(255, Math.max(0, Math.round(src[rightIdx + 1] + rightOffsetG)));
+      data[rightIdx + 2] = Math.min(255, Math.max(0, Math.round(src[rightIdx + 2] + rightOffsetB)));
+    }
+
+    // Second pass: Symmetric texture cross-fade in the core blend zone
     for (let d = 0; d < safeBlend; d++) {
       const leftIdx = (rowOffset + d) * 4;
       const rightIdx = (rowOffset + (width - 1 - d)) * 4;
 
-      const harmWeight = wHarm[d];
+      const curLR = data[leftIdx];
+      const curLG = data[leftIdx + 1];
+      const curLB = data[leftIdx + 2];
 
-      // Harmonic gradient offset (distributes step jump across distance d)
-      const leftOffsetR = 0.5 * deltaR * harmWeight;
-      const leftOffsetG = 0.5 * deltaG * harmWeight;
-      const leftOffsetB = 0.5 * deltaB * harmWeight;
+      const curRR = data[rightIdx];
+      const curRG = data[rightIdx + 1];
+      const curRB = data[rightIdx + 2];
 
-      const rightOffsetR = -0.5 * deltaR * harmWeight;
-      const rightOffsetG = -0.5 * deltaG * harmWeight;
-      const rightOffsetB = -0.5 * deltaB * harmWeight;
+      // Symmetrically mirrored texture target across the wrap meridian
+      const targetR = 0.5 * (curLR + curRR);
+      const targetG = 0.5 * (curLG + curRG);
+      const targetB = 0.5 * (curLB + curRB);
 
-      // Texture cross-fade within core blend zone
-      let baseLR = src[leftIdx];
-      let baseLG = src[leftIdx + 1];
-      let baseLB = src[leftIdx + 2];
+      const alpha = wCross[d]; // 0 at seam (d=0), 1 at boundary (d=safeBlend)
 
-      let baseRR = src[rightIdx];
-      let baseRG = src[rightIdx + 1];
-      let baseRB = src[rightIdx + 2];
-
-      if (d < coreBlend) {
-        const cross = wCross[d]; // 0 at d=0, 1 at d=coreBlend
-        baseLR = (1 - cross) * seamR + cross * baseLR;
-        baseLG = (1 - cross) * seamG + cross * baseLG;
-        baseLB = (1 - cross) * seamB + cross * baseLB;
-
-        baseRR = (1 - cross) * seamR + cross * baseRR;
-        baseRG = (1 - cross) * seamG + cross * baseRG;
-        baseRB = (1 - cross) * seamB + cross * baseRB;
-      }
-
-      // Write harmonized pixels into output
-      data[leftIdx] = Math.min(255, Math.max(0, Math.round(baseLR + leftOffsetR)));
-      data[leftIdx + 1] = Math.min(255, Math.max(0, Math.round(baseLG + leftOffsetG)));
-      data[leftIdx + 2] = Math.min(255, Math.max(0, Math.round(baseLB + leftOffsetB)));
+      data[leftIdx] = Math.round((1 - alpha) * targetR + alpha * curLR);
+      data[leftIdx + 1] = Math.round((1 - alpha) * targetG + alpha * curLG);
+      data[leftIdx + 2] = Math.round((1 - alpha) * targetB + alpha * curLB);
       data[leftIdx + 3] = 255;
 
-      data[rightIdx] = Math.min(255, Math.max(0, Math.round(baseRR + rightOffsetR)));
-      data[rightIdx + 1] = Math.min(255, Math.max(0, Math.round(baseRG + rightOffsetG)));
-      data[rightIdx + 2] = Math.min(255, Math.max(0, Math.round(baseRB + rightOffsetB)));
+      data[rightIdx] = Math.round((1 - alpha) * targetR + alpha * curRR);
+      data[rightIdx + 1] = Math.round((1 - alpha) * targetG + alpha * curRG);
+      data[rightIdx + 2] = Math.round((1 - alpha) * targetB + alpha * curRB);
       data[rightIdx + 3] = 255;
     }
 
-    // 3. Exact Bit-for-Bit Seam Equality at the physical boundary
+    // 3. Exact Bit-for-Bit Seam Equality at column 0 and column (width - 1)
+    const seamPixelL = rowOffset * 4;
+    const seamPixelR = (rowOffset + (width - 1)) * 4;
+
     const exactR = Math.round((data[seamPixelL] + data[seamPixelR]) / 2);
     const exactG = Math.round((data[seamPixelL + 1] + data[seamPixelR + 1]) / 2);
     const exactB = Math.round((data[seamPixelL + 2] + data[seamPixelR + 2]) / 2);
@@ -163,8 +168,8 @@ export function healPanoramaSeam(
   }
 
   // 4. Pole (Zenith +90° and Nadir -90°) Pinch Smoothing
-  smoothPoleRow(data, width, height, 0, 3);
-  smoothPoleRow(data, width, height, height - 1, 3);
+  smoothPoleRow(data, width, height, 0, 4);
+  smoothPoleRow(data, width, height, height - 1, 4);
 
   ctx.putImageData(imgData, 0, 0);
   return resultCanvas;

@@ -20,6 +20,7 @@ import {
   Coins,
   Wand2,
   Star,
+  ShieldCheck,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import type { ActiveTab, StylePreset, StylePresetId, ResolutionTier } from '../types/panorama';
@@ -45,6 +46,7 @@ import { IntegrationBadges } from './commercial/IntegrationBadges';
 import { TestimonialsSection } from './commercial/TestimonialsSection';
 import { CommercialFaq } from './commercial/CommercialFaq';
 import { exportVrReadyJpegBlob } from '../utils/xmpInjector';
+import { healPanoramaSeam } from '../utils/seamHealer';
 
 interface GeneratorTabProps {
   currentPanoramaUrl: string;
@@ -298,7 +300,35 @@ export function GeneratorTab({
         }, 500);
 
         // Call Gemini local proxy / direct endpoint
-        const finalDataUrl = await generateWithGemini(fullPrompt, geminiConfig);
+        const rawGenUrl = await generateWithGemini(fullPrompt, geminiConfig);
+
+        // Client-side symmetric seam healing if seamCorrection is true
+        let finalDataUrl = rawGenUrl;
+        if (seamCorrection) {
+          try {
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            finalDataUrl = await new Promise<string>((resolve) => {
+              img.onload = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.naturalWidth || img.width;
+                canvas.height = img.naturalHeight || img.height;
+                const ctx = canvas.getContext('2d');
+                if (ctx) {
+                  ctx.drawImage(img, 0, 0);
+                  const healed = healPanoramaSeam(canvas, 160);
+                  resolve(healed.toDataURL('image/png'));
+                } else {
+                  resolve(rawGenUrl);
+                }
+              };
+              img.onerror = () => resolve(rawGenUrl);
+              img.src = rawGenUrl;
+            });
+          } catch {
+            finalDataUrl = rawGenUrl;
+          }
+        }
 
         clearInterval(progressTimer);
         setGenerationProgress(95);
@@ -421,6 +451,24 @@ export function GeneratorTab({
     } else {
       setPrompt(`${prompt.trim()}, cinematic volumetric lighting, 8k ultra-sharp detail`);
     }
+  };
+
+  const handleManualHealSeam = () => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.naturalWidth || img.width;
+      canvas.height = img.naturalHeight || img.height;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(img, 0, 0);
+        const healed = healPanoramaSeam(canvas, 160);
+        onPanoramaChange(healed.toDataURL('image/png'));
+        confetti({ particleCount: 35, spread: 55, origin: { y: 0.7 } });
+      }
+    };
+    img.src = currentPanoramaUrl;
   };
 
   return (
@@ -1014,9 +1062,20 @@ export function GeneratorTab({
                 <span className="font-bold text-white tracking-wide">Live 360° Sphere Viewport</span>
                 <span className="text-cyan-400/60 hidden sm:inline">| Drag to look around, scroll to zoom</span>
               </div>
-              <div className="flex items-center gap-2 text-[11px] text-cyan-300 bg-cyan-950/60 px-2.5 py-1 rounded-full border border-cyan-500/30">
-                <Sliders className="w-3.5 h-3.5 text-cyan-400" />
-                <span>FOV: 75° (Interactive)</span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleManualHealSeam}
+                  className="flex items-center gap-1.5 text-[11px] text-teal-300 hover:text-white bg-teal-500/15 hover:bg-teal-500/25 px-2.5 py-1 rounded-full border border-teal-500/30 transition-all cursor-pointer font-semibold active:scale-95 shadow-sm"
+                  title="Run 160px multi-band seam alignment on current panorama"
+                >
+                  <ShieldCheck className="w-3.5 h-3.5 text-teal-400" />
+                  <span>Heal Seam</span>
+                </button>
+                <div className="flex items-center gap-2 text-[11px] text-cyan-300 bg-cyan-950/60 px-2.5 py-1 rounded-full border border-cyan-500/30">
+                  <Sliders className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>FOV: 75° (Interactive)</span>
+                </div>
               </div>
             </div>
 
