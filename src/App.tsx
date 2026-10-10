@@ -18,6 +18,8 @@ import {
   Gamepad2,
   Camera,
   Film,
+  Languages,
+  Check,
 } from 'lucide-react';
 import type { ActiveTab, StylePresetId } from './types/panorama';
 import { GeneratorTab } from './components/GeneratorTab';
@@ -34,6 +36,8 @@ import { PhotoTo360Page } from './components/landing/PhotoTo360Page';
 import { CubemapGeneratorPage } from './components/landing/CubemapGeneratorPage';
 import { MetadataInjectorPage } from './components/landing/MetadataInjectorPage';
 import { PhotoToVideoPage } from './components/landing/PhotoToVideoPage';
+import { EmbedViewer } from './components/commercial/EmbedViewer';
+import { getStoredLanguage, saveStoredLanguage, useI18n, type SupportedLang } from './utils/i18n';
 
 function getInitialTabFromLocation(): ActiveTab {
   if (typeof window === 'undefined') return 'generator';
@@ -58,12 +62,22 @@ function getInitialTabFromLocation(): ActiveTab {
 export function App() {
   const [activeTab, setActiveTab] = useState<ActiveTab>(getInitialTabFromLocation);
   const [isToolsDropdownOpen, setIsToolsDropdownOpen] = useState(false);
+  const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
+  const [currentLang, setCurrentLang] = useState<SupportedLang>(getStoredLanguage);
   const [generatorInputMode, setGeneratorInputMode] = useState<'text' | 'image'>('text');
   const [isMetadataModalOpen, setIsMetadataModalOpen] = useState(false);
   const [studioPresetPrompt, setStudioPresetPrompt] = useState<string | undefined>(undefined);
   const [studioPresetStyle, setStudioPresetStyle] = useState<StylePresetId | undefined>(undefined);
   const toolsDropdownRef = useRef<HTMLDivElement>(null);
+  const langDropdownRef = useRef<HTMLDivElement>(null);
   const closeTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const t = useI18n(currentLang);
+
+  const handleLanguageChange = (lang: SupportedLang) => {
+    setCurrentLang(lang);
+    saveStoredLanguage(lang);
+    setIsLangDropdownOpen(false);
+  };
 
   // Dynamic SEO metadata synchronization across active tabs & landing pages
   useEffect(() => {
@@ -188,10 +202,14 @@ export function App() {
       if (toolsDropdownRef.current && !toolsDropdownRef.current.contains(e.target as Node)) {
         setIsToolsDropdownOpen(false);
       }
+      if (langDropdownRef.current && !langDropdownRef.current.contains(e.target as Node)) {
+        setIsLangDropdownOpen(false);
+      }
     };
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setIsToolsDropdownOpen(false);
+        setIsLangDropdownOpen(false);
       }
     };
     document.addEventListener('pointerdown', handlePointerDown);
@@ -267,6 +285,14 @@ export function App() {
     return canvas.toDataURL('image/png');
   });
 
+  const isEmbedMode = typeof window !== 'undefined' && (
+    window.location.search.includes('embed=true') || window.location.hash.includes('embed')
+  );
+
+  if (isEmbedMode) {
+    return <EmbedViewer textureUrl={currentPanoramaUrl} />;
+  }
+
   return (
     <div className="min-h-screen bg-[#040c1a] text-sky-100 flex flex-col relative overflow-hidden bg-grid-cyber selection:bg-cyan-500/30 selection:text-white">
       {/* Dynamic Ambient Aurora Glows */}
@@ -329,7 +355,7 @@ export function App() {
                     : 'text-cyan-200/80 hover:text-white hover:bg-cyan-500/10'
                 }`}
               >
-                <span>Tools</span>
+                <span>{t.tools}</span>
                 <ChevronDown
                   className={`w-3 h-3 text-cyan-400 transition-transform duration-200 ${
                     isToolsDropdownOpen ? 'rotate-180' : ''
@@ -561,7 +587,7 @@ export function App() {
               }`}
             >
               <Sparkles className="w-3.5 h-3.5 text-cyan-300 fill-current" />
-              <span>Studio</span>
+              <span>{t.studio}</span>
             </button>
 
             <button
@@ -574,7 +600,7 @@ export function App() {
               }`}
             >
               <Eye className="w-3.5 h-3.5 text-teal-300" />
-              <span>360° Viewer</span>
+              <span>{t.viewer}</span>
               <span className="text-[9px] px-1 py-0.2 bg-teal-400/25 text-teal-300 rounded font-mono font-bold">
                 FREE
               </span>
@@ -590,7 +616,7 @@ export function App() {
               }`}
             >
               <Box className="w-3.5 h-3.5 text-cyan-300" />
-              <span>Cubemap</span>
+              <span>{t.cubemap}</span>
             </button>
 
             <button
@@ -603,7 +629,7 @@ export function App() {
               }`}
             >
               <Globe2 className="w-3.5 h-3.5 text-teal-300" />
-              <span>3D Globe</span>
+              <span>{t.globe}</span>
             </button>
 
             <button
@@ -616,19 +642,59 @@ export function App() {
               }`}
             >
               <CreditCard className="w-3.5 h-3.5 text-blue-300" />
-              <span>Pricing</span>
+              <span>{t.pricing}</span>
             </button>
           </nav>
 
-          {/* Right Action Trigger & Free Credits Pill */}
+          {/* Right Action Trigger, Language Selector & Free Credits Pill */}
           <div className="hidden lg:flex items-center gap-3">
+            {/* Language Selector Dropdown */}
+            <div ref={langDropdownRef} className="relative">
+              <button
+                type="button"
+                onClick={() => setIsLangDropdownOpen((prev) => !prev)}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[#06152d]/90 border border-cyan-500/25 text-cyan-200 text-xs font-semibold hover:bg-cyan-500/15 transition-all cursor-pointer"
+                title="Select Interface Language"
+              >
+                <Languages className="w-3.5 h-3.5 text-cyan-400" />
+                <span className="uppercase text-[11px] font-mono font-bold">{currentLang}</span>
+                <ChevronDown className={`w-3 h-3 text-cyan-400 transition-transform ${isLangDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {isLangDropdownOpen && (
+                <div className="absolute right-0 top-full mt-2 w-36 bg-[#020b18]/95 border border-cyan-400/30 rounded-2xl p-1.5 shadow-2xl backdrop-blur-2xl z-50 animate-in fade-in zoom-in-95 duration-100">
+                  {[
+                    { id: 'en', label: 'English' },
+                    { id: 'ja', label: '日本語' },
+                    { id: 'de', label: 'Deutsch' },
+                    { id: 'es', label: 'Español' },
+                    { id: 'zh', label: '中文' },
+                  ].map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => handleLanguageChange(item.id as SupportedLang)}
+                      className={`w-full px-2.5 py-1.5 rounded-xl text-left text-xs font-medium flex items-center justify-between cursor-pointer transition-colors ${
+                        currentLang === item.id
+                          ? 'bg-cyan-500/20 text-cyan-300 font-bold'
+                          : 'text-cyan-200/70 hover:bg-cyan-500/10 hover:text-white'
+                      }`}
+                    >
+                      <span>{item.label}</span>
+                      {currentLang === item.id && <Check className="w-3 h-3 text-teal-400" />}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
             <button
               type="button"
               onClick={() => setActiveTab('pricing')}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cyan-950/60 border border-cyan-500/30 text-cyan-300 text-xs font-mono font-bold hover:bg-cyan-900/60 transition-colors cursor-pointer"
             >
               <Coins className="w-3.5 h-3.5 text-amber-400" />
-              <span>50 Free Credits</span>
+              <span>{t.freeCredits}</span>
             </button>
 
             <button
@@ -637,7 +703,7 @@ export function App() {
               className="shimmer-btn px-4 py-2 bg-gradient-to-r from-cyan-400 via-teal-300 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 text-xs font-extrabold rounded-xl shadow-lg shadow-cyan-400/35 hover:shadow-cyan-400/60 hover:scale-105 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer"
             >
               <Zap className="w-3.5 h-3.5 fill-current" />
-              <span>Upgrade to Pro</span>
+              <span>{t.upgradePro}</span>
             </button>
           </div>
         </div>

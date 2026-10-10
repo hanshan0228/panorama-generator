@@ -23,6 +23,7 @@ import {
   ShieldCheck,
   RotateCcw,
   Film,
+  Code2,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import type { ActiveTab, StylePreset, StylePresetId, ResolutionTier } from '../types/panorama';
@@ -48,9 +49,53 @@ import { IntegrationBadges } from './commercial/IntegrationBadges';
 import { TestimonialsSection } from './commercial/TestimonialsSection';
 import { CommercialFaq } from './commercial/CommercialFaq';
 import { PhotoToVideoModal } from './commercial/PhotoToVideoModal';
+import { EmbedModal } from './commercial/EmbedModal';
 import { exportVrReadyJpegBlob } from '../utils/xmpInjector';
 import { healPanoramaSeam } from '../utils/seamHealer';
 import { enhanceAndUpscalePanorama } from '../utils/imageEnhancer';
+
+const PROMPT_BUILDER_CATEGORIES = [
+  {
+    name: 'Lighting & Atmosphere',
+    tags: [
+      'golden hour warm sunlight',
+      'cyberpunk neon reflections',
+      'volumetric fog & god rays',
+      'starry milky way nebula',
+      'overcast soft architectural lighting',
+    ],
+  },
+  {
+    name: 'Perspective & Horizon',
+    tags: [
+      '360 degree panoramic view',
+      'seamless equirectangular projection',
+      'eye-level human horizon',
+      'drone aerial 360 overview',
+      'spherical wide angle view',
+    ],
+  },
+  {
+    name: 'Environment & Setting',
+    tags: [
+      'luxury penthouse interior',
+      'snow-capped alpine lake',
+      'futuristic orbital hangar',
+      'ancient stone temple sanctuary',
+      'tropical ocean island beach',
+    ],
+  },
+  {
+    name: 'Engine & Quality',
+    tags: [
+      '8k photorealistic photography',
+      'Unreal Engine 5 Octane render',
+      'architectural digest photography',
+      'hyper-detailed raytracing reflections',
+      'Studio Ghibli anime watercolor',
+    ],
+  },
+];
 
 interface GeneratorTabProps {
   currentPanoramaUrl: string;
@@ -191,8 +236,19 @@ export function GeneratorTab({
   const [resolution, setResolution] = useState<ResolutionTier>('2K');
   const [seamCorrection, setSeamCorrection] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [generationProgress, setGenerationProgress] = useState(0);
+  const [generationProgress, setGenerationProgress] = useState<number>(0);
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+  const [isEmbedModalOpen, setIsEmbedModalOpen] = useState(false);
+  const [showPromptBuilder, setShowPromptBuilder] = useState(true);
+
+  const handleAppendTag = (tag: string) => {
+    setPrompt((prev) => {
+      const trimmed = prev.trim();
+      if (!trimmed) return tag;
+      if (trimmed.toLowerCase().includes(tag.toLowerCase())) return prev;
+      return `${trimmed}, ${tag}`;
+    });
+  };
 
   // Reference photos state for Image-to-Pano mode (Benchmarked from panoramagenerator.com)
   const [referenceImages, setReferenceImages] = useState<Array<{ id: string; name: string; preview: string }>>([]);
@@ -983,6 +1039,50 @@ export function GeneratorTab({
             />
           </div>
 
+          {/* 360° Prompt Studio (Keyword Helper) */}
+          <div className="relative z-10 bg-[#020917]/90 border border-cyan-500/20 rounded-2xl p-3 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-cyan-100 flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+                <span>360° Prompt Studio</span>
+                <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 bg-teal-400/20 text-teal-300 rounded">
+                  Keyword Helper
+                </span>
+              </span>
+              <button
+                type="button"
+                onClick={() => setShowPromptBuilder((prev) => !prev)}
+                className="text-[11px] text-cyan-400 hover:text-cyan-200 font-semibold cursor-pointer underline"
+              >
+                {showPromptBuilder ? 'Hide Keywords' : 'Show Keywords'}
+              </button>
+            </div>
+
+            {showPromptBuilder && (
+              <div className="space-y-2 pt-1.5 border-t border-cyan-500/15 animate-in fade-in duration-150">
+                {PROMPT_BUILDER_CATEGORIES.map((cat, idx) => (
+                  <div key={idx} className="space-y-1">
+                    <span className="text-[10px] uppercase font-mono font-bold text-cyan-400/70 block">
+                      {cat.name}:
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {cat.tags.map((tag, tIdx) => (
+                        <button
+                          key={tIdx}
+                          type="button"
+                          onClick={() => handleAppendTag(tag)}
+                          className="px-2 py-0.5 bg-cyan-950/70 hover:bg-cyan-900/80 border border-cyan-500/20 hover:border-cyan-400 text-cyan-200 hover:text-white rounded-lg text-[10px] font-medium transition-all cursor-pointer active:scale-95"
+                        >
+                          + {tag}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
           {/* Quick "Try:" Chips (Benchmarked directly from panoramagenerator.com) */}
           <div className="relative z-10">
             <span className="text-[10px] text-cyan-400/80 uppercase font-mono font-bold block mb-1.5">
@@ -1248,7 +1348,7 @@ export function GeneratorTab({
           </div>
 
           {/* Multi-Format Export Action Bar */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3">
             <button
               type="button"
               onClick={handleDownloadPng}
@@ -1315,6 +1415,23 @@ export function GeneratorTab({
               </div>
               <div className="text-xs font-bold text-white">Export Video</div>
               <div className="text-[10px] text-cyan-300/60 mt-0.5">360° Orbit Animation</div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setIsEmbedModalOpen(true)}
+              className="glass-card p-3.5 rounded-2xl text-left cursor-pointer group hover:border-pink-400/50 transition-all"
+            >
+              <div className="flex items-center justify-between mb-2 text-pink-400 group-hover:text-pink-300">
+                <div className="p-1.5 bg-pink-500/15 rounded-lg group-hover:scale-110 transition-transform">
+                  <Code2 className="w-4 h-4" />
+                </div>
+                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-pink-950/60 text-pink-300 font-bold border border-pink-500/20">
+                  IFRAME
+                </span>
+              </div>
+              <div className="text-xs font-bold text-white">Embed on Web</div>
+              <div className="text-[10px] text-cyan-300/60 mt-0.5">Interactive 3D Sphere</div>
             </button>
 
             <button
@@ -1392,6 +1509,13 @@ export function GeneratorTab({
       <PhotoToVideoModal
         isOpen={isVideoModalOpen}
         onClose={() => setIsVideoModalOpen(false)}
+        currentPanoramaUrl={currentPanoramaUrl}
+      />
+
+      {/* Embed 360 Viewer Modal */}
+      <EmbedModal
+        isOpen={isEmbedModalOpen}
+        onClose={() => setIsEmbedModalOpen(false)}
         currentPanoramaUrl={currentPanoramaUrl}
       />
     </div>

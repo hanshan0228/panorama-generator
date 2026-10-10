@@ -17,6 +17,7 @@ import {
   Trash2,
   Plus,
   X,
+  Code2,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { SphereViewer } from './SphereViewer';
@@ -25,6 +26,7 @@ import { convertFlatPhotoToEquirectangular } from '../utils/imageOptimizer';
 import { healPanoramaSeam } from '../utils/seamHealer';
 import { enhanceAndUpscalePanorama } from '../utils/imageEnhancer';
 import { repairPanoramaPoles } from '../utils/poleRepair';
+import { EmbedModal } from './commercial/EmbedModal';
 import type { ActiveTab, ViewerProjectionMode, PanoramaHotspot } from '../types/panorama';
 
 interface ViewerTabProps {
@@ -55,6 +57,7 @@ export function ViewerTab({
   const [isRepairingPoles, setIsRepairingPoles] = useState(false);
   const [enhanceSuccessMsg, setEnhanceSuccessMsg] = useState<string | null>(null);
   const [originalUploadedUrl, setOriginalUploadedUrl] = useState<string | null>(null);
+  const [isEmbedModalOpen, setIsEmbedModalOpen] = useState(false);
 
   // Interactive Scene Hotspots Tour state
   const [hotspots, setHotspots] = useState<PanoramaHotspot[]>([
@@ -467,6 +470,16 @@ export function ViewerTab({
               </div>
             </div>
 
+            <button
+              type="button"
+              onClick={() => setIsEmbedModalOpen(true)}
+              className="px-3.5 py-1.5 bg-pink-500/15 hover:bg-pink-500/25 border border-pink-400/40 text-pink-300 rounded-xl cursor-pointer flex items-center gap-1.5 font-bold transition-all shadow-sm active:scale-95"
+              title="Embed this interactive 360° viewer on your own website"
+            >
+              <Code2 className="w-3.5 h-3.5 text-pink-400" />
+              <span>Embed</span>
+            </button>
+
             <label className="shimmer-btn px-4 py-1.5 bg-cyan-400 hover:bg-cyan-300 text-slate-950 rounded-xl cursor-pointer flex items-center gap-1.5 font-extrabold transition-all shadow-md shadow-cyan-400/30 active:scale-95">
               <Upload className="w-3.5 h-3.5 stroke-[2.5]" />
               <span>Open Local Panorama</span>
@@ -794,6 +807,13 @@ export function ViewerTab({
           </div>
         </div>
       </div>
+
+      {/* Embed 360 Viewer Modal */}
+      <EmbedModal
+        isOpen={isEmbedModalOpen}
+        onClose={() => setIsEmbedModalOpen(false)}
+        currentPanoramaUrl={currentPanoramaUrl}
+      />
     </div>
   );
 }
