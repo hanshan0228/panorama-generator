@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
   Compass,
   Sparkles,
@@ -28,7 +28,98 @@ import { generateProceduralPanorama } from './utils/proceduralPanoramas';
 export function App() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('generator');
   const [isToolsDropdownOpen, setIsToolsDropdownOpen] = useState(false);
+  const [generatorInputMode, setGeneratorInputMode] = useState<'text' | 'image'>('text');
   const [isMetadataModalOpen, setIsMetadataModalOpen] = useState(false);
+  const toolsDropdownRef = useRef<HTMLDivElement>(null);
+  const closeTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Close dropdown on outside click or escape
+  useEffect(() => {
+    const handlePointerDown = (e: MouseEvent | TouchEvent) => {
+      if (toolsDropdownRef.current && !toolsDropdownRef.current.contains(e.target as Node)) {
+        setIsToolsDropdownOpen(false);
+      }
+    };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsToolsDropdownOpen(false);
+      }
+    };
+    document.addEventListener('pointerdown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+      if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+    };
+  }, []);
+
+  const handleMouseEnterTools = () => {
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+    setIsToolsDropdownOpen(true);
+  };
+
+  const handleMouseLeaveTools = () => {
+    // 180ms grace window ensures fast diagonal mouse travels never accidentally snap-close
+    closeTimerRef.current = setTimeout(() => {
+      setIsToolsDropdownOpen(false);
+    }, 180);
+  };
+
+  const handleSelectTextTo360 = () => {
+    setGeneratorInputMode('text');
+    setActiveTab('generator');
+    setIsToolsDropdownOpen(false);
+    setTimeout(() => {
+      const el = document.getElementById('prompt-input');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        (el as HTMLTextAreaElement).focus();
+      }
+    }, 60);
+  };
+
+  const handleSelectImageToPano = () => {
+    setGeneratorInputMode('image');
+    setActiveTab('generator');
+    setIsToolsDropdownOpen(false);
+    setTimeout(() => {
+      const el = document.getElementById('reference-uploader') || document.getElementById('studio-generator-workbench');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.classList.add('ring-2', 'ring-cyan-400');
+        setTimeout(() => {
+          el.classList.remove('ring-2', 'ring-cyan-400');
+        }, 1200);
+      }
+    }, 60);
+  };
+
+  const handleSelectViewer = () => {
+    setActiveTab('viewer');
+    setIsToolsDropdownOpen(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleSelectCubemap = () => {
+    setActiveTab('cubemap');
+    setIsToolsDropdownOpen(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleSelectGlobe = () => {
+    setActiveTab('globe');
+    setIsToolsDropdownOpen(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleSelectMetadataInjector = () => {
+    setIsMetadataModalOpen(true);
+    setIsToolsDropdownOpen(false);
+  };
 
   // Initialize with a default rich 2:1 equirectangular panorama
   const [currentPanoramaUrl, setCurrentPanoramaUrl] = useState<string>(() => {
@@ -89,121 +180,140 @@ export function App() {
           <nav className="flex items-center gap-1 bg-[#06152d]/90 border border-cyan-500/25 p-1.5 rounded-2xl backdrop-blur-xl shadow-inner overflow-visible">
             {/* Tools Mega Dropdown */}
             <div
+              ref={toolsDropdownRef}
               className="relative"
-              onMouseEnter={() => setIsToolsDropdownOpen(true)}
-              onMouseLeave={() => setIsToolsDropdownOpen(false)}
+              onMouseEnter={handleMouseEnterTools}
+              onMouseLeave={handleMouseLeaveTools}
             >
               <button
                 type="button"
-                onClick={() => setIsToolsDropdownOpen(!isToolsDropdownOpen)}
-                className="px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1 text-cyan-200/80 hover:text-white hover:bg-cyan-500/10 transition-colors cursor-pointer"
+                onClick={() => setIsToolsDropdownOpen((prev) => !prev)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer ${
+                  isToolsDropdownOpen
+                    ? 'bg-cyan-500/20 text-white border border-cyan-400/40 shadow-sm'
+                    : 'text-cyan-200/80 hover:text-white hover:bg-cyan-500/10'
+                }`}
               >
                 <span>Tools</span>
-                <ChevronDown className="w-3 h-3 text-cyan-400" />
+                <ChevronDown
+                  className={`w-3 h-3 text-cyan-400 transition-transform duration-200 ${
+                    isToolsDropdownOpen ? 'rotate-180' : ''
+                  }`}
+                />
               </button>
 
-              {/* Tools Dropdown Card */}
+              {/* Tools Dropdown Card with zero-gap hitbox */}
               {isToolsDropdownOpen && (
-                <div className="absolute top-full left-0 mt-2 w-72 bg-[#020b18]/95 border border-cyan-400/35 rounded-2xl p-3 shadow-2xl backdrop-blur-2xl z-50 animate-in fade-in duration-150">
-                  <div className="text-[10px] uppercase font-bold tracking-wider text-cyan-400/70 px-2 pb-1.5">
-                    AI Generators
-                  </div>
-                  <div className="space-y-1">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setActiveTab('generator');
-                        setIsToolsDropdownOpen(false);
-                      }}
-                      className="w-full px-2.5 py-1.5 rounded-xl hover:bg-cyan-950/60 text-left flex items-center gap-2 text-xs text-white transition-colors cursor-pointer"
-                    >
-                      <Wand2 className="w-3.5 h-3.5 text-cyan-400" />
-                      <div>
-                        <div className="font-semibold text-xs">Text to 360 Panorama</div>
-                        <div className="text-[10px] text-cyan-300/60">Generate from text description</div>
-                      </div>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setActiveTab('generator');
-                        setIsToolsDropdownOpen(false);
-                      }}
-                      className="w-full px-2.5 py-1.5 rounded-xl hover:bg-cyan-950/60 text-left flex items-center gap-2 text-xs text-white transition-colors cursor-pointer"
-                    >
-                      <ImagePlus className="w-3.5 h-3.5 text-teal-400" />
-                      <div>
-                        <div className="font-semibold text-xs">Image to Pano (Reference)</div>
-                        <div className="text-[10px] text-cyan-300/60">Steer with up to 3 photos</div>
-                      </div>
-                    </button>
-                  </div>
-
-                  <div className="text-[10px] uppercase font-bold tracking-wider text-cyan-400/70 px-2 pt-3 pb-1 border-t border-cyan-500/15 mt-2">
-                    3D &amp; Converters
-                  </div>
-                  <div className="space-y-1">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setActiveTab('viewer');
-                        setIsToolsDropdownOpen(false);
-                      }}
-                      className="w-full px-2.5 py-1.5 rounded-xl hover:bg-cyan-950/60 text-left flex items-center gap-2 text-xs text-white transition-colors cursor-pointer"
-                    >
-                      <Eye className="w-3.5 h-3.5 text-teal-400" />
-                      <div>
-                        <div className="font-semibold text-xs">360° VR WebGL Viewer</div>
-                        <div className="text-[10px] text-cyan-300/60">Inspect, cardboard VR, radar</div>
-                      </div>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setActiveTab('cubemap');
-                        setIsToolsDropdownOpen(false);
-                      }}
-                      className="w-full px-2.5 py-1.5 rounded-xl hover:bg-cyan-950/60 text-left flex items-center gap-2 text-xs text-white transition-colors cursor-pointer"
-                    >
-                      <Box className="w-3.5 h-3.5 text-cyan-400" />
-                      <div>
-                        <div className="font-semibold text-xs">Cubemap 6-Sided Slicer</div>
-                        <div className="text-[10px] text-cyan-300/60">Export ZIP for Unity &amp; Unreal</div>
-                      </div>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setActiveTab('globe');
-                        setIsToolsDropdownOpen(false);
-                      }}
-                      className="w-full px-2.5 py-1.5 rounded-xl hover:bg-cyan-950/60 text-left flex items-center gap-2 text-xs text-white transition-colors cursor-pointer"
-                    >
-                      <Globe2 className="w-3.5 h-3.5 text-emerald-400" />
-                      <div>
-                        <div className="font-semibold text-xs">3D Planetary Globe</div>
-                        <div className="text-[10px] text-cyan-300/60">Orbital sphere with atmosphere</div>
-                      </div>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsMetadataModalOpen(true);
-                        setIsToolsDropdownOpen(false);
-                      }}
-                      className="w-full px-2.5 py-1.5 rounded-xl hover:bg-cyan-950/60 text-left flex items-center gap-2 text-xs text-white transition-colors cursor-pointer"
-                    >
-                      <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
-                      <div>
-                        <div className="font-semibold text-xs flex items-center gap-1.5">
-                          <span>360° Metadata Injector</span>
-                          <span className="text-[9px] px-1 py-0.2 bg-blue-400/25 text-blue-300 rounded font-mono font-bold">
-                            NEW
-                          </span>
+                <div className="absolute top-full left-0 pt-2 w-72 z-50">
+                  {/* Invisible Bridge above panel to prevent hover flickering */}
+                  <div className="absolute -top-2 left-0 right-0 h-4 pointer-events-auto" />
+                  <div className="bg-[#020b18]/95 border border-cyan-400/35 rounded-2xl p-3 shadow-2xl backdrop-blur-2xl animate-in fade-in zoom-in-95 duration-150">
+                    <div className="text-[10px] uppercase font-bold tracking-wider text-cyan-400/70 px-2 pb-1.5 flex items-center justify-between">
+                      <span>AI Generators</span>
+                      <span className="text-[9px] font-mono text-cyan-500">2:1 VR</span>
+                    </div>
+                    <div className="space-y-1">
+                      <button
+                        type="button"
+                        onClick={handleSelectTextTo360}
+                        className="w-full px-2.5 py-1.5 rounded-xl hover:bg-cyan-950/80 hover:border hover:border-cyan-500/30 text-left flex items-center gap-2.5 text-xs text-white transition-all cursor-pointer group"
+                      >
+                        <div className="p-1.5 rounded-lg bg-cyan-500/15 text-cyan-400 group-hover:bg-cyan-500/30 group-hover:text-cyan-200 transition-colors">
+                          <Wand2 className="w-3.5 h-3.5" />
                         </div>
-                        <div className="text-[10px] text-cyan-300/60">Inject PhotoSphere XMP tags</div>
-                      </div>
-                    </button>
+                        <div>
+                          <div className="font-semibold text-xs text-white group-hover:text-cyan-200 transition-colors">
+                            Text to 360 Panorama
+                          </div>
+                          <div className="text-[10px] text-cyan-300/60">Generate from text description</div>
+                        </div>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleSelectImageToPano}
+                        className="w-full px-2.5 py-1.5 rounded-xl hover:bg-cyan-950/80 hover:border hover:border-cyan-500/30 text-left flex items-center gap-2.5 text-xs text-white transition-all cursor-pointer group"
+                      >
+                        <div className="p-1.5 rounded-lg bg-teal-500/15 text-teal-400 group-hover:bg-teal-500/30 group-hover:text-teal-200 transition-colors">
+                          <ImagePlus className="w-3.5 h-3.5" />
+                        </div>
+                        <div>
+                          <div className="font-semibold text-xs text-white group-hover:text-teal-200 transition-colors">
+                            Image to Pano (Reference)
+                          </div>
+                          <div className="text-[10px] text-cyan-300/60">Steer with up to 3 photos</div>
+                        </div>
+                      </button>
+                    </div>
+
+                    <div className="text-[10px] uppercase font-bold tracking-wider text-cyan-400/70 px-2 pt-3 pb-1 border-t border-cyan-500/15 mt-2 flex items-center justify-between">
+                      <span>3D &amp; Converters</span>
+                      <span className="text-[9px] font-mono text-cyan-500">Free Tools</span>
+                    </div>
+                    <div className="space-y-1">
+                      <button
+                        type="button"
+                        onClick={handleSelectViewer}
+                        className="w-full px-2.5 py-1.5 rounded-xl hover:bg-cyan-950/80 hover:border hover:border-cyan-500/30 text-left flex items-center gap-2.5 text-xs text-white transition-all cursor-pointer group"
+                      >
+                        <div className="p-1.5 rounded-lg bg-teal-500/15 text-teal-400 group-hover:bg-teal-500/30 group-hover:text-teal-200 transition-colors">
+                          <Eye className="w-3.5 h-3.5" />
+                        </div>
+                        <div>
+                          <div className="font-semibold text-xs text-white group-hover:text-teal-200 transition-colors">
+                            360° VR WebGL Viewer
+                          </div>
+                          <div className="text-[10px] text-cyan-300/60">Inspect, cardboard VR, radar</div>
+                        </div>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleSelectCubemap}
+                        className="w-full px-2.5 py-1.5 rounded-xl hover:bg-cyan-950/80 hover:border hover:border-cyan-500/30 text-left flex items-center gap-2.5 text-xs text-white transition-all cursor-pointer group"
+                      >
+                        <div className="p-1.5 rounded-lg bg-cyan-500/15 text-cyan-400 group-hover:bg-cyan-500/30 group-hover:text-cyan-200 transition-colors">
+                          <Box className="w-3.5 h-3.5" />
+                        </div>
+                        <div>
+                          <div className="font-semibold text-xs text-white group-hover:text-cyan-200 transition-colors">
+                            Cubemap 6-Sided Slicer
+                          </div>
+                          <div className="text-[10px] text-cyan-300/60">Export ZIP for Unity &amp; Unreal</div>
+                        </div>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleSelectGlobe}
+                        className="w-full px-2.5 py-1.5 rounded-xl hover:bg-cyan-950/80 hover:border hover:border-cyan-500/30 text-left flex items-center gap-2.5 text-xs text-white transition-all cursor-pointer group"
+                      >
+                        <div className="p-1.5 rounded-lg bg-emerald-500/15 text-emerald-400 group-hover:bg-emerald-500/30 group-hover:text-emerald-200 transition-colors">
+                          <Globe2 className="w-3.5 h-3.5" />
+                        </div>
+                        <div>
+                          <div className="font-semibold text-xs text-white group-hover:text-emerald-200 transition-colors">
+                            3D Planetary Globe
+                          </div>
+                          <div className="text-[10px] text-cyan-300/60">Orbital sphere with atmosphere</div>
+                        </div>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleSelectMetadataInjector}
+                        className="w-full px-2.5 py-1.5 rounded-xl hover:bg-cyan-950/80 hover:border hover:border-cyan-500/30 text-left flex items-center gap-2.5 text-xs text-white transition-all cursor-pointer group"
+                      >
+                        <div className="p-1.5 rounded-lg bg-blue-500/15 text-blue-400 group-hover:bg-blue-500/30 group-hover:text-blue-200 transition-colors">
+                          <ShieldCheck className="w-3.5 h-3.5" />
+                        </div>
+                        <div>
+                          <div className="font-semibold text-xs flex items-center gap-1.5 text-white group-hover:text-blue-200 transition-colors">
+                            <span>360° Metadata Injector</span>
+                            <span className="text-[9px] px-1 py-0.2 bg-blue-400/25 text-blue-300 rounded font-mono font-bold">
+                              NEW
+                            </span>
+                          </div>
+                          <div className="text-[10px] text-cyan-300/60">Inject PhotoSphere XMP tags</div>
+                        </div>
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
@@ -308,6 +418,8 @@ export function App() {
             currentPanoramaUrl={currentPanoramaUrl}
             onPanoramaChange={setCurrentPanoramaUrl}
             onNavigateTab={setActiveTab}
+            externalInputMode={generatorInputMode}
+            onInputModeChange={setGeneratorInputMode}
           />
         )}
         {activeTab === 'viewer' && (

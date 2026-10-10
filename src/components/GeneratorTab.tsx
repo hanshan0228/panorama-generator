@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
   Sparkles,
   Download,
@@ -53,6 +53,8 @@ interface GeneratorTabProps {
   currentPanoramaUrl: string;
   onPanoramaChange: (url: string) => void;
   onNavigateTab: (tab: ActiveTab) => void;
+  externalInputMode?: 'text' | 'image';
+  onInputModeChange?: (mode: 'text' | 'image') => void;
 }
 
 const STYLE_PRESETS: StylePreset[] = [
@@ -147,8 +149,21 @@ export function GeneratorTab({
   currentPanoramaUrl,
   onPanoramaChange,
   onNavigateTab,
+  externalInputMode,
+  onInputModeChange,
 }: GeneratorTabProps) {
-  const [inputMode, setInputMode] = useState<'text' | 'image'>('text');
+  const [inputMode, setInputMode] = useState<'text' | 'image'>(externalInputMode || 'text');
+
+  useEffect(() => {
+    if (externalInputMode && externalInputMode !== inputMode) {
+      setInputMode(externalInputMode);
+    }
+  }, [externalInputMode, inputMode]);
+
+  const handleModeChange = (newMode: 'text' | 'image') => {
+    setInputMode(newMode);
+    onInputModeChange?.(newMode);
+  };
   const [prompt, setPrompt] = useState(
     'futuristic cyberpunk city at night, neon holograms, rain reflections, volumetric fog, 8k equirectangular 360 panorama'
   );
@@ -530,7 +545,7 @@ export function GeneratorTab({
       {/* =========================================================================
           STUDIO INTERACTIVE WORKBENCH (2 Columns: Controls & 360 Viewport)
       ========================================================================= */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start relative">
+      <div id="studio-generator-workbench" className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start relative">
         {/* Gemini Proxy Config Modal */}
         {showConfigModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-in fade-in duration-200">
@@ -751,7 +766,7 @@ export function GeneratorTab({
             <div className="flex items-center gap-1 bg-[#020b18] p-1 border border-cyan-500/25 rounded-2xl">
               <button
                 type="button"
-                onClick={() => setInputMode('text')}
+                onClick={() => handleModeChange('text')}
                 className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
                   inputMode === 'text'
                     ? 'bg-gradient-to-r from-cyan-400 to-blue-600 text-slate-950 shadow-md shadow-cyan-500/30'
@@ -764,7 +779,7 @@ export function GeneratorTab({
 
               <button
                 type="button"
-                onClick={() => setInputMode('image')}
+                onClick={() => handleModeChange('image')}
                 className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
                   inputMode === 'image'
                     ? 'bg-gradient-to-r from-cyan-400 to-blue-600 text-slate-950 shadow-md shadow-cyan-500/30'
@@ -789,7 +804,7 @@ export function GeneratorTab({
 
           {/* Mode 2: Image to Pano Reference Photo Upload Box */}
           {inputMode === 'image' && (
-            <div className="space-y-3 bg-[#020b1c]/80 border border-cyan-500/25 p-4 rounded-2xl relative z-10 animate-fade-in">
+            <div id="reference-uploader" className="space-y-3 bg-[#020b1c]/80 border border-cyan-500/25 p-4 rounded-2xl relative z-10 animate-fade-in transition-all">
               <div className="flex items-center justify-between text-xs">
                 <span className="font-bold text-white flex items-center gap-1.5">
                   <ImagePlus className="w-3.5 h-3.5 text-cyan-400" />
