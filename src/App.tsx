@@ -14,6 +14,9 @@ import {
   Wand2,
   ImagePlus,
   ShieldCheck,
+  Sun,
+  Gamepad2,
+  Camera,
 } from 'lucide-react';
 import type { ActiveTab } from './types/panorama';
 import { GeneratorTab } from './components/GeneratorTab';
@@ -24,16 +27,40 @@ import { PricingTab } from './components/PricingTab';
 import { AdminTab } from './components/AdminTab';
 import { MetadataInjectorModal } from './components/commercial/MetadataInjectorModal';
 import { generateProceduralPanorama } from './utils/proceduralPanoramas';
+import { AiHdriGeneratorPage } from './components/landing/AiHdriGeneratorPage';
+import { SkyboxGeneratorPage } from './components/landing/SkyboxGeneratorPage';
+import { PhotoTo360Page } from './components/landing/PhotoTo360Page';
+import { CubemapGeneratorPage } from './components/landing/CubemapGeneratorPage';
+import { MetadataInjectorPage } from './components/landing/MetadataInjectorPage';
+
+function getInitialTabFromLocation(): ActiveTab {
+  if (typeof window === 'undefined') return 'generator';
+  const path = window.location.pathname.toLowerCase();
+  const hash = window.location.hash.toLowerCase();
+
+  if (path.includes('ai-hdri-generator') || hash.includes('ai-hdri-generator')) return 'landing-hdri';
+  if (path.includes('skybox-generator') || hash.includes('skybox-generator')) return 'landing-skybox';
+  if (path.includes('photo-to-360-converter') || hash.includes('photo-to-360-converter')) return 'landing-photo360';
+  if (path.includes('cubemap-generator') || hash.includes('cubemap-generator')) return 'landing-cubemap';
+  if (path.includes('360-metadata-injector') || hash.includes('360-metadata-injector')) return 'landing-metadata';
+  if (path.includes('viewer') || hash.includes('viewer')) return 'viewer';
+  if (path.includes('cubemap') || hash.includes('cubemap')) return 'cubemap';
+  if (path.includes('globe') || hash.includes('globe')) return 'globe';
+  if (path.includes('pricing') || hash.includes('pricing')) return 'pricing';
+  if (path.includes('showcase') || hash.includes('showcase')) return 'showcase';
+  if (path.includes('admin') || hash.includes('admin')) return 'admin';
+  return 'generator';
+}
 
 export function App() {
-  const [activeTab, setActiveTab] = useState<ActiveTab>('generator');
+  const [activeTab, setActiveTab] = useState<ActiveTab>(getInitialTabFromLocation);
   const [isToolsDropdownOpen, setIsToolsDropdownOpen] = useState(false);
   const [generatorInputMode, setGeneratorInputMode] = useState<'text' | 'image'>('text');
   const [isMetadataModalOpen, setIsMetadataModalOpen] = useState(false);
   const toolsDropdownRef = useRef<HTMLDivElement>(null);
   const closeTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Dynamic SEO metadata synchronization across active tabs
+  // Dynamic SEO metadata synchronization across active tabs & landing pages
   useEffect(() => {
     const tabSeoMap: Record<ActiveTab, { title: string; desc: string }> = {
       generator: {
@@ -64,6 +91,26 @@ export function App() {
         title: 'Admin Console | PanoramaAI Studio',
         desc: 'Model endpoint routing, usage quotas, and system administration console for PanoramaAI Studio.',
       },
+      'landing-hdri': {
+        title: 'AI HDRI Generator | Create 360° HDR Environments for Blender & Unreal',
+        desc: 'Generate photorealistic 360° high dynamic range lighting maps and panoramic skyboxes in seconds. 4K equirectangular textures, seamless wrap, and 32-bit Radiance .HDR export.',
+      },
+      'landing-skybox': {
+        title: 'AI Skybox Generator | Create 360° VR Skyboxes in Seconds',
+        desc: 'Craft panoramic 360° skyboxes and game environments from text prompts. Instant 6-sided cubemap slicing (+X, -X, +Y, -Y, +Z, -Z) and equirectangular export for Unity and Unreal.',
+      },
+      'landing-photo360': {
+        title: 'Photo to 360 Converter | Turn 2D Photos into 360° Panoramas with AI',
+        desc: 'Transform standard 2D photos, architectural concept renders, or scenery snapshots into immersive 360° equirectangular panoramas with multi-reference AI guidance.',
+      },
+      'landing-cubemap': {
+        title: 'Cubemap Generator | Slice 360° Equirectangular to 6 Cube Faces',
+        desc: 'Convert 2:1 equirectangular spherical panoramas into 6 rectilinear cube faces (+X, -X, +Y, -Y, +Z, -Z) with client-side WebGL math. One-click batch ZIP download.',
+      },
+      'landing-metadata': {
+        title: 'Free 360° Photo Metadata Injector | Facebook & Google Street View Ready',
+        desc: 'Embed official Google PhotoSphere XMP and EXIF metadata into any equirectangular JPG image directly in your browser. Fix flat panorama upload issues instantly.',
+      },
     };
 
     const target = tabSeoMap[activeTab] || tabSeoMap.generator;
@@ -72,7 +119,57 @@ export function App() {
     if (metaDesc) {
       metaDesc.setAttribute('content', target.desc);
     }
+
+    const canonicalLink = document.querySelector('link[rel="canonical"]');
+    if (canonicalLink) {
+      const slugMap: Partial<Record<ActiveTab, string>> = {
+        'landing-hdri': 'ai-hdri-generator/',
+        'landing-skybox': 'skybox-generator/',
+        'landing-photo360': 'photo-to-360-converter/',
+        'landing-cubemap': 'cubemap-generator/',
+        'landing-metadata': '360-metadata-injector/',
+      };
+      const slug = slugMap[activeTab] || '';
+      canonicalLink.setAttribute('href', `https://panoramagenerator.ai/${slug}`);
+    }
   }, [activeTab]);
+
+  // Synchronize history & popstate for browser back/forward buttons
+  useEffect(() => {
+    const handlePopState = () => {
+      setActiveTab(getInitialTabFromLocation());
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  const navigateTo = (tab: ActiveTab, pushPath?: string) => {
+    setActiveTab(tab);
+    setIsToolsDropdownOpen(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    const targetPath = pushPath || (() => {
+      switch (tab) {
+        case 'landing-hdri': return '/ai-hdri-generator/';
+        case 'landing-skybox': return '/skybox-generator/';
+        case 'landing-photo360': return '/photo-to-360-converter/';
+        case 'landing-cubemap': return '/cubemap-generator/';
+        case 'landing-metadata': return '/360-metadata-injector/';
+        case 'generator': return '/';
+        case 'viewer': return '/#viewer';
+        case 'cubemap': return '/#cubemap';
+        case 'globe': return '/#globe';
+        case 'pricing': return '/#pricing';
+        case 'showcase': return '/#showcase';
+        case 'admin': return '/#admin';
+        default: return '/';
+      }
+    })();
+
+    if (window.location.pathname !== targetPath) {
+      window.history.pushState(null, '', targetPath);
+    }
+  };
 
   // Close dropdown on outside click or escape
   useEffect(() => {
@@ -104,7 +201,6 @@ export function App() {
   };
 
   const handleMouseLeaveTools = () => {
-    // 180ms grace window ensures fast diagonal mouse travels never accidentally snap-close
     closeTimerRef.current = setTimeout(() => {
       setIsToolsDropdownOpen(false);
     }, 180);
@@ -112,8 +208,7 @@ export function App() {
 
   const handleSelectTextTo360 = () => {
     setGeneratorInputMode('text');
-    setActiveTab('generator');
-    setIsToolsDropdownOpen(false);
+    navigateTo('generator', '/');
     setTimeout(() => {
       const el = document.getElementById('prompt-input');
       if (el) {
@@ -125,8 +220,7 @@ export function App() {
 
   const handleSelectImageToPano = () => {
     setGeneratorInputMode('image');
-    setActiveTab('generator');
-    setIsToolsDropdownOpen(false);
+    navigateTo('generator', '/');
     setTimeout(() => {
       const el = document.getElementById('reference-uploader') || document.getElementById('studio-generator-workbench');
       if (el) {
@@ -140,26 +234,15 @@ export function App() {
   };
 
   const handleSelectViewer = () => {
-    setActiveTab('viewer');
-    setIsToolsDropdownOpen(false);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    navigateTo('viewer', '/#viewer');
   };
 
   const handleSelectCubemap = () => {
-    setActiveTab('cubemap');
-    setIsToolsDropdownOpen(false);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    navigateTo('cubemap', '/#cubemap');
   };
 
   const handleSelectGlobe = () => {
-    setActiveTab('globe');
-    setIsToolsDropdownOpen(false);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleSelectMetadataInjector = () => {
-    setIsMetadataModalOpen(true);
-    setIsToolsDropdownOpen(false);
+    navigateTo('globe', '/#globe');
   };
 
   // Initialize with a default rich 2:1 equirectangular panorama
@@ -245,15 +328,16 @@ export function App() {
 
               {/* Tools Dropdown Card with zero-gap hitbox */}
               {isToolsDropdownOpen && (
-                <div className="absolute top-full left-0 pt-2 w-72 z-50">
+                <div className="absolute top-full left-0 pt-2 w-[340px] sm:w-[600px] z-50">
                   {/* Invisible Bridge above panel to prevent hover flickering */}
                   <div className="absolute -top-2 left-0 right-0 h-4 pointer-events-auto" />
-                  <div className="bg-[#020b18]/95 border border-cyan-400/35 rounded-2xl p-3 shadow-2xl backdrop-blur-2xl animate-in fade-in zoom-in-95 duration-150">
-                    <div className="text-[10px] uppercase font-bold tracking-wider text-cyan-400/70 px-2 pb-1.5 flex items-center justify-between">
-                      <span>AI Generators</span>
-                      <span className="text-[9px] font-mono text-cyan-500">2:1 VR</span>
-                    </div>
-                    <div className="space-y-1">
+                  <div className="bg-[#020b18]/95 border border-cyan-400/35 rounded-2xl p-4 shadow-2xl backdrop-blur-2xl animate-in fade-in zoom-in-95 duration-150 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* Col 1: Studio & Direct Tools */}
+                    <div className="space-y-1.5">
+                      <div className="text-[10px] uppercase font-bold tracking-wider text-cyan-400/70 px-2 pb-1 flex items-center justify-between border-b border-cyan-500/15">
+                        <span>Studio Creators</span>
+                        <span className="text-[9px] font-mono text-cyan-500">Interactive</span>
+                      </div>
                       <button
                         type="button"
                         onClick={handleSelectTextTo360}
@@ -266,7 +350,7 @@ export function App() {
                           <div className="font-semibold text-xs text-white group-hover:text-cyan-200 transition-colors">
                             Text to 360 Panorama
                           </div>
-                          <div className="text-[10px] text-cyan-300/60">Generate from text description</div>
+                          <div className="text-[10px] text-cyan-300/60">Generate from prompt</div>
                         </div>
                       </button>
                       <button
@@ -284,13 +368,6 @@ export function App() {
                           <div className="text-[10px] text-cyan-300/60">Steer with up to 3 photos</div>
                         </div>
                       </button>
-                    </div>
-
-                    <div className="text-[10px] uppercase font-bold tracking-wider text-cyan-400/70 px-2 pt-3 pb-1 border-t border-cyan-500/15 mt-2 flex items-center justify-between">
-                      <span>3D &amp; Converters</span>
-                      <span className="text-[9px] font-mono text-cyan-500">Free Tools</span>
-                    </div>
-                    <div className="space-y-1">
                       <button
                         type="button"
                         onClick={handleSelectViewer}
@@ -318,7 +395,7 @@ export function App() {
                           <div className="font-semibold text-xs text-white group-hover:text-cyan-200 transition-colors">
                             Cubemap 6-Sided Slicer
                           </div>
-                          <div className="text-[10px] text-cyan-300/60">Export ZIP for Unity &amp; Unreal</div>
+                          <div className="text-[10px] text-cyan-300/60">Export ZIP for game engines</div>
                         </div>
                       </button>
                       <button
@@ -333,12 +410,96 @@ export function App() {
                           <div className="font-semibold text-xs text-white group-hover:text-emerald-200 transition-colors">
                             3D Planetary Globe
                           </div>
-                          <div className="text-[10px] text-cyan-300/60">Orbital sphere with atmosphere</div>
+                          <div className="text-[10px] text-cyan-300/60">Orbital sphere projection</div>
                         </div>
                       </button>
+                    </div>
+
+                    {/* Col 2: Programmatic Tools & Sub-Pages */}
+                    <div className="space-y-1.5">
+                      <div className="text-[10px] uppercase font-bold tracking-wider text-cyan-400/70 px-2 pb-1 flex items-center justify-between border-b border-cyan-500/15">
+                        <span>Specialized Tools</span>
+                        <span className="text-[9px] font-mono text-teal-400">SEO Matrix</span>
+                      </div>
                       <button
                         type="button"
-                        onClick={handleSelectMetadataInjector}
+                        onClick={() => navigateTo('landing-hdri', '/ai-hdri-generator/')}
+                        className="w-full px-2.5 py-1.5 rounded-xl hover:bg-cyan-950/80 hover:border hover:border-cyan-500/30 text-left flex items-center gap-2.5 text-xs text-white transition-all cursor-pointer group"
+                      >
+                        <div className="p-1.5 rounded-lg bg-amber-500/15 text-amber-400 group-hover:bg-amber-500/30 group-hover:text-amber-200 transition-colors">
+                          <Sun className="w-3.5 h-3.5" />
+                        </div>
+                        <div>
+                          <div className="font-semibold text-xs flex items-center gap-1.5 text-white group-hover:text-amber-200 transition-colors">
+                            <span>AI HDRI Generator</span>
+                            <span className="text-[9px] px-1 py-0.2 bg-amber-400/20 text-amber-300 rounded font-mono font-bold">
+                              Blender
+                            </span>
+                          </div>
+                          <div className="text-[10px] text-cyan-300/60">32-bit IBL lighting environments</div>
+                        </div>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => navigateTo('landing-skybox', '/skybox-generator/')}
+                        className="w-full px-2.5 py-1.5 rounded-xl hover:bg-cyan-950/80 hover:border hover:border-cyan-500/30 text-left flex items-center gap-2.5 text-xs text-white transition-all cursor-pointer group"
+                      >
+                        <div className="p-1.5 rounded-lg bg-indigo-500/15 text-indigo-400 group-hover:bg-indigo-500/30 group-hover:text-indigo-200 transition-colors">
+                          <Gamepad2 className="w-3.5 h-3.5" />
+                        </div>
+                        <div>
+                          <div className="font-semibold text-xs flex items-center gap-1.5 text-white group-hover:text-indigo-200 transition-colors">
+                            <span>AI Skybox Generator</span>
+                            <span className="text-[9px] px-1 py-0.2 bg-indigo-400/20 text-indigo-300 rounded font-mono font-bold">
+                              VR &bull; Unity
+                            </span>
+                          </div>
+                          <div className="text-[10px] text-cyan-300/60">Panoramic game environments</div>
+                        </div>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => navigateTo('landing-photo360', '/photo-to-360-converter/')}
+                        className="w-full px-2.5 py-1.5 rounded-xl hover:bg-cyan-950/80 hover:border hover:border-cyan-500/30 text-left flex items-center gap-2.5 text-xs text-white transition-all cursor-pointer group"
+                      >
+                        <div className="p-1.5 rounded-lg bg-teal-500/15 text-teal-400 group-hover:bg-teal-500/30 group-hover:text-teal-200 transition-colors">
+                          <Camera className="w-3.5 h-3.5" />
+                        </div>
+                        <div>
+                          <div className="font-semibold text-xs flex items-center gap-1.5 text-white group-hover:text-teal-200 transition-colors">
+                            <span>Photo to 360 Converter</span>
+                            <span className="text-[9px] px-1 py-0.2 bg-teal-400/20 text-teal-300 rounded font-mono font-bold">
+                              2D to 360
+                            </span>
+                          </div>
+                          <div className="text-[10px] text-cyan-300/60">Spatial expansion from photos</div>
+                        </div>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => navigateTo('landing-cubemap', '/cubemap-generator/')}
+                        className="w-full px-2.5 py-1.5 rounded-xl hover:bg-cyan-950/80 hover:border hover:border-cyan-500/30 text-left flex items-center gap-2.5 text-xs text-white transition-all cursor-pointer group"
+                      >
+                        <div className="p-1.5 rounded-lg bg-cyan-500/15 text-cyan-400 group-hover:bg-cyan-500/30 group-hover:text-cyan-200 transition-colors">
+                          <Box className="w-3.5 h-3.5" />
+                        </div>
+                        <div>
+                          <div className="font-semibold text-xs flex items-center gap-1.5 text-white group-hover:text-cyan-200 transition-colors">
+                            <span>Cubemap 6-Face Slicer</span>
+                            <span className="text-[9px] px-1 py-0.2 bg-cyan-400/20 text-cyan-300 rounded font-mono font-bold">
+                              ZIP
+                            </span>
+                          </div>
+                          <div className="text-[10px] text-cyan-300/60">Batch 6 cube face packaging</div>
+                        </div>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => navigateTo('landing-metadata', '/360-metadata-injector/')}
                         className="w-full px-2.5 py-1.5 rounded-xl hover:bg-cyan-950/80 hover:border hover:border-cyan-500/30 text-left flex items-center gap-2.5 text-xs text-white transition-all cursor-pointer group"
                       >
                         <div className="p-1.5 rounded-lg bg-blue-500/15 text-blue-400 group-hover:bg-blue-500/30 group-hover:text-blue-200 transition-colors">
@@ -348,10 +509,10 @@ export function App() {
                           <div className="font-semibold text-xs flex items-center gap-1.5 text-white group-hover:text-blue-200 transition-colors">
                             <span>360° Metadata Injector</span>
                             <span className="text-[9px] px-1 py-0.2 bg-blue-400/25 text-blue-300 rounded font-mono font-bold">
-                              NEW
+                              XMP
                             </span>
                           </div>
-                          <div className="text-[10px] text-cyan-300/60">Inject PhotoSphere XMP tags</div>
+                          <div className="text-[10px] text-cyan-300/60">PhotoSphere Facebook tagger</div>
                         </div>
                       </button>
                     </div>
@@ -458,7 +619,7 @@ export function App() {
           <GeneratorTab
             currentPanoramaUrl={currentPanoramaUrl}
             onPanoramaChange={setCurrentPanoramaUrl}
-            onNavigateTab={setActiveTab}
+            onNavigateTab={navigateTo}
             externalInputMode={generatorInputMode}
             onInputModeChange={setGeneratorInputMode}
           />
@@ -467,7 +628,7 @@ export function App() {
           <ViewerTab
             currentPanoramaUrl={currentPanoramaUrl}
             onPanoramaChange={setCurrentPanoramaUrl}
-            onNavigateTab={setActiveTab}
+            onNavigateTab={navigateTo}
           />
         )}
         {activeTab === 'cubemap' && (
@@ -478,6 +639,73 @@ export function App() {
         )}
         {activeTab === 'pricing' && <PricingTab />}
         {activeTab === 'admin' && <AdminTab />}
+
+        {/* Programmatic SEO Sub-Landing Pages */}
+        {activeTab === 'landing-hdri' && (
+          <AiHdriGeneratorPage
+            onLaunchStudio={(presetPrompt) => {
+              navigateTo('generator', '/');
+              setGeneratorInputMode('text');
+              if (presetPrompt) {
+                setTimeout(() => {
+                  const el = document.getElementById('prompt-input') as HTMLTextAreaElement | null;
+                  if (el) {
+                    el.value = presetPrompt;
+                    el.dispatchEvent(new Event('input', { bubbles: true }));
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    el.focus();
+                  }
+                }, 100);
+              }
+            }}
+            onOpenCubemap={() => navigateTo('cubemap', '/#cubemap')}
+          />
+        )}
+        {activeTab === 'landing-skybox' && (
+          <SkyboxGeneratorPage
+            onLaunchStudio={(presetPrompt) => {
+              navigateTo('generator', '/');
+              setGeneratorInputMode('text');
+              if (presetPrompt) {
+                setTimeout(() => {
+                  const el = document.getElementById('prompt-input') as HTMLTextAreaElement | null;
+                  if (el) {
+                    el.value = presetPrompt;
+                    el.dispatchEvent(new Event('input', { bubbles: true }));
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    el.focus();
+                  }
+                }, 100);
+              }
+            }}
+            onOpenCubemap={() => navigateTo('cubemap', '/#cubemap')}
+          />
+        )}
+        {activeTab === 'landing-photo360' && (
+          <PhotoTo360Page
+            onLaunchImageToPano={() => {
+              navigateTo('generator', '/');
+              setGeneratorInputMode('image');
+              setTimeout(() => {
+                const el = document.getElementById('reference-uploader') || document.getElementById('studio-generator-workbench');
+                if (el) {
+                  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+              }, 100);
+            }}
+            onOpenViewer={() => navigateTo('viewer', '/#viewer')}
+          />
+        )}
+        {activeTab === 'landing-cubemap' && (
+          <CubemapGeneratorPage
+            onLaunchStudio={() => navigateTo('generator', '/')}
+          />
+        )}
+        {activeTab === 'landing-metadata' && (
+          <MetadataInjectorPage
+            onLaunchStudio={() => navigateTo('generator', '/')}
+          />
+        )}
       </main>
 
       {/* =========================================================================
@@ -487,14 +715,14 @@ export function App() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 pb-10 border-b border-cyan-500/15">
             {/* Col 1: Brand & Bio */}
-            <div className="lg:col-span-2 space-y-4">
+            <div className="space-y-4">
               <div className="flex items-center gap-2.5">
                 <div className="p-2 bg-gradient-to-tr from-cyan-400 to-blue-600 rounded-xl text-slate-950 font-bold shadow-md shadow-cyan-500/25">
                   <Compass className="w-4 h-4" />
                 </div>
                 <span className="text-white font-extrabold text-base tracking-tight">PanoramaAI Studio</span>
               </div>
-              <p className="text-xs text-cyan-200/70 leading-relaxed max-w-sm">
+              <p className="text-xs text-cyan-200/70 leading-relaxed">
                 Next-generation artificial intelligence platform for 360° spherical equirectangular panorama synthesis, real-time WebGL inspection, cubemap slicing, and 3D environment pipelines.
               </p>
               <div className="flex items-center gap-2 pt-1 text-[11px] text-cyan-400">
@@ -503,56 +731,108 @@ export function App() {
               </div>
             </div>
 
-            {/* Col 2: AI Generators & Tools */}
+            {/* Col 2: Studio Tools */}
             <div className="space-y-3">
-              <h4 className="text-white font-bold text-xs uppercase tracking-wider">AI Generators</h4>
+              <h4 className="text-white font-bold text-xs uppercase tracking-wider">Studio Creators</h4>
               <ul className="space-y-2 text-xs">
                 <li>
-                  <button type="button" onClick={() => setActiveTab('generator')} className="hover:text-cyan-300 transition-colors cursor-pointer">
+                  <button type="button" onClick={() => navigateTo('generator', '/')} className="hover:text-cyan-300 transition-colors cursor-pointer">
                     Text to 360 Panorama
                   </button>
                 </li>
                 <li>
-                  <button type="button" onClick={() => setActiveTab('generator')} className="hover:text-cyan-300 transition-colors cursor-pointer">
+                  <button type="button" onClick={() => { setGeneratorInputMode('image'); navigateTo('generator', '/'); }} className="hover:text-cyan-300 transition-colors cursor-pointer">
                     Image to 360 (Reference Mode)
                   </button>
                 </li>
                 <li>
-                  <button type="button" onClick={() => setActiveTab('generator')} className="hover:text-cyan-300 transition-colors cursor-pointer">
-                    AI HDRI Skybox Generator
+                  <button type="button" onClick={() => navigateTo('viewer', '/#viewer')} className="hover:text-cyan-300 transition-colors cursor-pointer">
+                    360° WebGL Sphere Viewer
                   </button>
                 </li>
                 <li>
-                  <button type="button" onClick={() => setActiveTab('viewer')} className="hover:text-cyan-300 transition-colors cursor-pointer">
-                    360° WebGL Sphere Viewer
+                  <button type="button" onClick={() => navigateTo('globe', '/#globe')} className="hover:text-cyan-300 transition-colors cursor-pointer">
+                    3D Planetary Globe Simulator
                   </button>
                 </li>
               </ul>
             </div>
 
-            {/* Col 3: 3D Pipelines & Converters */}
+            {/* Col 3: Programmatic SEO Matrix */}
             <div className="space-y-3">
-              <h4 className="text-white font-bold text-xs uppercase tracking-wider">Converters &amp; 3D</h4>
+              <h4 className="text-white font-bold text-xs uppercase tracking-wider">Specialized AI Tools</h4>
               <ul className="space-y-2 text-xs">
                 <li>
-                  <button type="button" onClick={() => setActiveTab('cubemap')} className="hover:text-cyan-300 transition-colors cursor-pointer">
-                    Cubemap 6-Sided Slicer
-                  </button>
+                  <a
+                    href="/ai-hdri-generator/"
+                    onClick={(e) => { e.preventDefault(); navigateTo('landing-hdri', '/ai-hdri-generator/'); }}
+                    className="hover:text-cyan-300 transition-colors cursor-pointer flex items-center justify-between"
+                  >
+                    <span>AI HDRI Generator</span>
+                    <span className="text-[9px] font-mono px-1 rounded bg-amber-400/20 text-amber-300">3D</span>
+                  </a>
                 </li>
                 <li>
-                  <button type="button" onClick={() => setActiveTab('globe')} className="hover:text-cyan-300 transition-colors cursor-pointer">
-                    3D Planetary Globe Simulator
-                  </button>
+                  <a
+                    href="/skybox-generator/"
+                    onClick={(e) => { e.preventDefault(); navigateTo('landing-skybox', '/skybox-generator/'); }}
+                    className="hover:text-cyan-300 transition-colors cursor-pointer flex items-center justify-between"
+                  >
+                    <span>AI Skybox Generator</span>
+                    <span className="text-[9px] font-mono px-1 rounded bg-indigo-400/20 text-indigo-300">VR</span>
+                  </a>
                 </li>
                 <li>
-                  <a href="#blender" onClick={(e) => { e.preventDefault(); setActiveTab('cubemap'); }} className="hover:text-cyan-300 transition-colors cursor-pointer">
+                  <a
+                    href="/photo-to-360-converter/"
+                    onClick={(e) => { e.preventDefault(); navigateTo('landing-photo360', '/photo-to-360-converter/'); }}
+                    className="hover:text-cyan-300 transition-colors cursor-pointer flex items-center justify-between"
+                  >
+                    <span>Photo to 360 Converter</span>
+                    <span className="text-[9px] font-mono px-1 rounded bg-teal-400/20 text-teal-300">2D</span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/cubemap-generator/"
+                    onClick={(e) => { e.preventDefault(); navigateTo('landing-cubemap', '/cubemap-generator/'); }}
+                    className="hover:text-cyan-300 transition-colors cursor-pointer flex items-center justify-between"
+                  >
+                    <span>Cubemap 6-Face Slicer</span>
+                    <span className="text-[9px] font-mono px-1 rounded bg-cyan-400/20 text-cyan-300">ZIP</span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/360-metadata-injector/"
+                    onClick={(e) => { e.preventDefault(); navigateTo('landing-metadata', '/360-metadata-injector/'); }}
+                    className="hover:text-cyan-300 transition-colors cursor-pointer flex items-center justify-between"
+                  >
+                    <span>360° Metadata Injector</span>
+                    <span className="text-[9px] font-mono px-1 rounded bg-blue-400/20 text-blue-300">XMP</span>
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            {/* Col 4: Converters & Engine Formats */}
+            <div className="space-y-3">
+              <h4 className="text-white font-bold text-xs uppercase tracking-wider">Engine Formats</h4>
+              <ul className="space-y-2 text-xs">
+                <li>
+                  <button type="button" onClick={() => navigateTo('cubemap', '/#cubemap')} className="hover:text-cyan-300 transition-colors cursor-pointer">
                     Unity Skybox Export (ZIP)
-                  </a>
+                  </button>
                 </li>
                 <li>
-                  <a href="#unreal" onClick={(e) => { e.preventDefault(); setActiveTab('generator'); }} className="hover:text-cyan-300 transition-colors cursor-pointer">
+                  <button type="button" onClick={() => navigateTo('landing-hdri', '/ai-hdri-generator/')} className="hover:text-cyan-300 transition-colors cursor-pointer">
                     Radiance .HDR Container
-                  </a>
+                  </button>
+                </li>
+                <li>
+                  <button type="button" onClick={() => navigateTo('landing-skybox', '/skybox-generator/')} className="hover:text-cyan-300 transition-colors cursor-pointer">
+                    Unreal Engine HDRIBackdrop
+                  </button>
                 </li>
                 <li>
                   <button
@@ -560,21 +840,21 @@ export function App() {
                     onClick={() => setIsMetadataModalOpen(true)}
                     className="hover:text-cyan-300 transition-colors cursor-pointer flex items-center gap-1.5 text-cyan-200/90"
                   >
-                    <span>360° Metadata Injector</span>
+                    <span>PhotoSphere Facebook XMP</span>
                     <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30 font-bold">
-                      XMP
+                      EXIF
                     </span>
                   </button>
                 </li>
               </ul>
             </div>
 
-            {/* Col 4: Platform & Support */}
+            {/* Col 5: Company & Legal */}
             <div className="space-y-3">
               <h4 className="text-white font-bold text-xs uppercase tracking-wider">Company &amp; Legal</h4>
               <ul className="space-y-2 text-xs">
                 <li>
-                  <button type="button" onClick={() => setActiveTab('pricing')} className="hover:text-cyan-300 transition-colors cursor-pointer">
+                  <button type="button" onClick={() => navigateTo('pricing', '/#pricing')} className="hover:text-cyan-300 transition-colors cursor-pointer">
                     Pricing &amp; API Plans
                   </button>
                 </li>
@@ -590,7 +870,7 @@ export function App() {
                     onClick={() => {
                       const pin = prompt('Enter Admin Password:');
                       if (pin === 'admin888') {
-                        setActiveTab('admin');
+                        navigateTo('admin', '/#admin');
                       } else if (pin !== null) {
                         alert('Incorrect password');
                       }

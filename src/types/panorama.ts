@@ -75,7 +75,19 @@ export interface ShowcaseItem {
   tags: string[];
 }
 
-export type ActiveTab = 'generator' | 'viewer' | 'cubemap' | 'globe' | 'showcase' | 'pricing' | 'admin';
+export type ActiveTab =
+  | 'generator'
+  | 'viewer'
+  | 'cubemap'
+  | 'globe'
+  | 'showcase'
+  | 'pricing'
+  | 'admin'
+  | 'landing-hdri'
+  | 'landing-skybox'
+  | 'landing-photo360'
+  | 'landing-cubemap'
+  | 'landing-metadata';
 
 export interface ModelEndpointConfig {
   id: string;
