@@ -33,6 +33,47 @@ export function App() {
   const toolsDropdownRef = useRef<HTMLDivElement>(null);
   const closeTimerRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Dynamic SEO metadata synchronization across active tabs
+  useEffect(() => {
+    const tabSeoMap: Record<ActiveTab, { title: string; desc: string }> = {
+      generator: {
+        title: 'AI 360 Panorama Generator | Text to 360° VR Skybox & Cubemap Studio',
+        desc: 'Generate seamless 360° equirectangular panoramas, VR skyboxes, and cubemaps from text or photos in seconds. Free 360 WebGL viewer, seam healing, and 4K HDR export.',
+      },
+      viewer: {
+        title: 'Free 360° VR WebGL Viewer Online | Equirectangular Panorama Inspector',
+        desc: 'Inspect and preview 360° panoramas in real-time with Three.js WebGL, radar minimap, gyroscope orientation, and VR cardboard split-screen mode.',
+      },
+      cubemap: {
+        title: 'Cubemap 6-Sided Slicer | 360 Equirectangular to Unity & Unreal Skybox',
+        desc: 'Convert 2:1 equirectangular spherical panoramas into 6 cube faces (+X, -X, +Y, -Y, +Z, -Z) with one click and export ready-to-use ZIP archives.',
+      },
+      globe: {
+        title: '3D Planetary Globe Simulator | Interactive Orbit Texture Viewer',
+        desc: 'Project 360 equirectangular texture maps onto an interactive 3D planetary sphere with realistic atmospheric scattering and orbital lighting controls.',
+      },
+      pricing: {
+        title: 'Pricing & Credit Plans | PanoramaAI Studio Pro',
+        desc: 'Transparent credit-based pricing for AI 360 panorama generation. Free explorer tier with 50 credits, Pro subscriptions with full commercial license.',
+      },
+      showcase: {
+        title: 'Community 360° Panorama Showcase | AI VR Skybox Inspiration',
+        desc: 'Explore high-resolution 360 equirectangular panoramas created by 3D artists, game developers, and architects using PanoramaAI Studio.',
+      },
+      admin: {
+        title: 'Admin Console | PanoramaAI Studio',
+        desc: 'Model endpoint routing, usage quotas, and system administration console for PanoramaAI Studio.',
+      },
+    };
+
+    const target = tabSeoMap[activeTab] || tabSeoMap.generator;
+    document.title = target.title;
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) {
+      metaDesc.setAttribute('content', target.desc);
+    }
+  }, [activeTab]);
+
   // Close dropdown on outside click or escape
   useEffect(() => {
     const handlePointerDown = (e: MouseEvent | TouchEvent) => {

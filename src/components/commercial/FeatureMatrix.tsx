@@ -74,11 +74,11 @@ export function FeatureMatrix() {
       title: 'Seam-Aware Post-Processing',
       badge: 'Zero Cutline',
       description:
-        'We mirror and cross-fade the outer 80px on each boundary over a symmetric alpha gradient, rendering the horizontal wrap-around completely invisible.',
+        'We execute wide harmonic Poisson gradient alignment across 160px with symmetric S-curve blending, rendering the 360° horizontal wrap-around completely seamless.',
       bulletPoints: [
-        'Symmetric cross-fade seam healer',
-        'Eliminates the vertical split artifact',
-        'Pixel-matched boundary blending',
+        '160px wide harmonic Poisson seam healer',
+        'Eliminates vertical split boundary lines',
+        'Bit-for-bit matched boundary loop',
       ],
     },
     {

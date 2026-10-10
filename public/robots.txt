@@ -1,0 +1,9 @@
+# robots.txt for PanoramaAI Studio (https://panoramagenerator.ai)
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api/
+
+# Sitemap declaration
+Sitemap: https://panoramagenerator.ai/sitemap.xml
+Host: https://panoramagenerator.ai

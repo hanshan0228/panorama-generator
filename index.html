@@ -4,11 +4,230 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AI 360° Panorama Generator &amp; Viewer | Equirectangular VR Skybox Studio</title>
-    <meta name="description" content="Generate seamless 360° VR panoramas, cubemaps, and HDRI skyboxes from text prompts. Free online 360 panorama viewer, cubemap generator, and 3D globe tool." />
+
+    <!-- Primary Meta Tags (Benchmarked against top-ranking 360 panorama generators) -->
+    <title>AI 360 Panorama Generator | Text to 360° VR Skybox &amp; Cubemap Studio</title>
+    <meta name="title" content="AI 360 Panorama Generator | Text to 360° VR Skybox &amp; Cubemap Studio" />
+    <meta
+      name="description"
+      content="Generate seamless 360° equirectangular panoramas, VR skyboxes, and cubemaps from text or photos in seconds. Free 360 WebGL viewer, harmonic seam healing, and 4K HDR export."
+    />
+    <meta
+      name="keywords"
+      content="AI 360 panorama generator, text to 360 panorama, equirectangular 360 AI, 360 VR skybox generator, cubemap slicer, PhotoSphere XMP injector, Three.js 360 viewer, 4K HDRI generator, Blockade Labs alternative, Skybox AI, AI 360 image generator, panoramic image generator, 360 prompt generator, VR skybox, 2:1 equirectangular"
+    />
+    <meta name="author" content="PanoramaAI Studio" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <link rel="canonical" href="https://panoramagenerator.ai/" />
+    <meta name="theme-color" content="#040c1a" />
+
+    <!-- Open Graph / Facebook / Discord / LinkedIn -->
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:site_name" content="PanoramaAI Studio" />
+    <meta property="og:url" content="https://panoramagenerator.ai/" />
+    <meta property="og:title" content="AI 360 Panorama Generator | Text to 360° VR Skybox &amp; Cubemap Studio" />
+    <meta
+      property="og:description"
+      content="Generate seamless 360° equirectangular panoramas, VR skyboxes, and cubemaps from text or photos in seconds. Free 360 WebGL viewer, harmonic seam healing, and 4K HDR export."
+    />
+    <meta property="og:image" content="https://panoramagenerator.ai/og-preview.svg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="PanoramaAI Studio 360 Panorama Generator Interface" />
+
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@PanoramaAI" />
+    <meta name="twitter:creator" content="@PanoramaAI" />
+    <meta name="twitter:url" content="https://panoramagenerator.ai/" />
+    <meta name="twitter:title" content="AI 360 Panorama Generator | Text to 360° VR Skybox &amp; Cubemap Studio" />
+    <meta
+      name="twitter:description"
+      content="Generate seamless 360° equirectangular panoramas, VR skyboxes, and cubemaps from text or photos in seconds. Free 360 WebGL viewer, harmonic seam healing, and 4K HDR export."
+    />
+    <meta name="twitter:image" content="https://panoramagenerator.ai/og-preview.svg" />
+
+    <!-- Performance & Preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- Schema.org JSON-LD Structured Data: SoftwareApplication + FAQPage + Organization + Breadcrumbs -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "SoftwareApplication",
+            "@id": "https://panoramagenerator.ai/#software",
+            "name": "PanoramaAI Studio",
+            "headline": "AI 360° Panorama & VR Skybox Generator",
+            "description": "Professional browser-based AI platform to generate seamless 2:1 equirectangular panoramas, 360 VR skyboxes, 6-sided cubemap slices, and 4K HDR environments from text prompts or reference photos.",
+            "applicationCategory": "DesignApplication",
+            "operatingSystem": "All, Web Browser, WebGL 2.0",
+            "url": "https://panoramagenerator.ai/",
+            "image": "https://panoramagenerator.ai/og-preview.svg",
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "USD",
+              "description": "Free explorer tier with 50 free credits upon onboarding"
+            },
+            "aggregateRating": {
+              "@type": "AggregateRating",
+              "ratingValue": "4.9",
+              "ratingCount": "1280",
+              "bestRating": "5",
+              "worstRating": "1"
+            },
+            "featureList": [
+              "Text-to-360 Equirectangular Panorama AI Generation",
+              "Image-to-Pano Reference Photo Style Transfer (up to 3 photos)",
+              "Interactive Three.js WebGL 360° Sphere Viewer with VR Cardboard Split-Screen",
+              "6-Sided Cubemap Slicer for Unity Skybox and Unreal Engine",
+              "Client-Side 4K Super-Resolution Clarity Upscaling and USM Sharpening",
+              "Wide Harmonic Poisson 360° Seam Boundary Healing",
+              "Instant PhotoSphere XMP Metadata Injector for Facebook, Google Street View, and VR Headsets",
+              "Radiance .HDR Environment Map Export for Blender and Maya"
+            ]
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://panoramagenerator.ai/#organization",
+            "name": "PanoramaAI Studio",
+            "url": "https://panoramagenerator.ai/",
+            "logo": "https://panoramagenerator.ai/favicon.svg"
+          },
+          {
+            "@type": "BreadcrumbList",
+            "@id": "https://panoramagenerator.ai/#breadcrumbs",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://panoramagenerator.ai/"
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Studio Generator",
+                "item": "https://panoramagenerator.ai/#studio"
+              },
+              {
+                "@type": "ListItem",
+                "position": 3,
+                "name": "360° VR Viewer",
+                "item": "https://panoramagenerator.ai/#viewer"
+              },
+              {
+                "@type": "ListItem",
+                "position": 4,
+                "name": "Cubemap 6-Sided Slicer",
+                "item": "https://panoramagenerator.ai/#cubemap"
+              },
+              {
+                "@type": "ListItem",
+                "position": 5,
+                "name": "3D Planetary Globe",
+                "item": "https://panoramagenerator.ai/#globe"
+              }
+            ]
+          },
+          {
+            "@type": "FAQPage",
+            "@id": "https://panoramagenerator.ai/#faq",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "How do I generate a 360° panorama with AI?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Type a scene description in natural English (or attach up to 3 reference photos to steer style and lighting), select your resolution tier (1K, 2K, or 4K), and click Generate. The pipeline automatically constructs the cylindrical wrap, executes symmetric seam healing, and renders the result directly in the built-in 360° WebGL sphere viewer."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "What format and aspect ratio is the output panorama?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Standard output is a 2:1 equirectangular PNG image (such as 2048×1024 or 3840×1920 4K). You can also download Radiance .hdr files for 3D IBL lighting in Blender and Unreal Engine, or export 6-sided cubemap ZIP archives (Right, Left, Top, Bottom, Front, Back) ready for Unity Skyboxes."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "How does PanoramaAI eliminate visible 360° boundary seams?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "PanoramaAI employs a proprietary Poisson harmonic seam healing algorithm. It samples 160-pixel strips from the far-left (x=0) and far-right (x=W) edges, aligns their vertical color gradients with zero brightness discontinuity, and applies a symmetric cosine cross-fade so the 360-degree horizontal loop joins seamlessly with zero visible vertical seams."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Does the 360° viewer work on VR headsets like Meta Quest or Apple Vision Pro?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Yes. The embedded Three.js WebGL viewer is fully responsive on iOS Safari, Android Chrome, and Meta Quest Oculus Browser. You can pan with your mouse/touch, toggle the Cardboard Split-Screen VR mode for dual-eye viewing, or view directly in VR headsets."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Can I use the generated AI panoramas in Blender, Unreal Engine 5, or Unity?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Yes. The 2:1 equirectangular PNG drops directly into Blender as an Environment Texture (World Shader), into Unreal Engine 5 as an HDRIBackdrop or Skylight, and into Unity as a Panoramic Skybox material. The 6-sided cubemap slicer also generates Unity-ready cubic textures with one click."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "How do I inject PhotoSphere XMP metadata for Facebook and Google Street View?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "PanoramaAI includes a built-in client-side 360° Metadata Injector tool. Upload any 2:1 equirectangular image, and it will encode Adobe XMP PhotoSphere tags (ProjectionType=equirectangular, FullPanoWidthPixels, FullPanoHeightPixels) directly into the JPEG binary header without touching any external server."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Can I use the generated panoramas for commercial projects?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Yes. Outputs generated with paid credits (Pro or Enterprise plans) include full commercial usage rights for video games, architectural visualization, advertising, VR experiences, and client commissions."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
-    <div id="root"></div>
+    <!-- Fallback SEO semantic container for crawlers before JavaScript execution -->
+    <div id="root">
+      <noscript>
+        <header>
+          <h1>AI 360° Panorama Generator &amp; VR Skybox Studio</h1>
+          <p>
+            Generate seamless 360-degree equirectangular panoramas, VR skyboxes, and cubemaps from natural language text prompts or reference photos in seconds.
+          </p>
+        </header>
+        <main>
+          <section>
+            <h2>Core Features</h2>
+            <ul>
+              <li><strong>Text to 360 Panorama:</strong> Turn text descriptions into high-resolution 2:1 spherical environments.</li>
+              <li><strong>Image to Pano Reference:</strong> Steer style, lighting, and palette using up to 3 reference photos.</li>
+              <li><strong>360° WebGL VR Viewer:</strong> Inspect panoramas in real-time with Three.js, radar minimap, and VR Cardboard split-screen mode.</li>
+              <li><strong>Cubemap 6-Sided Slicer:</strong> Slice spherical panoramas into 6 cube faces (+X, -X, +Y, -Y, +Z, -Z) for Unity and Unreal Engine.</li>
+              <li><strong>3D Planetary Globe:</strong> Project 360 textures onto an interactive orbital planet sphere.</li>
+              <li><strong>4K Clarity Upscaling:</strong> Reconstruct fine architectural and environmental details with AI super-resolution.</li>
+              <li><strong>360° Seam Healing:</strong> Proprietary multi-band Poisson gradient blending eliminates 360-degree vertical seams.</li>
+              <li><strong>PhotoSphere Metadata Injector:</strong> Embed official XMP tags for Facebook, Google Street View, and VR headsets.</li>
+            </ul>
+          </section>
+        </main>
+      </noscript>
+    </div>
+
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

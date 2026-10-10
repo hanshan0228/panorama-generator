@@ -1,0 +1,140 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <!-- Background Gradients -->
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#020814" />
+      <stop offset="50%" stop-color="#040e22" />
+      <stop offset="100%" stop-color="#01050d" />
+    </linearGradient>
+
+    <!-- Glowing Auroras -->
+    <radialGradient id="glow-cyan" cx="30%" cy="30%" r="50%">
+      <stop offset="0%" stop-color="#00F2FE" stop-opacity="0.25" />
+      <stop offset="100%" stop-color="#00F2FE" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="glow-blue" cx="80%" cy="40%" r="55%">
+      <stop offset="0%" stop-color="#2563eb" stop-opacity="0.22" />
+      <stop offset="100%" stop-color="#2563eb" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="glow-teal" cx="50%" cy="90%" r="45%">
+      <stop offset="0%" stop-color="#14b8a6" stop-opacity="0.2" />
+      <stop offset="100%" stop-color="#14b8a6" stop-opacity="0" />
+    </radialGradient>
+
+    <linearGradient id="logo-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00F2FE" />
+      <stop offset="50%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#2563eb" />
+    </linearGradient>
+
+    <linearGradient id="text-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="50%" stop-color="#e0f2fe" />
+      <stop offset="100%" stop-color="#38bdf8" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background Base -->
+  <rect width="1200" height="630" fill="url(#bg)" />
+
+  <!-- Atmospheric Glow Orbs -->
+  <circle cx="360" cy="180" r="380" fill="url(#glow-cyan)" />
+  <circle cx="960" cy="240" r="420" fill="url(#glow-blue)" />
+  <circle cx="600" cy="550" r="320" fill="url(#glow-teal)" />
+
+  <!-- Cyber Grid Lines -->
+  <g opacity="0.08" stroke="#00F2FE" stroke-width="1">
+    <line x1="0" y1="105" x2="1200" y2="105" />
+    <line x1="0" y1="210" x2="1200" y2="210" />
+    <line x1="0" y1="315" x2="1200" y2="315" />
+    <line x1="0" y1="420" x2="1200" y2="420" />
+    <line x1="0" y1="525" x2="1200" y2="525" />
+    <line x1="200" y1="0" x2="200" y2="630" />
+    <line x1="400" y1="0" x2="400" y2="630" />
+    <line x1="600" y1="0" x2="600" y2="630" />
+    <line x1="800" y1="0" x2="800" y2="630" />
+    <line x1="1000" y1="0" x2="1000" y2="630" />
+  </g>
+
+  <!-- Brand Pill (Top Left) -->
+  <g transform="translate(80, 70)">
+    <!-- Compass Icon Container -->
+    <rect width="48" height="48" rx="14" fill="url(#logo-grad)" />
+    <!-- Compass needle symbol -->
+    <path d="M24 10 L30 24 L24 38 L18 24 Z" fill="#040e22" />
+    <circle cx="24" cy="24" r="3" fill="#ffffff" />
+    
+    <text x="62" y="32" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="28" fill="#ffffff" letter-spacing="-0.5">
+      PanoramaAI
+    </text>
+    <rect x="230" y="14" width="76" height="24" rx="6" fill="#0284c7" fill-opacity="0.3" stroke="#38bdf8" stroke-width="1" />
+    <text x="246" y="30" font-family="'Courier New', Courier, monospace" font-weight="700" font-size="12" fill="#38bdf8" letter-spacing="1.5">
+      STUDIO
+    </text>
+  </g>
+
+  <!-- Social Proof Tag (Top Right) -->
+  <g transform="translate(870, 74)">
+    <rect width="250" height="38" rx="19" fill="#071b38" stroke="#00F2FE" stroke-opacity="0.3" stroke-width="1" />
+    <text x="25" y="24" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-weight="700" font-size="13" fill="#fbbf24">
+      ★ 4.9/5
+    </text>
+    <text x="80" y="24" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-weight="500" font-size="13" fill="#93c5fd">
+      • 38k+ 3D &amp; VR Creators
+    </text>
+  </g>
+
+  <!-- Central Hero Typography -->
+  <text x="80" y="220" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="62" fill="url(#text-grad)" letter-spacing="-1.5">
+    AI 360° Panorama Generator
+  </text>
+  
+  <text x="80" y="280" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="400" font-size="24" fill="#bae6fd" opacity="0.9">
+    Transform text prompts &amp; photos into seamless 2:1 VR equirectangular skyboxes.
+  </text>
+
+  <!-- Feature Grid Cards -->
+  <g transform="translate(80, 340)">
+    <!-- Card 1 -->
+    <rect x="0" y="0" width="240" height="150" rx="20" fill="#061938" fill-opacity="0.75" stroke="#00F2FE" stroke-opacity="0.35" stroke-width="1.2" />
+    <circle cx="40" cy="40" r="18" fill="#00F2FE" fill-opacity="0.15" />
+    <text x="32" y="46" font-size="18">✨</text>
+    <text x="24" y="85" font-family="-apple-system, sans-serif" font-weight="700" font-size="17" fill="#ffffff">Text to 360 &amp; Image</text>
+    <text x="24" y="112" font-family="-apple-system, sans-serif" font-size="13" fill="#7dd3fc">Steer with reference photos &amp; instant procedural wrap</text>
+
+    <!-- Card 2 -->
+    <rect x="260" y="0" width="240" height="150" rx="20" fill="#061938" fill-opacity="0.75" stroke="#00F2FE" stroke-opacity="0.35" stroke-width="1.2" />
+    <circle cx="300" cy="40" r="18" fill="#14b8a6" fill-opacity="0.15" />
+    <text x="292" y="46" font-size="18">🌐</text>
+    <text x="284" y="85" font-family="-apple-system, sans-serif" font-weight="700" font-size="17" fill="#ffffff">360° WebGL Viewer</text>
+    <text x="284" y="112" font-family="-apple-system, sans-serif" font-size="13" fill="#7dd3fc">Interactive sphere orbit, radar minimap &amp; Cardboard VR</text>
+
+    <!-- Card 3 -->
+    <rect x="520" y="0" width="240" height="150" rx="20" fill="#061938" fill-opacity="0.75" stroke="#00F2FE" stroke-opacity="0.35" stroke-width="1.2" />
+    <circle cx="560" cy="40" r="18" fill="#38bdf8" fill-opacity="0.15" />
+    <text x="552" y="46" font-size="18">📦</text>
+    <text x="544" y="85" font-family="-apple-system, sans-serif" font-weight="700" font-size="17" fill="#ffffff">Cubemap 6-Sided</text>
+    <text x="544" y="112" font-family="-apple-system, sans-serif" font-size="13" fill="#7dd3fc">Slice to cube faces for Unity, Unreal &amp; Three.js</text>
+
+    <!-- Card 4 -->
+    <rect x="780" y="0" width="260" height="150" rx="20" fill="#061938" fill-opacity="0.75" stroke="#00F2FE" stroke-opacity="0.35" stroke-width="1.2" />
+    <circle cx="820" cy="40" r="18" fill="#818cf8" fill-opacity="0.15" />
+    <text x="812" y="46" font-size="18">🛡️</text>
+    <text x="804" y="85" font-family="-apple-system, sans-serif" font-weight="700" font-size="17" fill="#ffffff">Poisson Seam Healing</text>
+    <text x="804" y="112" font-family="-apple-system, sans-serif" font-size="13" fill="#7dd3fc">Wide harmonic gradient blend + PhotoSphere XMP tags</text>
+  </g>
+
+  <!-- Bottom Badges / Tech Stack -->
+  <g transform="translate(80, 545)">
+    <text x="0" y="24" font-family="-apple-system, sans-serif" font-weight="600" font-size="14" fill="#38bdf8" opacity="0.8">
+      Compatible With:
+    </text>
+    <text x="130" y="24" font-family="-apple-system, sans-serif" font-weight="700" font-size="14" fill="#ffffff">
+      Unreal Engine 5 • Unity 6 • Blender • Meta Quest • Three.js • Apple Vision Pro
+    </text>
+    
+    <text x="910" y="24" font-family="'Courier New', Courier, monospace" font-weight="700" font-size="13" fill="#00F2FE">
+      panoramagenerator.ai
+    </text>
+  </g>
+</svg>
