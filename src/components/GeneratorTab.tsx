@@ -38,10 +38,13 @@ import {
 } from '../utils/geminiClient';
 import { ShowcaseGallery } from './commercial/ShowcaseGallery';
 import { FeatureMatrix } from './commercial/FeatureMatrix';
+import { SeamShowcase } from './commercial/SeamShowcase';
 import { CameraComparison } from './commercial/CameraComparison';
 import { HowItWorksSteps } from './commercial/HowItWorksSteps';
 import { IntegrationBadges } from './commercial/IntegrationBadges';
+import { TestimonialsSection } from './commercial/TestimonialsSection';
 import { CommercialFaq } from './commercial/CommercialFaq';
+import { exportVrReadyJpegBlob } from '../utils/xmpInjector';
 
 interface GeneratorTabProps {
   currentPanoramaUrl: string;
@@ -375,6 +378,49 @@ export function GeneratorTab({
       }
     };
     img.src = currentPanoramaUrl;
+  };
+
+  const handleDownloadVrJpg = () => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = async () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(img, 0, 0);
+        const vrBlob = await exportVrReadyJpegBlob(canvas, 0.95);
+        const url = URL.createObjectURL(vrBlob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `360-vr-photosphere-${selectedStyle}-${resolution}-${Date.now()}.jpg`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+    };
+    img.src = currentPanoramaUrl;
+  };
+
+  const handleEnhancePrompt = () => {
+    if (!prompt.trim()) {
+      const random = QUICK_TRY_CHIPS[Math.floor(Math.random() * QUICK_TRY_CHIPS.length)];
+      setPrompt(random.prompt);
+      setSelectedStyle(random.style);
+      return;
+    }
+    const enhancements = [
+      'continuous 360 degree equirectangular horizon, 8k resolution, seamless horizontal loop, photorealistic lighting, balanced zenith and nadir',
+      'unreal engine 5 lumen lighting, 360 vr spherical skybox, ultra detailed architectural textures, golden hour volumetric atmosphere',
+      'equirectangular projection 2:1 ratio, vibrant color grading, sharp specular highlights, high dynamic range skybox environment',
+      'seamless 360 pano wrapping, hyper-detailed volumetric clouds, raytraced atmospheric haze, ultra-sharp horizon line',
+    ];
+    const picked = enhancements[Math.floor(Math.random() * enhancements.length)];
+    if (!prompt.toLowerCase().includes('equirectangular')) {
+      setPrompt(`${prompt.trim()}, ${picked}`);
+    } else {
+      setPrompt(`${prompt.trim()}, cinematic volumetric lighting, 8k ultra-sharp detail`);
+    }
   };
 
   return (
@@ -745,18 +791,30 @@ export function GeneratorTab({
               <label htmlFor="prompt-input" className="text-xs font-bold text-cyan-100">
                 Scene Description
               </label>
-              <button
-                type="button"
-                onClick={() => {
-                  const random = QUICK_TRY_CHIPS[Math.floor(Math.random() * QUICK_TRY_CHIPS.length)];
-                  setPrompt(random.prompt);
-                  setSelectedStyle(random.style);
-                }}
-                className="text-xs text-cyan-400 hover:text-cyan-300 flex items-center gap-1 transition-all cursor-pointer font-bold hover:scale-105 active:scale-95"
-              >
-                <RefreshCw className="w-3 h-3" />
-                <span>Randomize</span>
-              </button>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={handleEnhancePrompt}
+                  className="text-[11px] text-teal-300 hover:text-white flex items-center gap-1 px-2.5 py-1 rounded-xl bg-teal-500/15 border border-teal-500/30 hover:border-teal-400 transition-all cursor-pointer font-semibold active:scale-95 shadow-sm"
+                  title="Enhance prompt with 360° equirectangular VR keywords"
+                >
+                  <Sparkles className="w-3 h-3 text-teal-400" />
+                  <span>Enhance with AI</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const random = QUICK_TRY_CHIPS[Math.floor(Math.random() * QUICK_TRY_CHIPS.length)];
+                    setPrompt(random.prompt);
+                    setSelectedStyle(random.style);
+                  }}
+                  className="text-[11px] text-cyan-300 hover:text-white flex items-center gap-1 px-2.5 py-1 rounded-xl bg-cyan-500/15 border border-cyan-500/30 hover:border-cyan-400 transition-all cursor-pointer font-semibold active:scale-95 shadow-sm"
+                  title="Pick a random high-quality prompt"
+                >
+                  <RefreshCw className="w-3 h-3 text-cyan-400" />
+                  <span>Surprise Me</span>
+                </button>
+              </div>
             </div>
             <textarea
               id="prompt-input"
@@ -968,7 +1026,7 @@ export function GeneratorTab({
           </div>
 
           {/* Multi-Format Export Action Bar */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
             <button
               type="button"
               onClick={handleDownloadPng}
@@ -984,6 +1042,23 @@ export function GeneratorTab({
               </div>
               <div className="text-xs font-bold text-white">Download PNG</div>
               <div className="text-[10px] text-cyan-300/60 mt-0.5">2:1 Equirectangular</div>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleDownloadVrJpg}
+              className="glass-card p-3.5 rounded-2xl text-left cursor-pointer group hover:border-blue-400/50 transition-all"
+            >
+              <div className="flex items-center justify-between mb-2 text-blue-400 group-hover:text-blue-300">
+                <div className="p-1.5 bg-blue-500/15 rounded-lg group-hover:scale-110 transition-transform">
+                  <Download className="w-4 h-4" />
+                </div>
+                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-blue-950/60 text-blue-300 font-bold border border-blue-500/20">
+                  VR JPG
+                </span>
+              </div>
+              <div className="text-xs font-bold text-white">Download VR JPG</div>
+              <div className="text-[10px] text-cyan-300/60 mt-0.5">PhotoSphere XMP Tagged</div>
             </button>
 
             <button
@@ -1056,16 +1131,22 @@ export function GeneratorTab({
       {/* 2. Built for VR-Ready Equirectangular Output (Feature Matrix) */}
       <FeatureMatrix />
 
-      {/* 3. AI Panorama Generation vs 360° Camera Capture (Comparison Table) */}
+      {/* 3. Proprietary Seam Healer Interactive Demo */}
+      <SeamShowcase />
+
+      {/* 4. AI Panorama Generation vs 360° Camera Capture (Comparison Table) */}
       <CameraComparison />
 
-      {/* 4. How AI 360° Panorama Generation Works (4-Step Workflow) */}
+      {/* 5. How AI 360° Panorama Generation Works (4-Step Workflow) */}
       <HowItWorksSteps />
 
-      {/* 5. Drop Straight into Your Production Stack (Game Engine Badges) */}
+      {/* 6. Drop Straight into Your Production Stack (Game Engine Badges) */}
       <IntegrationBadges />
 
-      {/* 6. Comprehensive FAQ Accordion */}
+      {/* 7. Creator Stories & Global Metrics (Testimonials & Social Proof) */}
+      <TestimonialsSection />
+
+      {/* 8. Comprehensive FAQ Accordion */}
       <CommercialFaq />
     </div>
   );

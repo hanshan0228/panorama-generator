@@ -22,11 +22,13 @@ import { CubemapTab } from './components/CubemapTab';
 import { GlobeTab } from './components/GlobeTab';
 import { PricingTab } from './components/PricingTab';
 import { AdminTab } from './components/AdminTab';
+import { MetadataInjectorModal } from './components/commercial/MetadataInjectorModal';
 import { generateProceduralPanorama } from './utils/proceduralPanoramas';
 
 export function App() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('generator');
   const [isToolsDropdownOpen, setIsToolsDropdownOpen] = useState(false);
+  const [isMetadataModalOpen, setIsMetadataModalOpen] = useState(false);
 
   // Initialize with a default rich 2:1 equirectangular panorama
   const [currentPanoramaUrl, setCurrentPanoramaUrl] = useState<string>(() => {
@@ -181,6 +183,25 @@ export function App() {
                       <div>
                         <div className="font-semibold text-xs">3D Planetary Globe</div>
                         <div className="text-[10px] text-cyan-300/60">Orbital sphere with atmosphere</div>
+                      </div>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsMetadataModalOpen(true);
+                        setIsToolsDropdownOpen(false);
+                      }}
+                      className="w-full px-2.5 py-1.5 rounded-xl hover:bg-cyan-950/60 text-left flex items-center gap-2 text-xs text-white transition-colors cursor-pointer"
+                    >
+                      <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
+                      <div>
+                        <div className="font-semibold text-xs flex items-center gap-1.5">
+                          <span>360° Metadata Injector</span>
+                          <span className="text-[9px] px-1 py-0.2 bg-blue-400/25 text-blue-300 rounded font-mono font-bold">
+                            NEW
+                          </span>
+                        </div>
+                        <div className="text-[10px] text-cyan-300/60">Inject PhotoSphere XMP tags</div>
                       </div>
                     </button>
                   </div>
@@ -380,6 +401,18 @@ export function App() {
                     Radiance .HDR Container
                   </a>
                 </li>
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => setIsMetadataModalOpen(true)}
+                    className="hover:text-cyan-300 transition-colors cursor-pointer flex items-center gap-1.5 text-cyan-200/90"
+                  >
+                    <span>360° Metadata Injector</span>
+                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30 font-bold">
+                      XMP
+                    </span>
+                  </button>
+                </li>
               </ul>
             </div>
 
@@ -421,7 +454,7 @@ export function App() {
           {/* Bottom Bar */}
           <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-cyan-400/60">
             <div>
-              &copy; {new Date().getFullYear()} PanoramaAI Studio. All rights reserved. 2:1 Equirectangular Standard.
+              &copy; 2026 PanoramaAI Studio. All rights reserved. 2:1 Equirectangular Standard.
             </div>
 
             <div className="flex items-center gap-4">
@@ -437,6 +470,12 @@ export function App() {
           </div>
         </div>
       </footer>
+
+      {/* Global 360° Metadata Injector Modal */}
+      <MetadataInjectorModal
+        isOpen={isMetadataModalOpen}
+        onClose={() => setIsMetadataModalOpen(false)}
+      />
     </div>
   );
 }
