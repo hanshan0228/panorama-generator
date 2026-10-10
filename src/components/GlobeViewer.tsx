@@ -164,7 +164,7 @@ export function GlobeViewer({ textureUrl, className = '' }: GlobeViewerProps) {
           className={`p-2 rounded-full transition-colors ${
             isRotating ? 'bg-cyan-600 text-white' : 'hover:bg-slate-800 text-slate-300'
           }`}
-          title={isRotating ? 'Pause Rotation' : 'Resume Rotation'}
+          title={isRotating ? '暂停行星自转' : '开启行星自转'}
         >
           {isRotating ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
         </button>
@@ -179,7 +179,7 @@ export function GlobeViewer({ textureUrl, className = '' }: GlobeViewerProps) {
             value={rotationSpeed}
             onChange={(e) => setRotationSpeed(parseFloat(e.target.value))}
             className="w-16 accent-cyan-500 cursor-pointer"
-            title="Rotation Speed"
+            title="自转速度微调"
           />
         </div>
 
@@ -189,24 +189,24 @@ export function GlobeViewer({ textureUrl, className = '' }: GlobeViewerProps) {
           className={`px-2.5 py-1 rounded-full text-xs font-medium flex items-center gap-1 transition-colors ${
             wireframe ? 'bg-cyan-400 text-slate-950 font-bold shadow-md shadow-cyan-500/30' : 'hover:bg-slate-800 text-slate-300'
           }`}
-          title="Toggle Wireframe Mesh"
+          title="切换线框骨架/实体材质"
         >
           <Sun className="w-3.5 h-3.5" />
-          <span>{wireframe ? 'Shaded' : 'Wireframe'}</span>
+          <span>{wireframe ? '实体材质' : '线框骨架'}</span>
         </button>
 
         <button
           type="button"
           onClick={handleToggleFullscreen}
           className="p-2 hover:bg-slate-800 rounded-full text-slate-300 hover:text-white transition-colors"
-          title="Toggle Fullscreen"
+          title="切换全屏沉浸展示"
         >
           {isFullscreen ? <Minimize className="w-3.5 h-3.5" /> : <Maximize className="w-3.5 h-3.5" />}
         </button>
       </div>
 
       <div className="absolute top-4 left-4 pointer-events-none bg-slate-900/60 backdrop-blur-sm border border-slate-800/80 rounded-lg px-2.5 py-1 text-[11px] text-cyan-400 font-mono">
-        3D ORBITAL GLOBE
+        3D 轨道行星仪
       </div>
     </div>
   );

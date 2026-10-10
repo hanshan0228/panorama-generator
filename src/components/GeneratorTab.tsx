@@ -41,49 +41,49 @@ interface GeneratorTabProps {
 const STYLE_PRESETS: StylePreset[] = [
   {
     id: 'cyberpunk',
-    name: 'Cyberpunk Neon',
-    description: 'Futuristic sci-fi megacity, rain-slicked highway, glowing holographic neon',
+    name: '赛博朋克霓虹',
+    description: '未来科幻巨型都市、雨夜倒影与全息霓虹',
     promptSuffix: 'cyberpunk futuristic metropolis at night, glowing neon billboards, volumetric fog, rainy reflections',
     previewColor: 'from-pink-500 to-cyan-400',
   },
   {
     id: 'nature',
-    name: 'Tropical Sunset',
-    description: 'Golden hour coastline, crystal water reflections, palm trees, warm skies',
+    name: '热带日落海岛',
+    description: '夕阳金色海浪、水晶倒影、棕榈树与晚霞',
     promptSuffix: 'tropical island sunset, golden reflections on ocean waves, palm trees, purple clouds',
     previewColor: 'from-amber-400 to-orange-500',
   },
   {
     id: 'space',
-    name: 'Cosmic Nebula',
-    description: 'Deep space stars, swirling celestial dust, planets, stellar rings',
+    name: '深空星云秘境',
+    description: '深邃星系恒星、宇宙尘埃、行星光环与太空穹顶',
     promptSuffix: 'deep space nebula, purple and teal cosmic dust, glowing galaxies, ringed planet, stellar skybox',
     previewColor: 'from-cyan-400 to-blue-600',
   },
   {
     id: 'interior',
-    name: 'Modern Penthouse',
-    description: 'Floor-to-ceiling glass panoramic loft, oak flooring, architectural lighting',
+    name: '现代全景顶层公寓',
+    description: '落地玻璃幕墙、橡木地板、奢华城市黄昏全景',
     promptSuffix: 'luxury modern penthouse interior, floor-to-ceiling glass windows, evening city view, warm oak wood',
     previewColor: 'from-teal-500 to-sky-700',
   },
   {
     id: 'anime',
-    name: 'Anime Ghibli',
+    name: '日系治愈水彩动漫',
     description: '日系治愈水彩手绘动漫，蓝天白云、沿海公路与温暖海风',
     promptSuffix: 'Japanese anime hand-drawn watercolor aesthetic, gentle coastal breeze, lush green summer grass, fluffy white clouds, warm natural sunlight, nostalgic peaceful anime scenery',
     previewColor: 'from-sky-400 via-teal-300 to-emerald-400',
   },
   {
     id: 'fantasy',
-    name: 'Celestial Ruins',
-    description: 'Floating ancient temple, enchanted glowing runes, aurora borealis sky',
+    name: '浮空遗迹神殿',
+    description: '古代浮空神殿、发光魔法符文与极光苍穹',
     promptSuffix: 'ancient fantasy temple ruins, floating celestial stones, glowing magical runes, aurora sky',
     previewColor: 'from-emerald-400 to-teal-600',
   },
   {
     id: 'custom',
-    name: 'Pure Custom',
+    name: '纯净自定义提示词',
     description: '纯净输入模式，不追加任何风格后缀，完全遵循自定义提示词',
     promptSuffix: '',
     previewColor: 'from-slate-500 to-slate-700',
@@ -92,11 +92,11 @@ const STYLE_PRESETS: StylePreset[] = [
 
 const PROMPT_SUGGESTIONS = [
   '日系治愈手绘水彩动漫风，一个红衣小女孩骑着自行车吹着海风，一边是蔚蓝大海和沿海公路，阳光明媚，满天蓬松白云',
-  'Futuristic neon-lit cyberpunk street with flying vehicles and rainy ground reflections',
-  'Enchanted fairy forest at twilight with glowing giant mushrooms and mystical fireflies',
-  'Luxury glass penthouse apartment with panoramic sunset view over Manhattan skyline',
-  'Deep cosmic space with swirling magenta nebula clouds and distant crystalline asteroid ring',
-  'Ancient Egyptian cyber-temple at desert dawn with golden pyramids and holographic hieroglyphs',
+  '未来科幻赛博朋克雨夜街道，飞行穿梭机与潮湿路面全息倒影，巨型霓虹广告牌与未来摩天大楼',
+  '暮色森林奇幻秘境，发光的巨型蘑菇与漂浮的神秘萤火虫，神圣古树与林间薄雾',
+  '奢华现代全景顶层豪宅公寓，落地玻璃幕墙俯瞰曼哈顿黄昏天际线与温暖壁炉',
+  '深邃宇宙深空，璀璨的洋红色星云气体与遥远的水晶小行星环带，壮丽银河全景',
+  '沙漠黎明中的古埃及赛博神庙，金色金字塔与全息象形文字光环，科幻远古遗迹',
 ];
 
 export function GeneratorTab({
@@ -274,7 +274,7 @@ export function GeneratorTab({
                 <div className="p-1.5 bg-cyan-500/20 text-cyan-300 rounded-lg">
                   <Settings2 className="w-4 h-4" />
                 </div>
-                <h3 className="font-bold text-base text-cyan-100">AI Model &amp; Local Proxy Settings</h3>
+                <h3 className="font-bold text-base text-cyan-100">AI 大模型与本地代理设置</h3>
               </div>
               <button
                 type="button"
@@ -330,14 +330,14 @@ export function GeneratorTab({
                     </span>
                   </div>
                   <div className="text-[10.5px] text-cyan-200/70">
-                    调用本地 8317 端口转接 ChatGPT 绘图
+                    通过本地 8317 端口转接 Gemini 或 ChatGPT 绘图
                   </div>
                 </button>
               </div>
 
               <div>
                 <label className="block text-cyan-200 font-semibold mb-1">
-                  API Base URL
+                  API 接口地址 (Base URL)
                 </label>
                 <input
                   type="text"
@@ -360,7 +360,7 @@ export function GeneratorTab({
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <label className="text-cyan-200 font-semibold">
-                    API Key / Bearer Token
+                    API 密钥 (API Key / Token)
                   </label>
                   {geminiConfig.baseUrl.includes('googleapis.com') && (
                     <a
@@ -381,18 +381,18 @@ export function GeneratorTab({
                   placeholder={
                     geminiConfig.baseUrl.includes('googleapis.com')
                       ? '输入 Google AI Studio API Key (AIzaSy...)'
-                      : '输入 8317 Proxy Authorization Bearer Token'
+                      : '输入 8317 代理密钥 (默认 sk-wTdKu3XLWeAsvmaXr)'
                   }
                   className="w-full px-3.5 py-2.5 bg-[#030a17] border border-cyan-500/30 rounded-xl text-cyan-100 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/25 font-mono text-xs transition-all"
                 />
                 <p className="text-[11px] text-cyan-300/60 mt-1">
-                  Key 仅保存在您当前浏览器的本地 LocalStorage，不上传任何第三方。
+                  密钥仅保存在当前浏览器的本地存储 (LocalStorage)，不上传任何第三方。
                 </p>
               </div>
 
               <div>
                 <label className="block text-cyan-200 font-semibold mb-1">
-                  Image Model Name
+                  生图模型名称 (Model)
                 </label>
                 <input
                   type="text"
@@ -401,7 +401,7 @@ export function GeneratorTab({
                   placeholder={
                     geminiConfig.baseUrl.includes('googleapis.com')
                       ? 'imagen-3.0-generate-002'
-                      : 'gpt-image-2.5'
+                      : 'gemini-3.1-flash-image'
                   }
                   className="w-full px-3.5 py-2.5 bg-[#030a17] border border-cyan-500/30 rounded-xl text-cyan-100 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/25 font-mono text-xs transition-all"
                 />
@@ -449,7 +449,7 @@ export function GeneratorTab({
                 onClick={handleTestConnection}
                 className="px-3.5 py-2 bg-cyan-950/60 hover:bg-cyan-900/60 border border-cyan-500/30 text-cyan-200 rounded-xl text-xs font-semibold cursor-pointer disabled:opacity-50 transition-colors"
               >
-                {isTestingConn ? 'Testing...' : 'Test Connection'}
+                {isTestingConn ? '正在测试连接...' : '测试连通性'}
               </button>
 
               <div className="flex items-center gap-2">
@@ -458,7 +458,7 @@ export function GeneratorTab({
                   onClick={() => setShowConfigModal(false)}
                   className="px-3.5 py-2 bg-white/[0.05] hover:bg-white/10 text-slate-300 rounded-xl text-xs font-medium cursor-pointer transition-colors"
                 >
-                  Cancel
+                  取消
                 </button>
                 <button
                   type="button"
@@ -466,7 +466,7 @@ export function GeneratorTab({
                   className="px-4 py-2 bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 font-bold rounded-xl text-xs cursor-pointer flex items-center gap-1.5 shadow-lg shadow-cyan-400/25 active:scale-95 transition-all"
                 >
                   <Check className="w-3.5 h-3.5" />
-                  <span>Save &amp; Apply</span>
+                  <span>保存并应用</span>
                 </button>
               </div>
             </div>
@@ -485,13 +485,13 @@ export function GeneratorTab({
               <Sparkles className="w-4 h-4 fill-current" />
             </div>
             <div>
-              <h2 className="text-lg font-extrabold text-white tracking-tight">AI 360° Generator</h2>
-              <p className="text-xs text-cyan-300/70">Equirectangular VR &amp; Skybox Engine</p>
+              <h2 className="text-lg font-extrabold text-white tracking-tight">AI 360° 全景生成器</h2>
+              <p className="text-xs text-cyan-300/70">工业级等距柱状全景与天空盒引擎</p>
             </div>
           </div>
           <span className="text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-cyan-400/15 border border-cyan-400/40 text-cyan-300 flex items-center gap-1.5 shadow-sm">
             <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_#00F2FE]" />
-            2:1 STANDARD
+            2:1 工业标准
           </span>
         </div>
 
@@ -500,7 +500,7 @@ export function GeneratorTab({
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-cyan-100 flex items-center gap-1.5">
               <Cpu className="w-3.5 h-3.5 text-cyan-400" />
-              <span>Generation Engine</span>
+              <span>生成引擎模式</span>
             </span>
             <button
               type="button"
@@ -508,7 +508,7 @@ export function GeneratorTab({
               className="text-xs text-cyan-400 hover:text-cyan-300 flex items-center gap-1 transition-colors cursor-pointer font-semibold"
             >
               <Settings2 className="w-3 h-3" />
-              <span>Configure Proxy</span>
+              <span>配置模型与代理</span>
             </button>
           </div>
 
@@ -524,9 +524,9 @@ export function GeneratorTab({
             >
               <div className="text-xs font-bold flex items-center gap-1.5">
                 <Cpu className="w-3.5 h-3.5 text-teal-300" />
-                <span>Instant Engine</span>
+                <span>极速即时引擎</span>
               </div>
-              <div className="text-[10px] text-cyan-300/60 mt-0.5">Procedural render, 0s delay</div>
+              <div className="text-[10px] text-cyan-300/60 mt-0.5">程序化算法，0秒极速呈现</div>
             </button>
 
             <button
@@ -540,7 +540,7 @@ export function GeneratorTab({
             >
               <div className="text-xs font-bold flex items-center gap-1.5">
                 <Bot className="w-3.5 h-3.5 text-cyan-300" />
-                <span>AI Model (8317)</span>
+                <span>AI 大模型引擎</span>
               </div>
               <div className="text-[10px] text-cyan-300/80 truncate mt-0.5 font-mono">
                 {geminiConfig.model}
@@ -552,21 +552,21 @@ export function GeneratorTab({
             <div className="px-3 py-1.5 bg-cyan-950/50 border border-cyan-400/30 rounded-xl flex items-center justify-between text-[11px] text-cyan-200">
               <span className="flex items-center gap-1.5 truncate">
                 <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_6px_#00F2FE]" />
-                <span className="truncate">Connected: {geminiConfig.baseUrl}</span>
+                <span className="truncate">已连接：{geminiConfig.baseUrl}</span>
               </span>
               <button
                 type="button"
                 onClick={() => setShowConfigModal(true)}
                 className="text-cyan-400 hover:text-cyan-200 underline shrink-0 ml-2 cursor-pointer font-semibold"
               >
-                Settings
+                设置
               </button>
             </div>
           )}
 
           {configSavedToast && (
             <p className="text-[11px] text-teal-300 flex items-center gap-1 font-semibold">
-              <Check className="w-3 h-3" /> Proxy configuration saved!
+              <Check className="w-3 h-3" /> 模型与代理配置已保存生效！
             </p>
           )}
         </div>
@@ -575,7 +575,7 @@ export function GeneratorTab({
         <div className="space-y-2 relative z-10">
           <div className="flex items-center justify-between">
             <label htmlFor="prompt-input" className="text-xs font-bold text-cyan-100">
-              Prompt Description
+              全景画面描述 (提示词)
             </label>
             <button
               type="button"
@@ -583,7 +583,7 @@ export function GeneratorTab({
               className="text-xs text-cyan-400 hover:text-cyan-300 flex items-center gap-1.5 transition-all cursor-pointer font-bold hover:scale-105 active:scale-95"
             >
               <RefreshCw className="w-3 h-3" />
-              <span>Surprise Me</span>
+              <span>随机灵感</span>
             </button>
           </div>
           <textarea
@@ -591,14 +591,14 @@ export function GeneratorTab({
             rows={3}
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
-            placeholder="Describe the 360° environment you want to generate (e.g. Cyberpunk neon streets at rainy night, futuristic space station, tropical sunset island)..."
+            placeholder="描述您想要生成的 360° 全景空间（例如：赛博朋克雨夜街道全息霓虹、未来太空站穹顶、热带海岛日落、日系治愈水彩动漫）..."
             className="w-full px-4 py-3 bg-[#030c1c]/90 border border-cyan-500/25 rounded-2xl text-sm text-cyan-100 placeholder-cyan-500/40 focus:outline-none focus:border-cyan-400 focus:ring-4 focus:ring-cyan-400/20 transition-all resize-none shadow-inner"
           />
         </div>
 
         {/* Style Presets */}
         <div className="space-y-2.5 relative z-10">
-          <label className="text-xs font-bold text-cyan-100">Environment Style Preset</label>
+          <label className="text-xs font-bold text-cyan-100">空间环境风格预设</label>
           <div className="grid grid-cols-2 gap-2">
             {STYLE_PRESETS.map((style) => (
               <button
@@ -626,7 +626,7 @@ export function GeneratorTab({
         {/* Resolution Tier & Seam Correction */}
         <div className="grid grid-cols-2 gap-3 pt-1 relative z-10">
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-cyan-100">Output Resolution</label>
+            <label className="text-xs font-bold text-cyan-100">画质分辨率</label>
             <div className="flex items-center gap-1 bg-[#030c1c] p-1 border border-cyan-500/20 rounded-xl">
               {(['1K', '2K', '4K'] as ResolutionTier[]).map((res) => (
                 <button
@@ -646,7 +646,7 @@ export function GeneratorTab({
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-cyan-100">360° Seam Alignment</label>
+            <label className="text-xs font-bold text-cyan-100">360° 水平接缝缝合</label>
             <button
               type="button"
               onClick={() => setSeamCorrection((prev) => !prev)}
@@ -656,7 +656,7 @@ export function GeneratorTab({
                   : 'bg-[#030c1c] border-cyan-500/20 text-cyan-400/60 hover:text-cyan-200'
               }`}
             >
-              <span>Seamless Wrap</span>
+              <span>无缝消除接缝</span>
               <CheckCircle2 className="w-4 h-4 text-teal-300" />
             </button>
           </div>
@@ -667,14 +667,14 @@ export function GeneratorTab({
           <div className="p-3.5 bg-red-950/50 border border-red-500/50 rounded-2xl text-xs text-red-200 flex items-start gap-2.5">
             <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
             <div>
-              <p className="font-bold">API Generation Error:</p>
+              <p className="font-bold">API 生成异常：</p>
               <p className="text-[11px] text-red-300 break-all">{apiError}</p>
               <button
                 type="button"
                 onClick={() => setShowConfigModal(true)}
                 className="mt-1 text-[11px] underline text-red-300 hover:text-red-100 cursor-pointer"
               >
-                Click here to verify proxy endpoint and model settings →
+                点击此处检查代理地址与模型设置 →
               </button>
             </div>
           </div>
@@ -693,15 +693,15 @@ export function GeneratorTab({
                 <RefreshCw className="w-4 h-4 animate-spin text-slate-950" />
                 <span>
                   {engineMode === 'gemini'
-                    ? `Generating 360° skybox via ${geminiConfig.model}... (${generationProgress}%)`
-                    : `Synthesizing 360° panorama... (${generationProgress}%)`}
+                    ? `正在通过 ${geminiConfig.model} 生成 360° 天空盒... (${generationProgress}%)`
+                    : `正在合成 360° 全景图... (${generationProgress}%)`}
                 </span>
               </>
             ) : (
               <>
                 <Sparkles className="w-4 h-4 fill-current text-slate-950" />
                 <span>
-                  {engineMode === 'gemini' ? 'Generate 360° VR Panorama (AI)' : 'Generate 360° Panorama (Instant)'}
+                  {engineMode === 'gemini' ? '生成 360° VR 全景图 (AI 绘制)' : '即时生成 360° 全景图 (程序化)'}
                 </span>
               </>
             )}
@@ -711,7 +711,7 @@ export function GeneratorTab({
         {/* Quick Benchmark Presets */}
         <div className="pt-3 border-t border-cyan-500/20 relative z-10">
           <span className="text-[10px] text-cyan-400/80 uppercase tracking-wider font-mono font-bold">
-            Quick Benchmark Presets:
+            基准测试预设场景：
           </span>
           <div className="flex flex-wrap gap-1.5 mt-2">
             {PRESET_PANORAMAS.map((p) => (
@@ -740,12 +740,12 @@ export function GeneratorTab({
           <div className="px-5 py-3.5 bg-[#030e20]/90 border-b border-cyan-500/20 flex items-center justify-between text-xs text-cyan-200">
             <div className="flex items-center gap-2.5">
               <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_#00F2FE]" />
-              <span className="font-bold text-white tracking-wide">Live 360° Viewport</span>
-              <span className="text-cyan-400/60 hidden sm:inline">| Drag or swipe to look around</span>
+              <span className="font-bold text-white tracking-wide">实时 360° 全景视口</span>
+              <span className="text-cyan-400/60 hidden sm:inline">| 拖拽或滑动以环视全景</span>
             </div>
             <div className="flex items-center gap-2 text-[11px] text-cyan-300 bg-cyan-950/60 px-2.5 py-1 rounded-full border border-cyan-500/30">
               <Sliders className="w-3.5 h-3.5 text-cyan-400" />
-              <span>FOV: 75° (Interactive)</span>
+              <span>视角 FOV: 75° (交互可缩放)</span>
             </div>
           </div>
 
@@ -769,8 +769,8 @@ export function GeneratorTab({
                 PNG
               </span>
             </div>
-            <div className="text-xs font-bold text-white">Download PNG</div>
-            <div className="text-[10px] text-cyan-300/60 mt-0.5">2:1 Equirectangular</div>
+            <div className="text-xs font-bold text-white">下载 PNG 全景图</div>
+            <div className="text-[10px] text-cyan-300/60 mt-0.5">2:1 等距柱状投影</div>
           </button>
 
           <button
@@ -786,8 +786,8 @@ export function GeneratorTab({
                 .HDR
               </span>
             </div>
-            <div className="text-xs font-bold text-white">Export Radiance</div>
-            <div className="text-[10px] text-cyan-300/60 mt-0.5">Blender / Unreal Ready</div>
+            <div className="text-xs font-bold text-white">导出 .HDR 环境图</div>
+            <div className="text-[10px] text-cyan-300/60 mt-0.5">适配 Blender / 虚幻引擎</div>
           </button>
 
           <button
@@ -800,11 +800,11 @@ export function GeneratorTab({
                 <Box className="w-4 h-4" />
               </div>
               <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-teal-950/60 text-teal-300 font-bold border border-teal-500/20">
-                6 FACES
+                6 面
               </span>
             </div>
-            <div className="text-xs font-bold text-white">Slice Cubemap</div>
-            <div className="text-[10px] text-cyan-300/60 mt-0.5">Unity / Game Skybox</div>
+            <div className="text-xs font-bold text-white">天空盒切片</div>
+            <div className="text-[10px] text-cyan-300/60 mt-0.5">适配 Unity / 游戏天空盒</div>
           </button>
 
           <button
@@ -820,8 +820,8 @@ export function GeneratorTab({
                 3D
               </span>
             </div>
-            <div className="text-xs font-bold text-white">Project to Globe</div>
-            <div className="text-[10px] text-cyan-300/60 mt-0.5">Orbital 3D View</div>
+            <div className="text-xs font-bold text-white">全景地球仪</div>
+            <div className="text-[10px] text-cyan-300/60 mt-0.5">轨道三维球体漫游</div>
           </button>
         </div>
       </div>

@@ -67,12 +67,12 @@ export function App() {
                   PanoramaAI
                 </span>
                 <span className="text-[10px] font-mono px-2 py-0.5 bg-cyan-400/15 border border-cyan-400/40 text-cyan-300 rounded-md font-bold tracking-wider shadow-sm">
-                  STUDIO
+                  工作室
                 </span>
               </div>
               <div className="text-[10px] text-cyan-300/70 hidden sm:flex items-center gap-1.5 font-medium">
                 <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_#00F2FE]" />
-                <span>AI 360° VR &amp; Skybox Engine</span>
+                <span>AI 360° 全景漫游与天空盒引擎</span>
               </div>
             </div>
           </div>
@@ -89,7 +89,7 @@ export function App() {
               }`}
             >
               <Sparkles className="w-3.5 h-3.5 text-cyan-300 fill-current" />
-              <span>AI Generator</span>
+              <span>AI 全景生成</span>
             </button>
 
             <button
@@ -102,9 +102,9 @@ export function App() {
               }`}
             >
               <Eye className="w-3.5 h-3.5 text-teal-300" />
-              <span>360° Viewer</span>
+              <span>360° 全景漫游</span>
               <span className="text-[9px] px-1 py-0.2 bg-teal-400/25 text-teal-300 rounded font-mono font-bold">
-                FREE
+                免费
               </span>
             </button>
 
@@ -118,7 +118,7 @@ export function App() {
               }`}
             >
               <Box className="w-3.5 h-3.5 text-cyan-300" />
-              <span>Cubemap</span>
+              <span>立方体切片</span>
             </button>
 
             <button
@@ -131,7 +131,7 @@ export function App() {
               }`}
             >
               <Globe2 className="w-3.5 h-3.5 text-teal-300" />
-              <span>Photo to Globe</span>
+              <span>全景地球仪</span>
             </button>
 
             <button
@@ -144,7 +144,7 @@ export function App() {
               }`}
             >
               <CreditCard className="w-3.5 h-3.5 text-blue-300" />
-              <span>Pricing</span>
+              <span>会员与价格</span>
             </button>
           </nav>
 
@@ -156,7 +156,7 @@ export function App() {
               className="shimmer-btn px-4 py-2 bg-gradient-to-r from-cyan-400 via-teal-300 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 text-xs font-extrabold rounded-xl shadow-lg shadow-cyan-400/35 hover:shadow-cyan-400/60 hover:scale-105 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer"
             >
               <Zap className="w-3.5 h-3.5 fill-current" />
-              <span>Upgrade Pro</span>
+              <span>升级专业版</span>
             </button>
           </div>
         </div>
@@ -200,9 +200,9 @@ export function App() {
             <div className="p-1.5 bg-cyan-500/15 border border-cyan-500/30 rounded-lg text-cyan-400">
               <Compass className="w-3.5 h-3.5" />
             </div>
-            <span className="text-white font-bold tracking-tight">PanoramaAI Studio</span>
+            <span className="text-white font-bold tracking-tight">PanoramaAI 全景工作室</span>
             <span className="text-cyan-800">•</span>
-            <span className="text-cyan-300/80">Industrial Equirectangular 360° VR Pipeline</span>
+            <span className="text-cyan-300/80">工业级等距柱状 360° 全景生产管线</span>
           </div>
 
           <div className="flex items-center gap-4 text-cyan-200/70 text-xs font-medium">
@@ -211,53 +211,53 @@ export function App() {
               onClick={() => setActiveTab('viewer')}
               className="hover:text-cyan-300 transition-colors cursor-pointer"
             >
-              Free 360 Viewer
+              360° 全景预览
             </button>
             <button
               type="button"
               onClick={() => setActiveTab('cubemap')}
               className="hover:text-cyan-300 transition-colors cursor-pointer"
             >
-              Cubemap Slicer
+              天空盒切片
             </button>
             <button
               type="button"
               onClick={() => setActiveTab('globe')}
               className="hover:text-cyan-300 transition-colors cursor-pointer"
             >
-              Photo to Globe
+              全景地球仪
             </button>
             <button
               type="button"
               onClick={() => setActiveTab('pricing')}
               className="hover:text-cyan-300 transition-colors cursor-pointer"
             >
-              Pricing &amp; API
+              套餐价格与 API
             </button>
             <button
               type="button"
               onClick={() => {
-                const pin = prompt('Enter Admin PIN:');
+                const pin = prompt('请输入管理员密码：');
                 if (pin === 'admin888') {
                   setActiveTab('admin');
                 } else if (pin !== null) {
-                  alert('Invalid PIN');
+                  alert('密码错误');
                 }
               }}
               className="text-cyan-800 hover:text-cyan-600 text-[10px] transition-colors cursor-pointer"
             >
-              Admin
+              管理后台
             </button>
           </div>
 
           <div className="flex items-center gap-3 text-cyan-400/60">
             <span className="flex items-center gap-1.5 text-[11px] px-2.5 py-0.5 rounded-full bg-cyan-950/60 border border-cyan-500/30 text-cyan-300">
               <Activity className="w-3 h-3 text-teal-400" />
-              <span>WebGL 3D Active</span>
+              <span>WebGL 3D 渲染就绪</span>
             </span>
             <div className="flex items-center gap-1 text-[11px]">
               <Code2 className="w-3.5 h-3.5 text-cyan-400" />
-              <span>Three.js • 2:1 Equirectangular</span>
+              <span>Three.js • 2:1 等距柱状投影</span>
             </div>
           </div>
         </div>
