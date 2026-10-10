@@ -204,7 +204,7 @@ export function buildPanoramaPrompt(userPrompt: string, styleSuffix = ''): strin
   const suffix = styleSuffix ? `, ${styleSuffix}` : '';
   // Equirectangular 360 panoramic magic tokens:
   // Forbids borders, frames, vignettes, and circular fisheyes so the AI generates a true full-bleed 360 environment!
-  return `${sanitized}${suffix}, full 360 degree equirectangular projection panorama, 360 spherical VR skybox, 2:1 ratio texture map, seamless horizontal wrap, continuous 360 panoramic loop, matching left and right edges, level horizontal horizon at 50% vertical center, flat camera zero pitch, highly detailed, photorealistic 8k environment, full frame edge to edge, no borders, no circular lens, no black frame, no vignettes`;
+  return `${sanitized}${suffix}, full 360 degree equirectangular projection panorama, 360 spherical VR skybox, 2:1 ratio texture map, seamless horizontal wrap, continuous 360 panoramic loop, matching left and right edges, level horizontal horizon at 50% vertical center, flat camera zero pitch, ultra sharp focus, 8k uhd resolution, crisp micro-details, highly detailed photorealistic environment, full frame edge to edge, no borders, no circular lens, no black frame, no vignettes`;
 }
 
 /**

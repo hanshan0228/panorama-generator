@@ -7,7 +7,7 @@
  */
 
 export interface EnhanceOptions {
-  scaleFactor?: 2 | 4;
+  scaleFactor?: 1 | 2 | 4;
   sharpness?: number; // 0.0 to 1.0
   contrastBoost?: number; // 1.0 to 1.3
 }
@@ -21,8 +21,8 @@ export function enhanceAndUpscalePanorama(
   const origW = sourceImage.naturalWidth || sourceImage.width;
   const origH = sourceImage.naturalHeight || sourceImage.height;
 
-  const targetW = Math.min(4096, origW * scaleFactor);
-  const targetH = Math.min(2048, origH * scaleFactor);
+  const targetW = scaleFactor === 1 ? origW : Math.min(4096, origW * scaleFactor);
+  const targetH = scaleFactor === 1 ? origH : Math.min(2048, origH * scaleFactor);
 
   const canvas = document.createElement('canvas');
   canvas.width = targetW;

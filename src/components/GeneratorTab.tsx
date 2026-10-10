@@ -47,6 +47,7 @@ import { TestimonialsSection } from './commercial/TestimonialsSection';
 import { CommercialFaq } from './commercial/CommercialFaq';
 import { exportVrReadyJpegBlob } from '../utils/xmpInjector';
 import { healPanoramaSeam } from '../utils/seamHealer';
+import { enhanceAndUpscalePanorama } from '../utils/imageEnhancer';
 
 interface GeneratorTabProps {
   currentPanoramaUrl: string;
@@ -168,6 +169,7 @@ export function GeneratorTab({
   const [apiError, setApiError] = useState<string | null>(null);
   const [isTestingConn, setIsTestingConn] = useState(false);
   const [testConnResult, setTestConnResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [isUpscalingClarity, setIsUpscalingClarity] = useState(false);
 
   const creditsCost = resolution === '4K' ? 12 : resolution === '2K' ? 6 : 3;
 
@@ -302,32 +304,42 @@ export function GeneratorTab({
         // Call Gemini local proxy / direct endpoint
         const rawGenUrl = await generateWithGemini(fullPrompt, geminiConfig);
 
-        // Client-side symmetric seam healing if seamCorrection is true
+        // Client-side super-resolution, sharpening & seam healing
         let finalDataUrl = rawGenUrl;
-        if (seamCorrection) {
-          try {
-            const img = new Image();
-            img.crossOrigin = 'anonymous';
-            finalDataUrl = await new Promise<string>((resolve) => {
-              img.onload = () => {
-                const canvas = document.createElement('canvas');
+        try {
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          finalDataUrl = await new Promise<string>((resolve) => {
+            img.onload = () => {
+              let canvas: HTMLCanvasElement;
+              if (resolution === '4K') {
+                canvas = enhanceAndUpscalePanorama(img, {
+                  scaleFactor: 2,
+                  sharpness: 0.8,
+                  contrastBoost: 1.1,
+                });
+              } else if (resolution === '2K') {
+                canvas = enhanceAndUpscalePanorama(img, {
+                  scaleFactor: 1,
+                  sharpness: 0.6,
+                  contrastBoost: 1.05,
+                });
+              } else {
+                canvas = document.createElement('canvas');
                 canvas.width = img.naturalWidth || img.width;
                 canvas.height = img.naturalHeight || img.height;
                 const ctx = canvas.getContext('2d');
-                if (ctx) {
-                  ctx.drawImage(img, 0, 0);
-                  const healed = healPanoramaSeam(canvas, 160);
-                  resolve(healed.toDataURL('image/png'));
-                } else {
-                  resolve(rawGenUrl);
-                }
-              };
-              img.onerror = () => resolve(rawGenUrl);
-              img.src = rawGenUrl;
-            });
-          } catch {
-            finalDataUrl = rawGenUrl;
-          }
+                if (ctx) ctx.drawImage(img, 0, 0);
+              }
+
+              const healed = seamCorrection ? healPanoramaSeam(canvas, 160) : canvas;
+              resolve(healed.toDataURL('image/png'));
+            };
+            img.onerror = () => resolve(rawGenUrl);
+            img.src = rawGenUrl;
+          });
+        } catch {
+          finalDataUrl = rawGenUrl;
         }
 
         clearInterval(progressTimer);
@@ -469,6 +481,27 @@ export function GeneratorTab({
       }
     };
     img.src = currentPanoramaUrl;
+  };
+
+  const handleEnhanceClarity = () => {
+    setIsUpscalingClarity(true);
+    setTimeout(() => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        const enhancedCanvas = enhanceAndUpscalePanorama(img, {
+          scaleFactor: 2,
+          sharpness: 0.8,
+          contrastBoost: 1.1,
+        });
+        const healed = healPanoramaSeam(enhancedCanvas, 160);
+        onPanoramaChange(healed.toDataURL('image/png'));
+        setIsUpscalingClarity(false);
+        confetti({ particleCount: 45, spread: 60, origin: { y: 0.7 } });
+      };
+      img.onerror = () => setIsUpscalingClarity(false);
+      img.src = currentPanoramaUrl;
+    }, 80);
   };
 
   return (
@@ -1063,6 +1096,16 @@ export function GeneratorTab({
                 <span className="text-cyan-400/60 hidden sm:inline">| Drag to look around, scroll to zoom</span>
               </div>
               <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  disabled={isUpscalingClarity}
+                  onClick={handleEnhanceClarity}
+                  className="flex items-center gap-1.5 text-[11px] text-cyan-300 hover:text-white bg-cyan-500/15 hover:bg-cyan-500/25 px-2.5 py-1 rounded-full border border-cyan-500/30 transition-all cursor-pointer font-semibold active:scale-95 shadow-sm disabled:opacity-50"
+                  title="Apply 4K super-resolution reconstruction and unsharp mask sharpening"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>{isUpscalingClarity ? 'Enhancing...' : 'Enhance 4K Clarity'}</span>
+                </button>
                 <button
                   type="button"
                   onClick={handleManualHealSeam}

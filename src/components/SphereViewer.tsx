@@ -214,7 +214,7 @@ export function SphereViewer({
     });
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2.5));
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMapping = THREE.LinearToneMapping;
     renderer.toneMappingExposure = exposure;
     renderer.autoClear = false;
     container.appendChild(renderer.domElement);
