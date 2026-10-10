@@ -7,9 +7,9 @@ export interface GeminiConfig {
 }
 
 export const DEFAULT_GEMINI_CONFIG: GeminiConfig = {
-  apiKey: '56ac8711b49a4d7db9cf4edffd3fc215',
+  apiKey: 'sk-wTdKu3XLWeAsvmaXr',
   baseUrl: 'http://127.0.0.1:8317',
-  model: 'gpt-image-2.5',
+  model: 'gemini-3.1-flash-image',
 };
 
 export const GOOGLE_OFFICIAL_CONFIG: GeminiConfig = {
@@ -32,17 +32,16 @@ export function getStoredGeminiConfig(): GeminiConfig {
           apiKey: parsed.apiKey || DEFAULT_GEMINI_CONFIG.apiKey,
         };
       }
-      // If using local 8317 proxy but invalid model was left, fix to gpt-image-2.5
-      if (
-        parsed.baseUrl.includes('8317') &&
-        (parsed.model?.includes('gemini') || parsed.model?.includes('imagen'))
-      ) {
-        return {
-          ...parsed,
-          model: 'gpt-image-2.5',
-        };
-      }
-      return { ...DEFAULT_GEMINI_CONFIG, ...parsed };
+      // Migrate from stale dummy key
+      const activeKey =
+        !parsed.apiKey || parsed.apiKey === '56ac8711b49a4d7db9cf4edffd3fc215'
+          ? DEFAULT_GEMINI_CONFIG.apiKey
+          : parsed.apiKey;
+      return {
+        ...DEFAULT_GEMINI_CONFIG,
+        ...parsed,
+        apiKey: activeKey,
+      };
     }
   } catch {
     // fallback
@@ -148,7 +147,7 @@ export async function testProxyConnection(config: GeminiConfig): Promise<{
     return {
       success: true,
       models,
-      message: `Connected! ${models.length} models detected (Recommended: gpt-image-2.5).`,
+      message: `Connected! ${models.length} models detected (Recommended: gemini-3.1-flash-image / gpt-image-2.5).`,
     };
   } catch (err: unknown) {
     return {
@@ -226,17 +225,96 @@ export async function generateWithGemini(
   let rawImageUrl: string | null = null;
 
   if (!isGoogleDirect) {
-    // 1. Standard OpenAI-compatible /v1/images/generations (used by 8317 cli-proxy-api, One-API, etc.)
-    const endpoint = normalizedBase.endsWith('/v1')
-      ? `${normalizedBase}/images/generations`
-      : `${normalizedBase}/v1/images/generations`;
+    const isGeminiChatImage = model.toLowerCase().includes('gemini');
 
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-    };
-    if (apiKey) {
-      headers['Authorization'] = `Bearer ${apiKey}`;
-    }
+    if (isGeminiChatImage) {
+      // 8317 CLIProxyAPI serves gemini-3.1-flash-image via /v1/chat/completions
+      // and returns images in choices[0].message.images[0].image_url.url
+      const chatEndpoint = normalizedBase.endsWith('/v1')
+        ? `${normalizedBase}/chat/completions`
+        : `${normalizedBase}/v1/chat/completions`;
+
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      if (apiKey) {
+        headers['Authorization'] = `Bearer ${apiKey}`;
+      }
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 90000);
+
+      let res: Response;
+      try {
+        res = await fetch(chatEndpoint, {
+          method: 'POST',
+          headers,
+          signal: controller.signal,
+          body: JSON.stringify({
+            model,
+            messages: [
+              {
+                role: 'user',
+                content: prompt,
+              },
+            ],
+          }),
+        });
+      } catch (err: unknown) {
+        clearTimeout(timeoutId);
+        const isAbort = err instanceof Error && err.name === 'AbortError';
+        throw new Error(
+          isAbort
+            ? 'Gemini 图像生成请求超时 (90s)，模型计算时间过长，请稍后重试。'
+            : `无法连接到代理端点 [${chatEndpoint}]: ${err instanceof Error ? err.message : String(err)}`
+        );
+      } finally {
+        clearTimeout(timeoutId);
+      }
+
+      if (!res.ok) {
+        const errText = await res.text();
+        let parsedMsg = errText;
+        try {
+          const json = JSON.parse(errText);
+          parsedMsg = json.error?.message || json.message || errText;
+        } catch {
+          // ignore
+        }
+        throw new Error(`Proxy chat completions error [HTTP ${res.status}]: ${parsedMsg}`);
+      }
+
+      const data = await res.json();
+      const msg = data.choices?.[0]?.message;
+      if (msg?.images && Array.isArray(msg.images) && msg.images[0]?.image_url?.url) {
+        rawImageUrl = msg.images[0].image_url.url;
+      } else if (typeof msg?.content === 'string') {
+        const matchBase64 = msg.content.match(/data:image\/[^;]+;base64,[A-Za-z0-9+/=]+/);
+        if (matchBase64) {
+          rawImageUrl = matchBase64[0];
+        } else {
+          const matchUrl = msg.content.match(/https?:\/\/[^\s"'<>]+\.(?:png|jpg|jpeg|webp)/i);
+          if (matchUrl) {
+            rawImageUrl = matchUrl[0];
+          }
+        }
+      }
+
+      if (!rawImageUrl) {
+        throw new Error(`8317 代理返回的 Gemini 消息中未包含图片数据: ${JSON.stringify(msg).slice(0, 200)}`);
+      }
+    } else {
+      // 1. Standard OpenAI-compatible /v1/images/generations (used by 8317 cli-proxy-api, One-API, etc.)
+      const endpoint = normalizedBase.endsWith('/v1')
+        ? `${normalizedBase}/images/generations`
+        : `${normalizedBase}/v1/images/generations`;
+
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      if (apiKey) {
+        headers['Authorization'] = `Bearer ${apiKey}`;
+      }
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 90000); // 90s timeout for image diffusion
@@ -328,8 +406,9 @@ export async function generateWithGemini(
     if (!rawImageUrl) {
       throw new Error(`No image data received from proxy. Response: ${JSON.stringify(data).slice(0, 160)}`);
     }
-  } else {
-    // 2. Google Native Imagen API format:
+  }
+} else {
+  // 2. Google Native Imagen API format:
     // POST https://generativelanguage.googleapis.com/v1beta/models/{model}:predict?key={apiKey}
     const keyParam = apiKey ? `?key=${encodeURIComponent(apiKey)}` : '';
     const googleEndpoint = `${normalizedBase}/v1beta/models/${model}:predict${keyParam}`;

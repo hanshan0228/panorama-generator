@@ -135,7 +135,7 @@ export function GeneratorTab({
     saveStoredGeminiConfig(DEFAULT_GEMINI_CONFIG);
     setTestConnResult({
       success: true,
-      message: '已载入本地 8317 代理推荐配置 (gpt-image-2.5)！',
+      message: '已载入本地 8317 推荐配置 (gemini-3.1-flash-image)！支持谷歌大模型直接生图。',
     });
   };
 
@@ -409,7 +409,7 @@ export function GeneratorTab({
                   <span className="text-[10px] text-cyan-300/70 font-semibold">推荐模型:</span>
                   {(geminiConfig.baseUrl.includes('googleapis.com')
                     ? ['imagen-3.0-generate-002', 'imagen-3.0-fast-generate-001']
-                    : ['gpt-image-2.5', 'gpt-image-2', 'grok-imagine-image-2.0']
+                    : ['gemini-3.1-flash-image', 'gpt-image-2.5', 'grok-imagine-image-2.0']
                   ).map((m) => (
                     <button
                       key={m}
