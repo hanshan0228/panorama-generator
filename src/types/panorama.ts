@@ -87,7 +87,8 @@ export type ActiveTab =
   | 'landing-skybox'
   | 'landing-photo360'
   | 'landing-cubemap'
-  | 'landing-metadata';
+  | 'landing-metadata'
+  | 'landing-video';
 
 export interface ModelEndpointConfig {
   id: string;

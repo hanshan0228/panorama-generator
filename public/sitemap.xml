@@ -67,4 +67,15 @@
       <image:caption>Embed Google PhotoSphere XMP GPano tags into panoramic JPEG files</image:caption>
     </image:image>
   </url>
+  <url>
+    <loc>https://panoramagenerator.ai/360-photo-to-video/</loc>
+    <lastmod>2026-10-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://panoramagenerator.ai/og-preview.svg</image:loc>
+      <image:title>360 Photo to Video Converter for TikTok, Reels and YouTube</image:title>
+      <image:caption>Convert 360 panoramas into smooth orbital rotation videos with horizontal panning and elevation wave</image:caption>
+    </image:image>
+  </url>
 </urlset>

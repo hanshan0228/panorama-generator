@@ -17,8 +17,9 @@ import {
   Sun,
   Gamepad2,
   Camera,
+  Film,
 } from 'lucide-react';
-import type { ActiveTab } from './types/panorama';
+import type { ActiveTab, StylePresetId } from './types/panorama';
 import { GeneratorTab } from './components/GeneratorTab';
 import { ViewerTab } from './components/ViewerTab';
 import { CubemapTab } from './components/CubemapTab';
@@ -32,6 +33,7 @@ import { SkyboxGeneratorPage } from './components/landing/SkyboxGeneratorPage';
 import { PhotoTo360Page } from './components/landing/PhotoTo360Page';
 import { CubemapGeneratorPage } from './components/landing/CubemapGeneratorPage';
 import { MetadataInjectorPage } from './components/landing/MetadataInjectorPage';
+import { PhotoToVideoPage } from './components/landing/PhotoToVideoPage';
 
 function getInitialTabFromLocation(): ActiveTab {
   if (typeof window === 'undefined') return 'generator';
@@ -43,6 +45,7 @@ function getInitialTabFromLocation(): ActiveTab {
   if (path.includes('photo-to-360-converter') || hash.includes('photo-to-360-converter')) return 'landing-photo360';
   if (path.includes('cubemap-generator') || hash.includes('cubemap-generator')) return 'landing-cubemap';
   if (path.includes('360-metadata-injector') || hash.includes('360-metadata-injector')) return 'landing-metadata';
+  if (path.includes('360-photo-to-video') || hash.includes('360-photo-to-video')) return 'landing-video';
   if (path.includes('viewer') || hash.includes('viewer')) return 'viewer';
   if (path.includes('cubemap') || hash.includes('cubemap')) return 'cubemap';
   if (path.includes('globe') || hash.includes('globe')) return 'globe';
@@ -57,6 +60,8 @@ export function App() {
   const [isToolsDropdownOpen, setIsToolsDropdownOpen] = useState(false);
   const [generatorInputMode, setGeneratorInputMode] = useState<'text' | 'image'>('text');
   const [isMetadataModalOpen, setIsMetadataModalOpen] = useState(false);
+  const [studioPresetPrompt, setStudioPresetPrompt] = useState<string | undefined>(undefined);
+  const [studioPresetStyle, setStudioPresetStyle] = useState<StylePresetId | undefined>(undefined);
   const toolsDropdownRef = useRef<HTMLDivElement>(null);
   const closeTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -111,6 +116,10 @@ export function App() {
         title: 'Free 360° Photo Metadata Injector | Facebook & Google Street View Ready',
         desc: 'Embed official Google PhotoSphere XMP and EXIF metadata into any equirectangular JPG image directly in your browser. Fix flat panorama upload issues instantly.',
       },
+      'landing-video': {
+        title: '360 Photo to Video Converter | Create Rotating 360° Videos for TikTok & YouTube',
+        desc: 'Convert 360° equirectangular panoramas and spherical photos into cinematic rotation videos for social media. Export MP4 in 16:9 widescreen, 9:16 vertical, or 1:1 square.',
+      },
     };
 
     const target = tabSeoMap[activeTab] || tabSeoMap.generator;
@@ -128,6 +137,7 @@ export function App() {
         'landing-photo360': 'photo-to-360-converter/',
         'landing-cubemap': 'cubemap-generator/',
         'landing-metadata': '360-metadata-injector/',
+        'landing-video': '360-photo-to-video/',
       };
       const slug = slugMap[activeTab] || '';
       canonicalLink.setAttribute('href', `https://panoramagenerator.ai/${slug}`);
@@ -155,6 +165,7 @@ export function App() {
         case 'landing-photo360': return '/photo-to-360-converter/';
         case 'landing-cubemap': return '/cubemap-generator/';
         case 'landing-metadata': return '/360-metadata-injector/';
+        case 'landing-video': return '/360-photo-to-video/';
         case 'generator': return '/';
         case 'viewer': return '/#viewer';
         case 'cubemap': return '/#cubemap';
@@ -515,6 +526,25 @@ export function App() {
                           <div className="text-[10px] text-cyan-300/60">PhotoSphere Facebook tagger</div>
                         </div>
                       </button>
+
+                      <button
+                        type="button"
+                        onClick={() => navigateTo('landing-video', '/360-photo-to-video/')}
+                        className="w-full px-2.5 py-1.5 rounded-xl hover:bg-cyan-950/80 hover:border hover:border-cyan-500/30 text-left flex items-center gap-2.5 text-xs text-white transition-all cursor-pointer group"
+                      >
+                        <div className="p-1.5 rounded-lg bg-purple-500/15 text-purple-400 group-hover:bg-purple-500/30 group-hover:text-purple-200 transition-colors">
+                          <Film className="w-3.5 h-3.5" />
+                        </div>
+                        <div>
+                          <div className="font-semibold text-xs flex items-center gap-1.5 text-white group-hover:text-purple-200 transition-colors">
+                            <span>360° Photo to Video</span>
+                            <span className="text-[9px] px-1 py-0.2 bg-purple-400/25 text-purple-300 rounded font-mono font-bold">
+                              MP4
+                            </span>
+                          </div>
+                          <div className="text-[10px] text-cyan-300/60">TikTok &amp; YouTube rotation animator</div>
+                        </div>
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -622,6 +652,8 @@ export function App() {
             onNavigateTab={navigateTo}
             externalInputMode={generatorInputMode}
             onInputModeChange={setGeneratorInputMode}
+            externalPrompt={studioPresetPrompt}
+            externalStyle={studioPresetStyle}
           />
         )}
         {activeTab === 'viewer' && (
@@ -644,19 +676,10 @@ export function App() {
         {activeTab === 'landing-hdri' && (
           <AiHdriGeneratorPage
             onLaunchStudio={(presetPrompt) => {
-              navigateTo('generator', '/');
+              if (presetPrompt) setStudioPresetPrompt(presetPrompt);
+              setStudioPresetStyle('nature');
               setGeneratorInputMode('text');
-              if (presetPrompt) {
-                setTimeout(() => {
-                  const el = document.getElementById('prompt-input') as HTMLTextAreaElement | null;
-                  if (el) {
-                    el.value = presetPrompt;
-                    el.dispatchEvent(new Event('input', { bubbles: true }));
-                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    el.focus();
-                  }
-                }, 100);
-              }
+              navigateTo('generator', '/');
             }}
             onOpenCubemap={() => navigateTo('cubemap', '/#cubemap')}
           />
@@ -664,19 +687,10 @@ export function App() {
         {activeTab === 'landing-skybox' && (
           <SkyboxGeneratorPage
             onLaunchStudio={(presetPrompt) => {
-              navigateTo('generator', '/');
+              if (presetPrompt) setStudioPresetPrompt(presetPrompt);
+              setStudioPresetStyle('space');
               setGeneratorInputMode('text');
-              if (presetPrompt) {
-                setTimeout(() => {
-                  const el = document.getElementById('prompt-input') as HTMLTextAreaElement | null;
-                  if (el) {
-                    el.value = presetPrompt;
-                    el.dispatchEvent(new Event('input', { bubbles: true }));
-                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    el.focus();
-                  }
-                }, 100);
-              }
+              navigateTo('generator', '/');
             }}
             onOpenCubemap={() => navigateTo('cubemap', '/#cubemap')}
           />
@@ -703,6 +717,11 @@ export function App() {
         )}
         {activeTab === 'landing-metadata' && (
           <MetadataInjectorPage
+            onLaunchStudio={() => navigateTo('generator', '/')}
+          />
+        )}
+        {activeTab === 'landing-video' && (
+          <PhotoToVideoPage
             onLaunchStudio={() => navigateTo('generator', '/')}
           />
         )}
@@ -810,6 +829,16 @@ export function App() {
                   >
                     <span>360° Metadata Injector</span>
                     <span className="text-[9px] font-mono px-1 rounded bg-blue-400/20 text-blue-300">XMP</span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/360-photo-to-video/"
+                    onClick={(e) => { e.preventDefault(); navigateTo('landing-video', '/360-photo-to-video/'); }}
+                    className="hover:text-cyan-300 transition-colors cursor-pointer flex items-center justify-between"
+                  >
+                    <span>360° Photo to Video</span>
+                    <span className="text-[9px] font-mono px-1 rounded bg-purple-400/20 text-purple-300">MP4</span>
                   </a>
                 </li>
               </ul>

@@ -22,6 +22,7 @@ import {
   Star,
   ShieldCheck,
   RotateCcw,
+  Film,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import type { ActiveTab, StylePreset, StylePresetId, ResolutionTier } from '../types/panorama';
@@ -46,6 +47,7 @@ import { HowItWorksSteps } from './commercial/HowItWorksSteps';
 import { IntegrationBadges } from './commercial/IntegrationBadges';
 import { TestimonialsSection } from './commercial/TestimonialsSection';
 import { CommercialFaq } from './commercial/CommercialFaq';
+import { PhotoToVideoModal } from './commercial/PhotoToVideoModal';
 import { exportVrReadyJpegBlob } from '../utils/xmpInjector';
 import { healPanoramaSeam } from '../utils/seamHealer';
 import { enhanceAndUpscalePanorama } from '../utils/imageEnhancer';
@@ -56,6 +58,8 @@ interface GeneratorTabProps {
   onNavigateTab: (tab: ActiveTab) => void;
   externalInputMode?: 'text' | 'image';
   onInputModeChange?: (mode: 'text' | 'image') => void;
+  externalPrompt?: string;
+  externalStyle?: StylePresetId;
 }
 
 const STYLE_PRESETS: StylePreset[] = [
@@ -152,6 +156,8 @@ export function GeneratorTab({
   onNavigateTab,
   externalInputMode,
   onInputModeChange,
+  externalPrompt,
+  externalStyle,
 }: GeneratorTabProps) {
   const [inputMode, setInputMode] = useState<'text' | 'image'>(externalInputMode || 'text');
 
@@ -169,10 +175,24 @@ export function GeneratorTab({
     'futuristic cyberpunk city at night, neon holograms, rain reflections, volumetric fog, 8k equirectangular 360 panorama'
   );
   const [selectedStyle, setSelectedStyle] = useState<StylePresetId>('cyberpunk');
+
+  useEffect(() => {
+    if (externalPrompt) {
+      setPrompt(externalPrompt);
+    }
+  }, [externalPrompt]);
+
+  useEffect(() => {
+    if (externalStyle) {
+      setSelectedStyle(externalStyle);
+    }
+  }, [externalStyle]);
+
   const [resolution, setResolution] = useState<ResolutionTier>('2K');
   const [seamCorrection, setSeamCorrection] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationProgress, setGenerationProgress] = useState(0);
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
 
   // Reference photos state for Image-to-Pano mode (Benchmarked from panoramagenerator.com)
   const [referenceImages, setReferenceImages] = useState<Array<{ id: string; name: string; preview: string }>>([]);
@@ -1228,7 +1248,7 @@ export function GeneratorTab({
           </div>
 
           {/* Multi-Format Export Action Bar */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
             <button
               type="button"
               onClick={handleDownloadPng}
@@ -1278,6 +1298,23 @@ export function GeneratorTab({
               </div>
               <div className="text-xs font-bold text-white">Export .HDR</div>
               <div className="text-[10px] text-cyan-300/60 mt-0.5">For Blender &amp; Unreal</div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setIsVideoModalOpen(true)}
+              className="glass-card p-3.5 rounded-2xl text-left cursor-pointer group hover:border-purple-400/50 transition-all"
+            >
+              <div className="flex items-center justify-between mb-2 text-purple-400 group-hover:text-purple-300">
+                <div className="p-1.5 bg-purple-500/15 rounded-lg group-hover:scale-110 transition-transform">
+                  <Film className="w-4 h-4" />
+                </div>
+                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-purple-950/60 text-purple-300 font-bold border border-purple-500/20">
+                  MP4
+                </span>
+              </div>
+              <div className="text-xs font-bold text-white">Export Video</div>
+              <div className="text-[10px] text-cyan-300/60 mt-0.5">360° Orbit Animation</div>
             </button>
 
             <button
@@ -1350,6 +1387,13 @@ export function GeneratorTab({
 
       {/* 8. Comprehensive FAQ Accordion */}
       <CommercialFaq />
+
+      {/* 360 Photo-to-Video Animation Modal */}
+      <PhotoToVideoModal
+        isOpen={isVideoModalOpen}
+        onClose={() => setIsVideoModalOpen(false)}
+        currentPanoramaUrl={currentPanoramaUrl}
+      />
     </div>
   );
 }

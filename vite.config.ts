@@ -19,6 +19,7 @@ export default defineConfig({
         photo360: resolve(import.meta.dirname, 'photo-to-360-converter/index.html'),
         cubemap: resolve(import.meta.dirname, 'cubemap-generator/index.html'),
         metadata: resolve(import.meta.dirname, '360-metadata-injector/index.html'),
+        video: resolve(import.meta.dirname, '360-photo-to-video/index.html'),
       },
     },
   },
