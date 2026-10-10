@@ -164,19 +164,19 @@ export async function testProxyConnection(config: GeminiConfig): Promise<{
  */
 const SAFETY_REPLACEMENTS: Array<{ pattern: RegExp; replacement: string }> = [
   {
-    pattern: /宫崎骏(风格)?|吉卜力(工作室)?|hayao\s*miyazaki|studio\s*ghibli/gi,
+    pattern: /hayao\s*miyazaki|studio\s*ghibli/gi,
     replacement: 'Japanese anime hand-drawn watercolor aesthetic, nostalgic summer breeze, lush green grass, fluffy white clouds, warm natural sunlight',
   },
   {
-    pattern: /新海诚(风格)?|makoto\s*shinkai/gi,
+    pattern: /makoto\s*shinkai/gi,
     replacement: 'vibrant atmospheric anime cinematic lighting, detailed cumulus clouds, high-contrast emotional sky',
   },
   {
-    pattern: /迪士尼(风格)?|disney(\s*animation)?/gi,
+    pattern: /disney(\s*animation)?/gi,
     replacement: '3D stylized animation cinematic render, magical atmosphere, rich volumetric light',
   },
   {
-    pattern: /皮克斯(风格)?|pixar(\s*animation)?/gi,
+    pattern: /pixar(\s*animation)?/gi,
     replacement: '3D animated feature film render, soft subsurface scattering, vibrant colors',
   },
 ];
