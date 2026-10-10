@@ -1,9 +1,34 @@
-import { useState } from 'react';
-import { Check, Sparkles, Zap, Shield, ChevronDown, ChevronUp } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Check, Sparkles, Zap, Shield, ChevronDown, ChevronUp, User } from 'lucide-react';
+import type { ManagedUser } from '../types/panorama';
+import { getCurrentUser } from '../utils/adminStorage';
+import { CheckoutModal } from './commercial/CheckoutModal';
 
 export function PricingTab() {
   const [billingCycle, setBillingCycle] = useState<'yearly' | 'monthly'>('yearly');
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
+
+  // Current session user state
+  const [currentUser, setCurrentUser] = useState<ManagedUser>(() => getCurrentUser());
+
+  // Checkout modal state
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [checkoutInitialPlan, setCheckoutInitialPlan] = useState<'pro' | 'enterprise'>('pro');
+
+  useEffect(() => {
+    const handleFocus = () => setCurrentUser(getCurrentUser());
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, []);
+
+  const handleOpenCheckout = (plan: 'pro' | 'enterprise') => {
+    setCheckoutInitialPlan(plan);
+    setIsCheckoutOpen(true);
+  };
+
+  const handleCheckoutSuccess = (updatedUser: ManagedUser) => {
+    setCurrentUser(updatedUser);
+  };
 
   const FAQS = [
     {
@@ -24,6 +49,9 @@ export function PricingTab() {
     },
   ];
 
+  const isPro = currentUser.plan === 'pro';
+  const isEnterprise = currentUser.plan === 'enterprise';
+
   return (
     <div className="space-y-12 max-w-5xl mx-auto">
       {/* Title & Billing Toggle */}
@@ -39,30 +67,45 @@ export function PricingTab() {
           From indie game creators to commercial architectural visualization studios, pick the plan that fits your production pipeline.
         </p>
 
+        {/* Current Account Status Pill */}
+        <div className="inline-flex items-center gap-2 px-3 py-1 bg-slate-900/80 border border-slate-700/80 rounded-xl text-xs text-slate-300">
+          <User className="w-3.5 h-3.5 text-cyan-400" />
+          <span>
+            Signed in as: <strong className="text-white">{currentUser.name}</strong> ({currentUser.email})
+          </span>
+          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 uppercase font-bold">
+            {currentUser.plan} Plan
+          </span>
+          <span className="text-slate-500">·</span>
+          <span className="text-amber-300 font-mono font-bold">{currentUser.creditsBalance} credits left</span>
+        </div>
+
         {/* Yearly vs Monthly Toggle */}
-        <div className="inline-flex items-center gap-1.5 p-1.5 bg-[#030e20] border border-cyan-500/25 rounded-2xl text-xs shadow-inner">
-          <button
-            type="button"
-            onClick={() => setBillingCycle('yearly')}
-            className={`px-4 py-2 rounded-xl font-bold transition-all cursor-pointer ${
-              billingCycle === 'yearly'
-                ? 'bg-gradient-to-r from-cyan-400 to-blue-600 text-slate-950 shadow-md shadow-cyan-400/30'
-                : 'text-cyan-200/60 hover:text-white'
-            }`}
-          >
-            Annual Billing <span className="text-[10px] text-cyan-300 font-extrabold ml-1.5 px-1.5 py-0.5 bg-cyan-950/80 rounded-full border border-cyan-400/40">Save 50%</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setBillingCycle('monthly')}
-            className={`px-4 py-2 rounded-xl font-bold transition-all cursor-pointer ${
-              billingCycle === 'monthly'
-                ? 'bg-gradient-to-r from-cyan-400 to-blue-600 text-slate-950 shadow-md shadow-cyan-400/30'
-                : 'text-cyan-200/60 hover:text-white'
-            }`}
-          >
-            Monthly Billing
-          </button>
+        <div className="flex items-center justify-center mt-2">
+          <div className="inline-flex items-center gap-1.5 p-1.5 bg-[#030e20] border border-cyan-500/25 rounded-2xl text-xs shadow-inner">
+            <button
+              type="button"
+              onClick={() => setBillingCycle('yearly')}
+              className={`px-4 py-2 rounded-xl font-bold transition-all cursor-pointer ${
+                billingCycle === 'yearly'
+                  ? 'bg-gradient-to-r from-cyan-400 to-blue-600 text-slate-950 shadow-md shadow-cyan-400/30'
+                  : 'text-cyan-200/60 hover:text-white'
+              }`}
+            >
+              Annual Billing <span className="text-[10px] text-cyan-300 font-extrabold ml-1.5 px-1.5 py-0.5 bg-cyan-950/80 rounded-full border border-cyan-400/40">Save 50%</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setBillingCycle('monthly')}
+              className={`px-4 py-2 rounded-xl font-bold transition-all cursor-pointer ${
+                billingCycle === 'monthly'
+                  ? 'bg-gradient-to-r from-cyan-400 to-blue-600 text-slate-950 shadow-md shadow-cyan-400/30'
+                  : 'text-cyan-200/60 hover:text-white'
+              }`}
+            >
+              Monthly Billing
+            </button>
+          </div>
         </div>
       </div>
 
@@ -73,7 +116,7 @@ export function PricingTab() {
           <div className="space-y-4">
             <div>
               <div className="text-sm font-bold text-cyan-200">Free Explorer</div>
-              <div className="text-xs text-cyan-400/60 mt-0.5">For personal exploration & 360° viewing</div>
+              <div className="text-xs text-cyan-400/60 mt-0.5">For personal exploration &amp; 360° viewing</div>
             </div>
             <div className="flex items-baseline gap-1">
               <span className="text-4xl font-black text-white">$0</span>
@@ -84,7 +127,7 @@ export function PricingTab() {
                 <div className="p-1 rounded-full bg-cyan-400/20 text-cyan-300">
                   <Check className="w-3 h-3" />
                 </div>
-                <span>3 Free AI Panorama Generations</span>
+                <span>50 AI Generation Credits</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <div className="p-1 rounded-full bg-cyan-400/20 text-cyan-300">
@@ -96,7 +139,7 @@ export function PricingTab() {
                 <div className="p-1 rounded-full bg-cyan-400/20 text-cyan-300">
                   <Check className="w-3 h-3" />
                 </div>
-                <span>Cubemap Slicer (256px)</span>
+                <span>Cubemap Slicer (256px - 1024px)</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <div className="p-1 rounded-full bg-cyan-400/20 text-cyan-300">
@@ -109,9 +152,10 @@ export function PricingTab() {
 
           <button
             type="button"
-            className="w-full py-3 bg-cyan-950/40 hover:bg-cyan-900/50 text-cyan-200 font-bold text-xs rounded-xl border border-cyan-500/25 transition-colors cursor-pointer"
+            disabled={currentUser.plan === 'free'}
+            className="w-full py-3 bg-cyan-950/40 text-cyan-200/80 font-bold text-xs rounded-xl border border-cyan-500/25 transition-colors disabled:opacity-50"
           >
-            Current Plan
+            {currentUser.plan === 'free' ? 'Current Active Plan' : 'Downgrade to Free'}
           </button>
         </div>
 
@@ -127,7 +171,7 @@ export function PricingTab() {
                 <Sparkles className="w-4 h-4 text-cyan-400 fill-current" />
                 <span>Pro Creator</span>
               </div>
-              <div className="text-xs text-cyan-200/80 mt-0.5">Designed for indie game devs & 3D artists</div>
+              <div className="text-xs text-cyan-200/80 mt-0.5">Designed for indie game devs &amp; 3D artists</div>
             </div>
             <div className="flex items-baseline gap-1">
               <span className="text-4xl font-black text-white">
@@ -140,13 +184,13 @@ export function PricingTab() {
                 <div className="p-1 rounded-full bg-cyan-400 text-slate-950 font-bold shadow-sm">
                   <Check className="w-3 h-3 stroke-[3]" />
                 </div>
-                <span>Monthly <strong>150 Fast Generations</strong></span>
+                <span>Monthly <strong>1,000 High-Speed AI Generations</strong></span>
               </li>
               <li className="flex items-center gap-2.5">
                 <div className="p-1 rounded-full bg-cyan-400 text-slate-950 font-bold shadow-sm">
                   <Check className="w-3 h-3 stroke-[3]" />
                 </div>
-                <span><strong>2K & 4K Ultra HD</strong> Lossless Panoramas</span>
+                <span><strong>2K &amp; 4K Ultra HD</strong> Lossless Panoramas</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <div className="p-1 rounded-full bg-cyan-400 text-slate-950 font-bold shadow-sm">
@@ -171,9 +215,10 @@ export function PricingTab() {
 
           <button
             type="button"
+            onClick={() => handleOpenCheckout('pro')}
             className="shimmer-btn w-full py-3.5 bg-gradient-to-r from-cyan-400 via-teal-300 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 font-black text-xs rounded-xl shadow-lg shadow-cyan-400/40 transition-all cursor-pointer active:scale-95 tracking-wide"
           >
-            Upgrade to Pro
+            {isPro ? 'Manage / Renew Pro' : isEnterprise ? 'Switch to Pro' : 'Upgrade to Pro'}
           </button>
         </div>
 
@@ -183,9 +228,9 @@ export function PricingTab() {
             <div>
               <div className="text-sm font-bold text-cyan-200 flex items-center gap-1.5">
                 <Zap className="w-4 h-4 text-cyan-400 fill-current" />
-                <span>Studio & Enterprise</span>
+                <span>Studio &amp; Enterprise</span>
               </div>
-              <div className="text-xs text-cyan-400/60 mt-0.5">For creative studios & pipeline integration</div>
+              <div className="text-xs text-cyan-400/60 mt-0.5">For creative studios &amp; pipeline integration</div>
             </div>
             <div className="flex items-baseline gap-1">
               <span className="text-4xl font-black text-white">
@@ -198,7 +243,7 @@ export function PricingTab() {
                 <div className="p-1 rounded-full bg-cyan-400/20 text-cyan-300">
                   <Check className="w-3 h-3" />
                 </div>
-                <span>Monthly <strong>500 Concurrent Generations</strong></span>
+                <span>Monthly <strong>5,000 High-Volume Generations</strong></span>
               </li>
               <li className="flex items-center gap-2.5">
                 <div className="p-1 rounded-full bg-cyan-400/20 text-cyan-300">
@@ -210,7 +255,7 @@ export function PricingTab() {
                 <div className="p-1 rounded-full bg-cyan-400/20 text-cyan-300">
                   <Check className="w-3 h-3" />
                 </div>
-                <span>Batch Processing & Priority Support</span>
+                <span>Batch Processing &amp; Priority Support</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <div className="p-1 rounded-full bg-cyan-400/20 text-cyan-300">
@@ -223,9 +268,10 @@ export function PricingTab() {
 
           <button
             type="button"
+            onClick={() => handleOpenCheckout('enterprise')}
             className="w-full py-3 bg-cyan-950/40 hover:bg-cyan-900/50 text-cyan-200 font-bold text-xs rounded-xl border border-cyan-500/25 transition-colors cursor-pointer"
           >
-            Get Started with Studio
+            {isEnterprise ? 'Current Active Plan' : 'Get Started with Studio'}
           </button>
         </div>
       </div>
@@ -234,7 +280,7 @@ export function PricingTab() {
       <div className="space-y-4 pt-6 border-t border-cyan-500/20">
         <h2 className="text-lg font-black text-white text-center flex items-center justify-center gap-2">
           <Shield className="w-4 h-4 text-cyan-400" />
-          Frequently Asked Questions
+          <span>Frequently Asked Questions</span>
         </h2>
 
         <div className="space-y-3 max-w-2xl mx-auto">
@@ -267,6 +313,15 @@ export function PricingTab() {
           })}
         </div>
       </div>
+
+      {/* Checkout Modal */}
+      <CheckoutModal
+        isOpen={isCheckoutOpen}
+        onClose={() => setIsCheckoutOpen(false)}
+        initialPlan={checkoutInitialPlan}
+        initialCycle={billingCycle}
+        onSuccess={handleCheckoutSuccess}
+      />
     </div>
   );
 }

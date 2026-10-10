@@ -14,9 +14,19 @@ export function GlobeViewer({ textureUrl, className = '' }: GlobeViewerProps) {
   const animFrameIdRef = useRef<number | null>(null);
 
   const [isRotating, setIsRotating] = useState(true);
+  const isRotatingRef = useRef(isRotating);
   const [rotationSpeed, setRotationSpeed] = useState(0.005);
+  const rotationSpeedRef = useRef(rotationSpeed);
   const [wireframe, setWireframe] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    isRotatingRef.current = isRotating;
+  }, [isRotating]);
+
+  useEffect(() => {
+    rotationSpeedRef.current = rotationSpeed;
+  }, [rotationSpeed]);
 
   // Drag interaction
   const isDraggingRef = useRef(false);
@@ -80,8 +90,8 @@ export function GlobeViewer({ textureUrl, className = '' }: GlobeViewerProps) {
     const animate = () => {
       animFrameIdRef.current = requestAnimationFrame(animate);
 
-      if (isRotating && !isDraggingRef.current) {
-        globe.rotation.y += rotationSpeed;
+      if (isRotatingRef.current && !isDraggingRef.current) {
+        globe.rotation.y += rotationSpeedRef.current;
       }
 
       renderer.render(scene, camera);

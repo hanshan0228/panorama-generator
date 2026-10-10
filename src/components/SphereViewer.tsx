@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, memo } from 'react';
 import * as THREE from 'three';
 import {
   Camera,
@@ -35,7 +35,7 @@ interface SphereViewerProps {
   onRemoveHotspot?: (id: string) => void;
 }
 
-export function SphereViewer({
+export const SphereViewer = memo(function SphereViewer({
   textureUrl,
   projectionMode = 'sphere',
   initialFov = 75,
@@ -54,17 +54,22 @@ export function SphereViewer({
 
   // Interaction & visual state
   const [isAutoRotating, setIsAutoRotating] = useState(false);
+  const isAutoRotatingRef = useRef(isAutoRotating);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [currentFov, setCurrentFov] = useState(initialFov);
   const [activeMode, setActiveMode] = useState<ViewerProjectionMode>(projectionMode);
   const [exposure, setExposure] = useState(1.1);
+  const exposureRef = useRef(exposure);
   const [contrast, setContrast] = useState(105);
   const [saturation, setSaturation] = useState(110);
   const [showSettingsDrawer, setShowSettingsDrawer] = useState(false);
 
+  useEffect(() => {
+    isAutoRotatingRef.current = isAutoRotating;
+  }, [isAutoRotating]);
+
   // Gyroscope & VR state
   const [isGyroActive, setIsGyroActive] = useState(false);
-  const [gyroAvailable, setGyroAvailable] = useState(false);
+  const [gyroAvailable] = useState(() => typeof window !== 'undefined' && 'DeviceOrientationEvent' in window);
   const gyroAlphaRef = useRef<number | null>(null);
   const gyroBetaRef = useRef<number | null>(null);
   const gyroGammaRef = useRef<number | null>(null);
@@ -76,6 +81,12 @@ export function SphereViewer({
   const [newHotspotTitle, setNewHotspotTitle] = useState('');
   const [newHotspotDesc, setNewHotspotDesc] = useState('');
   const [pendingHotspotCoords, setPendingHotspotCoords] = useState<{ lon: number; lat: number } | null>(null);
+  const hotspotsRef = useRef(hotspots);
+  const hotspotElementsRef = useRef<Map<string, HTMLDivElement>>(new Map());
+
+  useEffect(() => {
+    hotspotsRef.current = hotspots;
+  }, [hotspots]);
 
   // Ambient Soundscape state
   const [ambientSound, setAmbientSound] = useState<AmbientSoundType>('none');
@@ -90,6 +101,10 @@ export function SphereViewer({
   // Smooth FOV zoom damping
   const targetFovRef = useRef<number>(initialFov);
   const currentFovRef = useRef<number>(initialFov);
+
+  // Performance & DOM Dirty-checking tracking refs
+  const lastHeadingTextRef = useRef('');
+  const lastFrustumStateRef = useRef('');
 
   // High-fidelity Momentum & Fling Tracking
   const isUserInteractingRef = useRef(false);
@@ -114,10 +129,21 @@ export function SphereViewer({
   // Keyboard navigation keys state
   const keysPressedRef = useRef<{ [key: string]: boolean }>({});
 
-  // Sync mode with props
-  useEffect(() => {
-    setActiveMode(projectionMode);
-  }, [projectionMode]);
+  const hotspotsAvailable = activeMode !== 'vr-cardboard' && activeMode !== 'little-planet';
+  function selectProjectionMode(mode: ViewerProjectionMode): void {
+    setActiveMode(mode);
+    if (mode === 'vr-cardboard' || mode === 'little-planet') {
+      setIsAddingHotspotMode(false);
+      setPendingHotspotCoords(null);
+    }
+  }
+
+  // Sync mode with props during render
+  const [prevPropMode, setPrevPropMode] = useState(projectionMode);
+  if (projectionMode !== prevPropMode) {
+    setPrevPropMode(projectionMode);
+    selectProjectionMode(projectionMode);
+  }
 
   // Audio lifecycle
   useEffect(() => {
@@ -130,13 +156,6 @@ export function SphereViewer({
       soundEngine.stop();
     };
   }, [ambientSound, isMuted]);
-
-  // Check DeviceOrientation API availability
-  useEffect(() => {
-    if (typeof window !== 'undefined' && 'DeviceOrientationEvent' in window) {
-      setGyroAvailable(true);
-    }
-  }, []);
 
   // Request & listen to Gyroscope
   const toggleGyroscope = async () => {
@@ -203,19 +222,19 @@ export function SphereViewer({
     const scene = new THREE.Scene();
     sceneRef.current = scene;
 
-    const camera = new THREE.PerspectiveCamera(currentFov, width / height, 0.1, 2500);
+    const camera = new THREE.PerspectiveCamera(currentFovRef.current, width / height, 0.1, 2500);
     cameraRef.current = camera;
 
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
-      alpha: true,
+      alpha: false,
       powerPreference: 'high-performance',
       preserveDrawingBuffer: true,
     });
     renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2.5));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
     renderer.toneMapping = THREE.LinearToneMapping;
-    renderer.toneMappingExposure = exposure;
+    renderer.toneMappingExposure = exposureRef.current;
     renderer.autoClear = false;
     container.appendChild(renderer.domElement);
     rendererRef.current = renderer;
@@ -225,9 +244,11 @@ export function SphereViewer({
     texture.colorSpace = THREE.SRGBColorSpace;
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.ClampToEdgeWrapping;
-    texture.generateMipmaps = false;
-    texture.minFilter = THREE.LinearFilter;
+    texture.generateMipmaps = true;
+    texture.minFilter = THREE.LinearMipmapLinearFilter;
     texture.magFilter = THREE.LinearFilter;
+    const maxAnisotropy = renderer.capabilities?.getMaxAnisotropy?.() || 1;
+    texture.anisotropy = Math.min(4, maxAnisotropy);
 
     let geometry: THREE.BufferGeometry;
     let material: THREE.Material;
@@ -238,7 +259,7 @@ export function SphereViewer({
       material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide });
 
       camera.position.set(0, 0, 0);
-      camera.fov = currentFov;
+      camera.fov = currentFovRef.current;
       camera.updateProjectionMatrix();
     } else if (activeMode === 'little-planet') {
       geometry = new THREE.SphereGeometry(300, 96, 64);
@@ -253,13 +274,15 @@ export function SphereViewer({
       material = new THREE.MeshBasicMaterial({ map: texture });
 
       camera.position.set(0, 0, 0);
-      camera.fov = currentFov;
+      camera.fov = currentFovRef.current;
       camera.updateProjectionMatrix();
     }
 
     const mesh = new THREE.Mesh(geometry, material);
     scene.add(mesh);
     displayMeshRef.current = mesh;
+
+    const tempHotspotVec = new THREE.Vector3();
 
     const animate = () => {
       animFrameIdRef.current = requestAnimationFrame(animate);
@@ -271,7 +294,7 @@ export function SphereViewer({
       if (keys['KeyA'] || keys['ArrowLeft']) targetLonRef.current -= 0.8;
       if (keys['KeyD'] || keys['ArrowRight']) targetLonRef.current += 0.8;
 
-      if (isAutoRotating && !isUserInteractingRef.current && !isGyroActive) {
+      if (isAutoRotatingRef.current && !isUserInteractingRef.current && !isGyroActive) {
         targetLonRef.current += 0.08;
       }
 
@@ -297,7 +320,6 @@ export function SphereViewer({
       if (Math.abs(currentFovRef.current - prevFov) > 0.005) {
         camera.fov = currentFovRef.current;
         camera.updateProjectionMatrix();
-        setCurrentFov(Math.round(currentFovRef.current));
       }
 
       if (activeMode === 'little-planet') {
@@ -322,8 +344,10 @@ export function SphereViewer({
       const CARDINALS = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
       const cardIdx = Math.round(normLon / 45) % 8;
       const degRounded = Math.round(normLon);
-      if (minimapHeadingRef.current) {
-        minimapHeadingRef.current.textContent = `${CARDINALS[cardIdx]} · ${degRounded}°`;
+      const headingText = `${CARDINALS[cardIdx]} · ${degRounded}°`;
+      if (minimapHeadingRef.current && lastHeadingTextRef.current !== headingText) {
+        lastHeadingTextRef.current = headingText;
+        minimapHeadingRef.current.textContent = headingText;
       }
 
       if (minimapFrustumRef1.current) {
@@ -342,43 +366,47 @@ export function SphereViewer({
         const leftCenter = (normLon / 360) * 100;
         const startLeft = leftCenter - wPct / 2;
 
-        if (startLeft < 0) {
-          minimapFrustumRef1.current.style.display = 'block';
-          minimapFrustumRef1.current.style.left = `${startLeft + 100}%`;
-          minimapFrustumRef1.current.style.width = `${-startLeft}%`;
-          minimapFrustumRef1.current.style.top = `${topPct}%`;
-          minimapFrustumRef1.current.style.height = `${hPct}%`;
+        const frustumKey = `${startLeft.toFixed(1)}_${topPct.toFixed(1)}_${wPct.toFixed(1)}_${hPct.toFixed(1)}`;
+        if (lastFrustumStateRef.current !== frustumKey) {
+          lastFrustumStateRef.current = frustumKey;
+          if (startLeft < 0) {
+            minimapFrustumRef1.current.style.display = 'block';
+            minimapFrustumRef1.current.style.left = `${startLeft + 100}%`;
+            minimapFrustumRef1.current.style.width = `${-startLeft}%`;
+            minimapFrustumRef1.current.style.top = `${topPct}%`;
+            minimapFrustumRef1.current.style.height = `${hPct}%`;
 
-          if (minimapFrustumRef2.current) {
-            minimapFrustumRef2.current.style.display = 'block';
-            minimapFrustumRef2.current.style.left = '0%';
-            minimapFrustumRef2.current.style.width = `${wPct + startLeft}%`;
-            minimapFrustumRef2.current.style.top = `${topPct}%`;
-            minimapFrustumRef2.current.style.height = `${hPct}%`;
-          }
-        } else if (startLeft + wPct > 100) {
-          minimapFrustumRef1.current.style.display = 'block';
-          minimapFrustumRef1.current.style.left = `${startLeft}%`;
-          minimapFrustumRef1.current.style.width = `${100 - startLeft}%`;
-          minimapFrustumRef1.current.style.top = `${topPct}%`;
-          minimapFrustumRef1.current.style.height = `${hPct}%`;
+            if (minimapFrustumRef2.current) {
+              minimapFrustumRef2.current.style.display = 'block';
+              minimapFrustumRef2.current.style.left = '0%';
+              minimapFrustumRef2.current.style.width = `${wPct + startLeft}%`;
+              minimapFrustumRef2.current.style.top = `${topPct}%`;
+              minimapFrustumRef2.current.style.height = `${hPct}%`;
+            }
+          } else if (startLeft + wPct > 100) {
+            minimapFrustumRef1.current.style.display = 'block';
+            minimapFrustumRef1.current.style.left = `${startLeft}%`;
+            minimapFrustumRef1.current.style.width = `${100 - startLeft}%`;
+            minimapFrustumRef1.current.style.top = `${topPct}%`;
+            minimapFrustumRef1.current.style.height = `${hPct}%`;
 
-          if (minimapFrustumRef2.current) {
-            minimapFrustumRef2.current.style.display = 'block';
-            minimapFrustumRef2.current.style.left = '0%';
-            minimapFrustumRef2.current.style.width = `${wPct - (100 - startLeft)}%`;
-            minimapFrustumRef2.current.style.top = `${topPct}%`;
-            minimapFrustumRef2.current.style.height = `${hPct}%`;
-          }
-        } else {
-          minimapFrustumRef1.current.style.display = 'block';
-          minimapFrustumRef1.current.style.left = `${startLeft}%`;
-          minimapFrustumRef1.current.style.width = `${wPct}%`;
-          minimapFrustumRef1.current.style.top = `${topPct}%`;
-          minimapFrustumRef1.current.style.height = `${hPct}%`;
+            if (minimapFrustumRef2.current) {
+              minimapFrustumRef2.current.style.display = 'block';
+              minimapFrustumRef2.current.style.left = '0%';
+              minimapFrustumRef2.current.style.width = `${wPct - (100 - startLeft)}%`;
+              minimapFrustumRef2.current.style.top = `${topPct}%`;
+              minimapFrustumRef2.current.style.height = `${hPct}%`;
+            }
+          } else {
+            minimapFrustumRef1.current.style.display = 'block';
+            minimapFrustumRef1.current.style.left = `${startLeft}%`;
+            minimapFrustumRef1.current.style.width = `${wPct}%`;
+            minimapFrustumRef1.current.style.top = `${topPct}%`;
+            minimapFrustumRef1.current.style.height = `${hPct}%`;
 
-          if (minimapFrustumRef2.current) {
-            minimapFrustumRef2.current.style.display = 'none';
+            if (minimapFrustumRef2.current) {
+              minimapFrustumRef2.current.style.display = 'none';
+            }
           }
         }
       }
@@ -406,6 +434,41 @@ export function SphereViewer({
         renderer.setViewport(0, 0, curWidth, curHeight);
         renderer.clear();
         renderer.render(scene, camera);
+      }
+
+      // Real-time 3D spatial Hotspots projection to screen space
+      if (activeMode !== 'little-planet' && activeMode !== 'vr-cardboard') {
+        const spotList = hotspotsRef.current;
+        for (let sIdx = 0; sIdx < spotList.length; sIdx++) {
+          const spot = spotList[sIdx];
+          const el = hotspotElementsRef.current.get(spot.id);
+          if (!el) continue;
+          const sPhi = THREE.MathUtils.degToRad(90 - spot.lat);
+          const sTheta = THREE.MathUtils.degToRad(spot.lon);
+          const sx = 500 * Math.sin(sPhi) * Math.cos(sTheta);
+          const sy = 500 * Math.cos(sPhi);
+          const sz = 500 * Math.sin(sPhi) * Math.sin(sTheta);
+          tempHotspotVec.set(sx, sy, sz);
+          tempHotspotVec.project(camera);
+          if (
+            tempHotspotVec.z < 1 &&
+            tempHotspotVec.x >= -1.1 &&
+            tempHotspotVec.x <= 1.1 &&
+            tempHotspotVec.y >= -1.1 &&
+            tempHotspotVec.y <= 1.1
+          ) {
+            const screenX = (tempHotspotVec.x * 0.5 + 0.5) * curWidth;
+            const screenY = (-(tempHotspotVec.y * 0.5) + 0.5) * curHeight;
+            el.style.display = 'block';
+            el.style.transform = `translate3d(${screenX}px, ${screenY}px, 0) translate(-50%, -50%)`;
+          } else {
+            el.style.display = 'none';
+          }
+        }
+      } else {
+        hotspotElementsRef.current.forEach((el) => {
+          el.style.display = 'none';
+        });
       }
     };
 
@@ -438,13 +501,25 @@ export function SphereViewer({
 
   // Keyboard navigation listeners
   useEffect(() => {
+    const isEditingInput = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      return (
+        target &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.isContentEditable)
+      );
+    };
+
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (isEditingInput(e)) return;
       keysPressedRef.current[e.code] = true;
       if (e.code === 'Space') {
         setIsAutoRotating((p) => !p);
       }
     };
     const handleKeyUp = (e: KeyboardEvent) => {
+      if (isEditingInput(e)) return;
       keysPressedRef.current[e.code] = false;
     };
 
@@ -458,12 +533,13 @@ export function SphereViewer({
 
   useEffect(() => {
     if (cameraRef.current && activeMode !== 'little-planet') {
-      cameraRef.current.fov = currentFov;
+      cameraRef.current.fov = currentFovRef.current;
       cameraRef.current.updateProjectionMatrix();
     }
-  }, [currentFov, activeMode]);
+  }, [activeMode]);
 
   useEffect(() => {
+    exposureRef.current = exposure;
     if (rendererRef.current) {
       rendererRef.current.toneMappingExposure = exposure;
     }
@@ -510,13 +586,19 @@ export function SphereViewer({
 
   const handlePointerUp = () => {
     isUserInteractingRef.current = false;
-    // Cap maximum fling velocity to prevent wild runaway rotation
-    const maxVelocity = 3.2;
-    velocityXRef.current = Math.max(-maxVelocity, Math.min(maxVelocity, velocityXRef.current));
-    velocityYRef.current = Math.max(-maxVelocity, Math.min(maxVelocity, velocityYRef.current));
+    const timeSinceLastMove = performance.now() - lastPointerTimeRef.current;
+    if (timeSinceLastMove > 65) {
+      velocityXRef.current = 0;
+      velocityYRef.current = 0;
+    } else {
+      // Cap maximum fling velocity to prevent wild runaway rotation
+      const maxVelocity = 2.8;
+      velocityXRef.current = Math.max(-maxVelocity, Math.min(maxVelocity, velocityXRef.current));
+      velocityYRef.current = Math.max(-maxVelocity, Math.min(maxVelocity, velocityYRef.current));
+    }
 
     // Hotspot click to add in adding mode
-    if (isAddingHotspotMode && onAddHotspot) {
+    if (hotspotsAvailable && isAddingHotspotMode && onAddHotspot) {
       const lon = currentLonRef.current % 360;
       const lat = currentLatRef.current;
       setPendingHotspotCoords({ lon, lat });
@@ -601,7 +683,7 @@ export function SphereViewer({
 
   const handleCreateHotspot = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!pendingHotspotCoords || !onAddHotspot) return;
+    if (!hotspotsAvailable || !pendingHotspotCoords || !onAddHotspot) return;
 
     onAddHotspot({
       id: `spot_${Date.now()}`,
@@ -643,8 +725,14 @@ export function SphereViewer({
         </div>
       )}
 
+      {activeMode === 'vr-cardboard' && onAddHotspot && (
+        <div className="absolute top-14 left-1/2 -translate-x-1/2 z-20 rounded-lg bg-slate-900/90 px-3 py-1 text-[10px] text-slate-300 pointer-events-none">
+          Hotspots are unavailable in VR split-screen mode.
+        </div>
+      )}
+
       {/* Adding Hotspot Overlay Guide */}
-      {isAddingHotspotMode && (
+      {hotspotsAvailable && isAddingHotspotMode && (
         <div className="absolute top-16 left-1/2 -translate-x-1/2 z-30 px-4 py-2 bg-gradient-to-r from-cyan-400 to-teal-300 text-slate-950 font-bold border border-cyan-200 rounded-xl shadow-2xl text-xs flex items-center gap-2 animate-bounce">
           <MapPin className="w-4 h-4 text-slate-950" />
           <span>Rotate view & click canvas to place spatial hotspot</span>
@@ -662,7 +750,7 @@ export function SphereViewer({
       <div className="absolute top-4 left-4 z-20 flex flex-wrap items-center gap-1.5 p-1 bg-slate-900/80 backdrop-blur-md border border-slate-800 rounded-xl text-xs shadow-lg">
         <button
           type="button"
-          onClick={() => setActiveMode('sphere')}
+          onClick={() => selectProjectionMode('sphere')}
           className={`px-2.5 py-1 rounded-lg font-medium flex items-center gap-1 transition-all cursor-pointer ${
             activeMode === 'sphere'
               ? 'bg-gradient-to-r from-cyan-400 to-blue-600 text-slate-950 font-bold shadow-sm shadow-cyan-500/30'
@@ -676,7 +764,7 @@ export function SphereViewer({
 
         <button
           type="button"
-          onClick={() => setActiveMode('curved')}
+          onClick={() => selectProjectionMode('curved')}
           className={`px-2.5 py-1 rounded-lg font-medium flex items-center gap-1 transition-all cursor-pointer ${
             activeMode === 'curved'
               ? 'bg-cyan-600 text-white shadow-sm'
@@ -690,7 +778,7 @@ export function SphereViewer({
 
         <button
           type="button"
-          onClick={() => setActiveMode('little-planet')}
+          onClick={() => selectProjectionMode('little-planet')}
           className={`px-2.5 py-1 rounded-lg font-medium flex items-center gap-1 transition-all cursor-pointer ${
             activeMode === 'little-planet'
               ? 'bg-teal-400 text-slate-950 font-bold shadow-sm shadow-teal-400/30'
@@ -704,7 +792,7 @@ export function SphereViewer({
 
         <button
           type="button"
-          onClick={() => setActiveMode(activeMode === 'vr-cardboard' ? 'sphere' : 'vr-cardboard')}
+          onClick={() => selectProjectionMode(activeMode === 'vr-cardboard' ? 'sphere' : 'vr-cardboard')}
           className={`px-2.5 py-1 rounded-lg font-medium flex items-center gap-1 transition-all cursor-pointer ${
             activeMode === 'vr-cardboard'
               ? 'bg-pink-600 text-white shadow-sm'
@@ -738,12 +826,13 @@ export function SphereViewer({
           <button
             type="button"
             onClick={() => setIsAddingHotspotMode((p) => !p)}
-            className={`p-2 backdrop-blur-md border rounded-xl transition-colors cursor-pointer ${
+            disabled={!hotspotsAvailable}
+            className={`p-2 backdrop-blur-md border rounded-xl transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
               isAddingHotspotMode
                 ? 'bg-cyan-500 border-cyan-400 text-slate-950 font-bold'
                 : 'bg-slate-900/80 border-slate-800 text-slate-400 hover:text-white'
             }`}
-            title="Add spatial tour hotspot to 360° scene"
+            title={hotspotsAvailable ? 'Add spatial tour hotspot to 360° scene' : 'Hotspots are unavailable in VR split-screen and little-planet modes'}
           >
             <MapPin className="w-4 h-4" />
           </button>
@@ -760,37 +849,31 @@ export function SphereViewer({
       </div>
 
       {/* Hotspots Overlay Markers on Screen */}
-      {hotspots.map((spot) => {
-        // Calculate screen projection offset roughly relative to currentLon & currentLat
-        const dLon = ((spot.lon - currentLonRef.current + 540) % 360) - 180;
-        const dLat = spot.lat - currentLatRef.current;
-        // Check if hotspot is roughly in front FOV (-45 to +45 deg)
-        const isVisibleInFov = Math.abs(dLon) < currentFov * 0.6 && Math.abs(dLat) < currentFov * 0.5;
-
-        if (!isVisibleInFov || activeMode === 'little-planet') return null;
-
-        const leftPercent = 50 + (dLon / (currentFov * 0.6)) * 45;
-        const topPercent = 50 - (dLat / (currentFov * 0.5)) * 45;
-
-        return (
-          <div
-            key={spot.id}
-            style={{ left: `${leftPercent}%`, top: `${topPercent}%` }}
-            className="absolute z-20 -translate-x-1/2 -translate-y-1/2 cursor-pointer group"
-            onClick={(e) => {
-              e.stopPropagation();
-              setActiveHotspot(spot);
-            }}
-          >
-            <div className="p-2 bg-gradient-to-tr from-cyan-400 to-teal-400 text-slate-950 rounded-full shadow-[0_0_15px_rgba(0,242,254,0.6)] border-2 border-white group-hover:scale-125 transition-transform animate-pulse">
-              <MapPin className="w-3.5 h-3.5" />
-            </div>
-            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-0.5 bg-slate-950/90 border border-slate-700 text-white text-[10px] rounded whitespace-nowrap shadow-md opacity-0 group-hover:opacity-100 transition-opacity">
-              {spot.title}
-            </div>
+      {hotspots.map((spot) => (
+        <div
+          key={spot.id}
+          ref={(el) => {
+            if (el) {
+              hotspotElementsRef.current.set(spot.id, el);
+            } else {
+              hotspotElementsRef.current.delete(spot.id);
+            }
+          }}
+          style={{ display: 'none' }}
+          className="absolute top-0 left-0 z-20 cursor-pointer group pointer-events-auto"
+          onClick={(e) => {
+            e.stopPropagation();
+            setActiveHotspot(spot);
+          }}
+        >
+          <div className="p-2 bg-gradient-to-tr from-cyan-400 to-teal-400 text-slate-950 rounded-full shadow-[0_0_15px_rgba(0,242,254,0.6)] border-2 border-white group-hover:scale-125 transition-transform animate-pulse">
+            <MapPin className="w-3.5 h-3.5" />
           </div>
-        );
-      })}
+          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-0.5 bg-slate-950/90 border border-slate-700 text-white text-[10px] rounded whitespace-nowrap shadow-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+            {spot.title}
+          </div>
+        </div>
+      ))}
 
       {/* Active Hotspot Inspector Card */}
       {activeHotspot && (
@@ -827,7 +910,7 @@ export function SphereViewer({
       )}
 
       {/* New Hotspot Details Modal */}
-      {pendingHotspotCoords && (
+      {hotspotsAvailable && pendingHotspotCoords && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
           <form
             onSubmit={handleCreateHotspot}
@@ -1139,4 +1222,4 @@ export function SphereViewer({
       )}
     </div>
   );
-}
+});

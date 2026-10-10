@@ -1,8 +1,25 @@
-import type { ModelEndpointConfig, ManagedUser, SystemBillingConfig } from '../types/panorama';
+import type {
+  ModelEndpointConfig,
+  ModelRoutingConfig,
+  ModelRoutingMode,
+  ManagedUser,
+  SystemBillingConfig,
+  SubscriptionRecord,
+  InvoiceRecord,
+  PaymentGatewayConfig,
+} from '../types/panorama';
 
 const MODELS_STORAGE_KEY = 'panorama_admin_models_config';
+const ROUTING_STORAGE_KEY = 'panorama_admin_routing_config';
 const USERS_STORAGE_KEY = 'panorama_admin_users_config';
 const BILLING_STORAGE_KEY = 'panorama_admin_billing_config';
+const SUBSCRIPTIONS_STORAGE_KEY = 'panorama_admin_subscriptions_config';
+const INVOICES_STORAGE_KEY = 'panorama_admin_invoices_config';
+const CURRENT_USER_ID_STORAGE_KEY = 'panorama_current_user_id';
+const PAYMENTS_STORAGE_KEY = 'panorama_admin_payments_config';
+const ADMIN_PASSWORD_STORAGE_KEY = 'panorama_admin_secure_password';
+const ADMIN_AUTH_SESSION_KEY = 'panorama_admin_session_token';
+export const DEFAULT_ADMIN_PASSWORD = 'admin888';
 
 export const DEFAULT_MODEL_ENDPOINTS: ModelEndpointConfig[] = [
   {
@@ -141,6 +158,16 @@ export function getStoredModelEndpoints(): ModelEndpointConfig[] {
 export function saveStoredModelEndpoints(endpoints: ModelEndpointConfig[]): void {
   try {
     localStorage.setItem(MODELS_STORAGE_KEY, JSON.stringify(endpoints));
+    const defaultEp = endpoints.find((ep) => ep.isDefault);
+    if (defaultEp) {
+      const routing = getStoredRoutingConfig();
+      if (routing.primaryEndpointId !== defaultEp.id) {
+        saveStoredRoutingConfig({
+          ...routing,
+          primaryEndpointId: defaultEp.id,
+        });
+      }
+    }
   } catch {
     // fallback
   }
@@ -181,3 +208,484 @@ export function saveStoredBillingConfig(config: SystemBillingConfig): void {
     // fallback
   }
 }
+
+export const DEFAULT_SUBSCRIPTIONS: SubscriptionRecord[] = [
+  {
+    id: 'sub_9011',
+    userId: 'usr_8801',
+    userEmail: 'creator.alex@studio360.io',
+    userName: 'Alex Vance',
+    plan: 'pro',
+    billingCycle: 'monthly',
+    amount: 19.9,
+    currency: 'USD',
+    status: 'active',
+    currentPeriodStart: '2026-03-12',
+    currentPeriodEnd: '2026-04-12',
+    cancelAtPeriodEnd: false,
+    paymentMethod: 'Visa •••• 4242',
+  },
+  {
+    id: 'sub_9012',
+    userId: 'usr_8802',
+    userEmail: 'vr.developer@metaverse.com',
+    userName: 'Chen Lin',
+    plan: 'enterprise',
+    billingCycle: 'yearly',
+    amount: 358.8,
+    currency: 'USD',
+    status: 'active',
+    currentPeriodStart: '2026-01-05',
+    currentPeriodEnd: '2027-01-05',
+    cancelAtPeriodEnd: false,
+    paymentMethod: 'MasterCard •••• 8891',
+  },
+  {
+    id: 'sub_9013',
+    userId: 'usr_8803',
+    userEmail: 'sarah.design@archviz.org',
+    userName: 'Sarah Connor',
+    plan: 'pro',
+    billingCycle: 'yearly',
+    amount: 118.8,
+    currency: 'USD',
+    status: 'active',
+    currentPeriodStart: '2026-02-18',
+    currentPeriodEnd: '2027-02-18',
+    cancelAtPeriodEnd: false,
+    paymentMethod: 'Apple Pay (Amex •••• 1004)',
+  },
+];
+
+export const DEFAULT_INVOICES: InvoiceRecord[] = [
+  {
+    id: 'inv_2026_001',
+    subscriptionId: 'sub_9012',
+    userId: 'usr_8802',
+    userEmail: 'vr.developer@metaverse.com',
+    amount: 358.8,
+    currency: 'USD',
+    status: 'paid',
+    date: '2026-01-05',
+    planName: 'Enterprise Annual Studio',
+  },
+  {
+    id: 'inv_2026_002',
+    subscriptionId: 'sub_9013',
+    userId: 'usr_8803',
+    userEmail: 'sarah.design@archviz.org',
+    amount: 118.8,
+    currency: 'USD',
+    status: 'paid',
+    date: '2026-02-18',
+    planName: 'Pro Creator Annual',
+  },
+  {
+    id: 'inv_2026_003',
+    subscriptionId: 'sub_9011',
+    userId: 'usr_8801',
+    userEmail: 'creator.alex@studio360.io',
+    amount: 19.9,
+    currency: 'USD',
+    status: 'paid',
+    date: '2026-03-12',
+    planName: 'Pro Creator Monthly',
+  },
+];
+
+export function getStoredSubscriptions(): SubscriptionRecord[] {
+  try {
+    const raw = localStorage.getItem(SUBSCRIPTIONS_STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {
+    // fallback
+  }
+  return DEFAULT_SUBSCRIPTIONS;
+}
+
+export function saveStoredSubscriptions(subs: SubscriptionRecord[]): void {
+  try {
+    localStorage.setItem(SUBSCRIPTIONS_STORAGE_KEY, JSON.stringify(subs));
+  } catch {
+    // fallback
+  }
+}
+
+export function getStoredInvoices(): InvoiceRecord[] {
+  try {
+    const raw = localStorage.getItem(INVOICES_STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {
+    // fallback
+  }
+  return DEFAULT_INVOICES;
+}
+
+export function saveStoredInvoices(invs: InvoiceRecord[]): void {
+  try {
+    localStorage.setItem(INVOICES_STORAGE_KEY, JSON.stringify(invs));
+  } catch {
+    // fallback
+  }
+}
+
+/**
+ * Returns the current active user for the studio session.
+ * Defaults to the first user or Explorer guest if not found.
+ */
+export function getCurrentUser(): ManagedUser {
+  const users = getStoredManagedUsers();
+  try {
+    const currentId = localStorage.getItem(CURRENT_USER_ID_STORAGE_KEY);
+    if (currentId) {
+      const found = users.find((u) => u.id === currentId);
+      if (found) return found;
+    }
+  } catch {
+    // fallback
+  }
+  // Default to Alex Vance or first available user
+  return users[0] || DEFAULT_MANAGED_USERS[0];
+}
+
+export function setCurrentUserId(userId: string): void {
+  try {
+    localStorage.setItem(CURRENT_USER_ID_STORAGE_KEY, userId);
+  } catch {
+    // fallback
+  }
+}
+
+/**
+ * Deduct credits from the currently logged in user upon generating a panorama.
+ * Enforces account active status check and strictly rejects negative or non-numeric debit amounts.
+ */
+export function deductCurrentUserCredits(amount: number): { success: boolean; remaining: number } {
+  if (typeof amount !== 'number' || isNaN(amount) || amount <= 0) {
+    return { success: false, remaining: getCurrentUser().creditsBalance };
+  }
+
+  const users = getStoredManagedUsers();
+  const current = getCurrentUser();
+  const userIdx = users.findIndex((u) => u.id === current.id);
+  if (userIdx === -1) return { success: false, remaining: 0 };
+
+  const targetUser = users[userIdx];
+  // Strictly prevent suspended or inactive accounts from consuming credits or generating
+  if (targetUser.status !== 'active') {
+    return { success: false, remaining: targetUser.creditsBalance };
+  }
+
+  if (targetUser.creditsBalance < amount) {
+    return { success: false, remaining: targetUser.creditsBalance };
+  }
+
+  targetUser.creditsBalance -= amount;
+  targetUser.apiCallsCount += 1;
+  targetUser.lastActiveAt = '刚刚调用';
+  saveStoredManagedUsers(users);
+  return { success: true, remaining: targetUser.creditsBalance };
+}
+
+/**
+ * Top up credits or adjust plan for user.
+ */
+export function topUpCurrentUserCredits(amount: number): ManagedUser {
+  const users = getStoredManagedUsers();
+  const current = getCurrentUser();
+  const next = users.map((u) => {
+    if (u.id === current.id) {
+      return {
+        ...u,
+        creditsBalance: u.creditsBalance + amount,
+        creditsTotal: u.creditsTotal + amount,
+      };
+    }
+    return u;
+  });
+  saveStoredManagedUsers(next);
+  return getCurrentUser();
+}
+
+/**
+ * Completes a commercial SaaS subscription purchase:
+ * Upgrades the user's plan, adds subscription record, logs invoice, and allocates monthly credits.
+ */
+export function processCheckoutSubscription(params: {
+  plan: 'pro' | 'enterprise';
+  billingCycle: 'monthly' | 'yearly';
+  amount: number;
+  paymentMethod: string;
+}): { user: ManagedUser; subscription: SubscriptionRecord; invoice: InvoiceRecord } {
+  const current = getCurrentUser();
+  const users = getStoredManagedUsers();
+  const billing = getStoredBillingConfig();
+
+  const creditsToGrant =
+    params.plan === 'enterprise'
+      ? 5000
+      : billing.proMonthlyCredits || 1000;
+
+  // 1. Update User Plan & Credits
+  const updatedUsers = users.map((u) => {
+    if (u.id === current.id) {
+      return {
+        ...u,
+        plan: params.plan,
+        creditsBalance: u.creditsBalance + creditsToGrant,
+        creditsTotal: u.creditsTotal + creditsToGrant,
+        status: 'active' as const,
+        lastActiveAt: 'Just now',
+      };
+    }
+    return u;
+  });
+  saveStoredManagedUsers(updatedUsers);
+
+  // 2. Create / Update Subscription Record
+  const now = new Date();
+  const endDate = new Date(now);
+  if (params.billingCycle === 'yearly') {
+    endDate.setFullYear(now.getFullYear() + 1);
+  } else {
+    endDate.setMonth(now.getMonth() + 1);
+  }
+
+  const subId = `sub_${Date.now().toString().slice(-6)}`;
+  const subscription: SubscriptionRecord = {
+    id: subId,
+    userId: current.id,
+    userEmail: current.email,
+    userName: current.name,
+    plan: params.plan,
+    billingCycle: params.billingCycle,
+    amount: params.amount,
+    currency: 'USD',
+    status: 'active',
+    currentPeriodStart: now.toISOString().split('T')[0],
+    currentPeriodEnd: endDate.toISOString().split('T')[0],
+    cancelAtPeriodEnd: false,
+    paymentMethod: params.paymentMethod,
+  };
+
+  const subs = getStoredSubscriptions();
+  // If user already had a subscription, replace or append
+  const existingIdx = subs.findIndex((s) => s.userId === current.id);
+  let updatedSubs: SubscriptionRecord[];
+  if (existingIdx !== -1) {
+    updatedSubs = subs.map((s, idx) => (idx === existingIdx ? subscription : s));
+  } else {
+    updatedSubs = [subscription, ...subs];
+  }
+  saveStoredSubscriptions(updatedSubs);
+
+  // 3. Create Invoice Record
+  const invId = `inv_${now.getFullYear()}_${Date.now().toString().slice(-4)}`;
+  const invoice: InvoiceRecord = {
+    id: invId,
+    subscriptionId: subId,
+    userId: current.id,
+    userEmail: current.email,
+    amount: params.amount,
+    currency: 'USD',
+    status: 'paid',
+    date: now.toISOString().split('T')[0],
+    planName: `${params.plan.toUpperCase()} Plan (${params.billingCycle === 'yearly' ? 'Annual' : 'Monthly'})`,
+  };
+
+  const invoices = getStoredInvoices();
+  saveStoredInvoices([invoice, ...invoices]);
+
+  return {
+    user: getCurrentUser(),
+    subscription,
+    invoice,
+  };
+}
+
+export const DEFAULT_ROUTING_CONFIG: ModelRoutingConfig = {
+  mode: 'failover',
+  primaryEndpointId: 'gemini-imagen3',
+  secondaryEndpointId: 'gemini-flash-img',
+  tertiaryEndpointId: 'fal-flux-schnell',
+  roundRobinIndex: 0,
+};
+
+export function getStoredRoutingConfig(): ModelRoutingConfig {
+  try {
+    const raw = localStorage.getItem(ROUTING_STORAGE_KEY);
+    if (raw) return { ...DEFAULT_ROUTING_CONFIG, ...JSON.parse(raw) };
+  } catch {
+    // fallback
+  }
+  return DEFAULT_ROUTING_CONFIG;
+}
+
+export function saveStoredRoutingConfig(config: ModelRoutingConfig): void {
+  try {
+    localStorage.setItem(ROUTING_STORAGE_KEY, JSON.stringify(config));
+  } catch {
+    // fallback
+  }
+}
+
+/**
+ * Resolves the candidate execution endpoints pipeline based on admin routing policy:
+ * - 'single': strictly try the designated primary model only. If disabled or missing, returns empty pipeline without fallback.
+ * - 'failover': try primary model first; if quota exhausted or fails, switch only to explicitly configured secondary/tertiary endpoints. Never silently append unselected endpoints.
+ * - 'round-robin': rotate strictly across enabled models sequentially. Returns empty if all models disabled.
+ */
+export function getModelExecutionPipeline(): {
+  endpoints: ModelEndpointConfig[];
+  mode: ModelRoutingMode;
+} {
+  const endpoints = getStoredModelEndpoints();
+  const routing = getStoredRoutingConfig();
+  const enabledEndpoints = endpoints.filter((ep) => ep.isEnabled);
+
+  // If all endpoints are disabled by admin, return empty pipeline. Never silently mock or fallback!
+  if (enabledEndpoints.length === 0) {
+    return { endpoints: [], mode: routing.mode };
+  }
+
+  if (routing.mode === 'single') {
+    const primary = enabledEndpoints.find((ep) => ep.id === routing.primaryEndpointId);
+    // Strict Single mode: only the designated primary model is allowed. No silent substitution.
+    return { endpoints: primary ? [primary] : [], mode: 'single' };
+  }
+
+  if (routing.mode === 'failover') {
+    const ordered: ModelEndpointConfig[] = [];
+    const primary = enabledEndpoints.find((ep) => ep.id === routing.primaryEndpointId);
+    if (primary) ordered.push(primary);
+
+    const secondary = enabledEndpoints.find(
+      (ep) => ep.id === routing.secondaryEndpointId && ep.id !== primary?.id
+    );
+    if (secondary) ordered.push(secondary);
+
+    if (routing.tertiaryEndpointId) {
+      const tertiary = enabledEndpoints.find(
+        (ep) => ep.id === routing.tertiaryEndpointId && !ordered.some((o) => o.id === ep.id)
+      );
+      if (tertiary) ordered.push(tertiary);
+    }
+
+    // Failover strictly honors designated endpoints. Never append unchosen endpoints behind admin's back.
+    return {
+      endpoints: ordered,
+      mode: 'failover',
+    };
+  }
+
+  if (routing.mode === 'round-robin') {
+    const total = enabledEndpoints.length;
+    const startIndex = (routing.roundRobinIndex || 0) % total;
+    const rotated = [
+      ...enabledEndpoints.slice(startIndex),
+      ...enabledEndpoints.slice(0, startIndex),
+    ];
+
+    // Increment round robin pointer for next call
+    saveStoredRoutingConfig({
+      ...routing,
+      roundRobinIndex: (startIndex + 1) % total,
+    });
+
+    return { endpoints: rotated, mode: 'round-robin' };
+  }
+
+  return { endpoints: enabledEndpoints, mode: 'failover' };
+}
+
+/**
+ * Returns the currently active model endpoint configuration configured in Admin Ops.
+ * Returns null if all endpoints are disabled.
+ */
+export function getActiveModelEndpoint(): ModelEndpointConfig | null {
+  const pipeline = getModelExecutionPipeline();
+  return pipeline.endpoints[0] || null;
+}
+
+export const DEFAULT_PAYMENT_CONFIG: PaymentGatewayConfig = {
+  // Stripe configuration (keys and Price IDs blank by default)
+  stripeEnabled: true,
+  stripePublishableKey: '',
+  stripeSecretKey: '',
+  stripeWebhookSecret: '',
+  stripeProMonthlyPriceId: '',
+  stripeProYearlyPriceId: '',
+  stripeEnterpriseMonthlyPriceId: '',
+  stripeEnterpriseYearlyPriceId: '',
+
+  // PayPal Subscriptions configuration (keys and Plan IDs blank by default)
+  paypalEnabled: true,
+  paypalMode: 'sandbox',
+  paypalClientId: '',
+  paypalClientSecret: '',
+  paypalProMonthlyPlanId: '',
+  paypalProYearlyPlanId: '',
+  paypalEnterpriseMonthlyPlanId: '',
+  paypalEnterpriseYearlyPlanId: '',
+};
+
+export function getStoredPaymentConfig(): PaymentGatewayConfig {
+  try {
+    const raw = localStorage.getItem(PAYMENTS_STORAGE_KEY);
+    if (raw) return { ...DEFAULT_PAYMENT_CONFIG, ...JSON.parse(raw) };
+  } catch {
+    // fallback
+  }
+  return DEFAULT_PAYMENT_CONFIG;
+}
+
+export function saveStoredPaymentConfig(config: PaymentGatewayConfig): void {
+  try {
+    localStorage.setItem(PAYMENTS_STORAGE_KEY, JSON.stringify(config));
+  } catch {
+    // fallback
+  }
+}
+
+export function getStoredAdminPassword(): string {
+  try {
+    const raw = localStorage.getItem(ADMIN_PASSWORD_STORAGE_KEY);
+    if (raw) return raw;
+  } catch {
+    // fallback
+  }
+  return DEFAULT_ADMIN_PASSWORD;
+}
+
+export function setStoredAdminPassword(password: string): void {
+  try {
+    localStorage.setItem(ADMIN_PASSWORD_STORAGE_KEY, password);
+  } catch {
+    // fallback
+  }
+}
+
+export function isAdminSessionValid(): boolean {
+  try {
+    return sessionStorage.getItem(ADMIN_AUTH_SESSION_KEY) === 'authenticated';
+  } catch {
+    return false;
+  }
+}
+
+export function setAdminSession(authenticated: boolean): void {
+  try {
+    if (authenticated) {
+      sessionStorage.setItem(ADMIN_AUTH_SESSION_KEY, 'authenticated');
+    } else {
+      sessionStorage.removeItem(ADMIN_AUTH_SESSION_KEY);
+    }
+  } catch {
+    // fallback
+  }
+}
+
+export function verifyAdminPassword(password: string): boolean {
+  return password.trim() === getStoredAdminPassword();
+}
+

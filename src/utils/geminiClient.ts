@@ -1,4 +1,5 @@
 import { healPanoramaSeam } from './seamHealer';
+import { getActiveModelEndpoint } from './adminStorage';
 
 export interface GeminiConfig {
   apiKey: string;
@@ -7,7 +8,7 @@ export interface GeminiConfig {
 }
 
 export const DEFAULT_GEMINI_CONFIG: GeminiConfig = {
-  apiKey: 'sk-wTdKu3XLWeAsvmaXr',
+  apiKey: '',
   baseUrl: 'http://127.0.0.1:8317',
   model: 'gemini-3.1-flash-image',
 };
@@ -21,6 +22,20 @@ export const GOOGLE_OFFICIAL_CONFIG: GeminiConfig = {
 const GEMINI_CONFIG_STORAGE_KEY = 'panorama_gemini_config';
 
 export function getStoredGeminiConfig(): GeminiConfig {
+  // Check if an enabled active endpoint is configured in Admin Ops Hub
+  try {
+    const activeEp = getActiveModelEndpoint();
+    if (activeEp && activeEp.isEnabled) {
+      return {
+        baseUrl: activeEp.baseUrl || DEFAULT_GEMINI_CONFIG.baseUrl,
+        apiKey: activeEp.apiKey || DEFAULT_GEMINI_CONFIG.apiKey,
+        model: activeEp.model || DEFAULT_GEMINI_CONFIG.model,
+      };
+    }
+  } catch {
+    // fallback to local config
+  }
+
   try {
     const raw = localStorage.getItem(GEMINI_CONFIG_STORAGE_KEY);
     if (raw) {
@@ -32,15 +47,10 @@ export function getStoredGeminiConfig(): GeminiConfig {
           apiKey: parsed.apiKey || DEFAULT_GEMINI_CONFIG.apiKey,
         };
       }
-      // Migrate from stale dummy key
-      const activeKey =
-        !parsed.apiKey || parsed.apiKey === '56ac8711b49a4d7db9cf4edffd3fc215'
-          ? DEFAULT_GEMINI_CONFIG.apiKey
-          : parsed.apiKey;
       return {
         ...DEFAULT_GEMINI_CONFIG,
         ...parsed,
-        apiKey: activeKey,
+        apiKey: (parsed.apiKey || '').trim(),
       };
     }
   } catch {
@@ -218,7 +228,7 @@ export async function generateWithGemini(
   config: GeminiConfig
 ): Promise<string> {
   const normalizedBase = (config.baseUrl || 'http://127.0.0.1:8317').replace(/\/+$/, '');
-  const apiKey = (config.apiKey || '56ac8711b49a4d7db9cf4edffd3fc215').trim();
+  const apiKey = (config.apiKey || '').trim();
   const model = config.model.trim() || 'gpt-image-2.5';
 
   const isGoogleDirect = normalizedBase.includes('googleapis.com');

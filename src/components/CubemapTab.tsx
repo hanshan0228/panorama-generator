@@ -15,34 +15,60 @@ interface CubemapTabProps {
   currentPanoramaUrl: string;
 }
 
+interface SliceResult {
+  sourceUrl: string;
+  faceSize: number;
+  faces: CubemapFace[];
+  error: string | null;
+}
+
 export function CubemapTab({ currentPanoramaUrl }: CubemapTabProps) {
   const [faceSize, setFaceSize] = useState<number>(512);
-  const [faces, setFaces] = useState<CubemapFace[]>([]);
-  const [isSlicing, setIsSlicing] = useState<boolean>(false);
+  const [result, setResult] = useState<SliceResult | null>(null);
   const [downloadSuccess, setDownloadSuccess] = useState<boolean>(false);
+  const currentResult = result?.sourceUrl === currentPanoramaUrl && result.faceSize === faceSize ? result : null;
+  const faces = currentResult?.faces ?? [];
+  const isSlicing = currentResult === null;
+  const slicingError = currentResult?.error;
 
-  // Automatically slice into cubemap whenever panorama or faceSize changes
+  // Results belong to one source and resolution; stale results cannot be downloaded.
   useEffect(() => {
-    setIsSlicing(true);
+    let active = true;
     const img = new Image();
     img.crossOrigin = 'anonymous';
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        ctx.drawImage(img, 0, 0);
-        try {
-          const sliced = sliceEquirectangularToCubemap(canvas, faceSize);
-          setFaces(sliced);
-        } catch {
-          // Fallback if slicing fails
-        }
-      }
-      setIsSlicing(false);
+    const fail = (error: unknown) => {
+      if (!active) return;
+      const message = error instanceof Error ? error.message : String(error);
+      console.error('Cubemap slicing failed:', error);
+      setResult({ sourceUrl: currentPanoramaUrl, faceSize, faces: [], error: message });
     };
-    img.src = currentPanoramaUrl;
+    img.onload = () => {
+      if (!active) return;
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) throw new Error('Canvas context is unavailable. Please try again.');
+        ctx.drawImage(img, 0, 0);
+        const sliced = sliceEquirectangularToCubemap(canvas, faceSize);
+        if (sliced.length !== 6) throw new Error('Could not create all six cubemap faces.');
+        setResult({ sourceUrl: currentPanoramaUrl, faceSize, faces: sliced, error: null });
+      } catch (error: unknown) {
+        fail(error);
+      }
+    };
+    img.onerror = () => fail(new Error('Unable to load this panorama. Please select a valid image.'));
+    if (currentPanoramaUrl) {
+      img.src = currentPanoramaUrl;
+    } else {
+      queueMicrotask(() => fail(new Error('Please select a panorama before slicing.')));
+    }
+    return () => {
+      active = false;
+      img.onload = null;
+      img.onerror = null;
+    };
   }, [currentPanoramaUrl, faceSize]);
 
   // Download all 6 faces as a ZIP package
@@ -139,6 +165,12 @@ export function CubemapTab({ currentPanoramaUrl }: CubemapTabProps) {
           )}
         </button>
       </div>
+
+      {slicingError && (
+        <div role="alert" className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-200">
+          {slicingError}
+        </div>
+      )}
 
       {/* Unfolded Cube Cross (T-Cross) Preview Layout */}
       <div className="glass-panel border border-white/10 rounded-3xl p-6 space-y-4 shadow-xl">

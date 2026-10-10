@@ -1,0 +1,158 @@
+/* Front-facing spatial studio. Admin and embed views retain their existing theme. */
+.studio-shell {
+  --studio-ground: #0b1115;
+  --studio-surface: #111c22;
+  --studio-edge: rgba(171, 201, 204, .16);
+  --studio-accent: #9ee6d3;
+  background-color: var(--studio-ground);
+  background-image: radial-gradient(ellipse at 50% 0%, rgba(64, 111, 111, .16), transparent 42%),
+    linear-gradient(180deg, #101a20, #0b1115 48rem);
+  color: #e8eff0;
+  font-family: 'Aptos', 'Trebuchet MS', 'Microsoft YaHei', sans-serif;
+  color-scheme: dark;
+}
+.studio-shell .studio-ambient > div { opacity: .18; animation: none; }
+.studio-shell .studio-ambient::after {
+  content: '';
+  position: absolute;
+  width: min(76rem, 120vw);
+  height: min(76rem, 120vw);
+  left: 50%;
+  top: -45rem;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  border: 1px solid rgba(170, 206, 200, .09);
+  box-shadow: 0 0 0 5rem rgba(170, 206, 200, .025), 0 0 0 10rem rgba(170, 206, 200, .018);
+}
+.studio-shell .studio-skip-link {
+  position: fixed;
+  left: 1rem;
+  top: 1rem;
+  z-index: 100;
+  transform: translateY(-200%);
+  background: #b2ecd9;
+  color: #102322;
+  padding: .75rem 1rem;
+  border-radius: .5rem;
+  font-weight: 600;
+}
+.studio-shell .studio-skip-link:focus { transform: translateY(0); }
+.studio-shell > header {
+  background: rgba(11, 17, 21, .9);
+  border-bottom-color: var(--studio-edge);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, .12);
+  backdrop-filter: blur(18px);
+}
+.studio-shell > header nav {
+  background: rgba(23, 36, 43, .75);
+  border-color: var(--studio-edge);
+  border-radius: 999px;
+  box-shadow: none;
+}
+.studio-shell #studio-tools-menu > div {
+  background: #111c22;
+  border-color: rgba(158, 230, 211, .24);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, .5);
+}
+.studio-shell :is(button, a, input, textarea, select):focus-visible {
+  outline: 2px solid var(--studio-accent);
+  outline-offset: 4px;
+}
+.studio-shell button {
+  transition: background-color .15s cubic-bezier(0.2, 0, 0, 1),
+    border-color .15s cubic-bezier(0.2, 0, 0, 1),
+    color .15s cubic-bezier(0.2, 0, 0, 1),
+    box-shadow .15s cubic-bezier(0.2, 0, 0, 1),
+    transform .12s cubic-bezier(0.2, 0, 0, 1);
+}
+.studio-shell button:not(:disabled):active { transform: scale(0.972); }
+.studio-shell button:disabled { cursor: not-allowed; }
+.studio-shell :is(.glass-panel, .glass-card, .glass-dock) {
+  background: linear-gradient(145deg, rgba(24, 40, 47, .94), rgba(13, 24, 30, .96));
+  border-color: var(--studio-edge);
+  box-shadow: 0 20px 54px rgba(0, 0, 0, .22), inset 0 1px rgba(231, 255, 247, .04);
+}
+.studio-shell .glass-card:hover {
+  border-color: rgba(158, 230, 211, .36);
+  box-shadow: 0 24px 55px rgba(0, 0, 0, .28);
+}
+.studio-shell .shimmer-btn {
+  background-image: linear-gradient(115deg, #b2ecd9, #80cec7);
+  color: #102322;
+  box-shadow: 0 4px 20px rgba(126, 210, 192, .12);
+}
+.studio-shell .shimmer-btn::after { animation: none; opacity: 0; }
+.studio-shell .shimmer-btn:not(:disabled):hover {
+  background-image: linear-gradient(115deg, #c6f5e6, #9ddfd5);
+  box-shadow: 0 6px 25px rgba(126, 210, 192, .22);
+}
+.studio-shell .studio-hero {
+  position: relative;
+  padding-top: clamp(1.5rem, 5vw, 4rem);
+  padding-bottom: 1.5rem;
+  animation: studio-arrive .6s ease-out both;
+}
+.studio-eyebrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  color: #a0b7b7;
+}
+.studio-coordinate { font-family: 'Cascadia Code', Consolas, monospace; font-size: .62rem; letter-spacing: .16em; }
+.studio-orbit-mark { color: #9ee6d3; font-size: 1.8rem; font-weight: 300; }
+.studio-shell .studio-hero h1 {
+  font-family: 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+  font-weight: 400;
+  font-size: clamp(2.7rem, 5.6vw, 4.9rem);
+  line-height: 1.09;
+  letter-spacing: -.055em;
+  text-wrap: balance;
+  color: #f1f4ed;
+}
+.studio-shell .studio-hero p { color: #aabdc3; max-width: 39rem; font-size: 1rem; line-height: 1.8; }
+.studio-shell .studio-hero > .inline-flex {
+  background: rgba(158, 230, 211, .045);
+  border-color: rgba(158, 230, 211, .16);
+  box-shadow: none;
+  color: #c1d6d4;
+}
+.studio-shell #studio-generator-workbench { gap: 1.5rem; }
+.studio-shell #studio-generator-workbench > .glass-panel { border-radius: 1.5rem; }
+.studio-shell #studio-generator-workbench textarea {
+  background: #0d171d;
+  border-color: rgba(180, 210, 213, .22);
+  font-size: .9rem;
+  line-height: 1.75;
+  padding: 1rem;
+  resize: vertical;
+  min-height: 9rem;
+  transition: border-color .2s, box-shadow .2s;
+}
+.studio-shell #studio-generator-workbench textarea:focus {
+  border-color: #9ee6d3;
+  box-shadow: 0 0 0 3px rgba(158, 230, 211, .08);
+}
+.studio-shell #studio-generator-workbench textarea::placeholder { color: #748b94; }
+.studio-shell footer { border-color: var(--studio-edge); }
+@keyframes studio-arrive {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (max-width: 767px) {
+  .studio-shell > header > div { height: auto; min-height: 4rem; flex-wrap: wrap; padding-block: .7rem; gap: .75rem; }
+  .studio-shell > header nav { order: 3; width: 100%; justify-content: center; flex-wrap: wrap; border-radius: 1rem; }
+  .studio-shell #studio-tools-menu { position: fixed; top: auto; left: 1rem; width: calc(100vw - 2rem); max-height: 70vh; overflow-y: auto; padding-top: .5rem; }
+  .studio-shell .studio-eyebrow { gap: .7rem; margin-bottom: 1.3rem; }
+  .studio-shell .studio-coordinate { font-size: .5rem; letter-spacing: .08em; }
+  .studio-shell .studio-hero > .inline-flex { max-width: 100%; font-size: .62rem; text-align: left; }
+  .studio-shell #studio-generator-workbench > .glass-panel { padding: 1.25rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .studio-shell *, .studio-shell *::before, .studio-shell *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

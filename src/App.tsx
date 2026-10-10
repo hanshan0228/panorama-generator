@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import './studio.css';
 import {
   Compass,
   Sparkles,
@@ -27,6 +28,8 @@ import { GlobeTab } from './components/GlobeTab';
 import { PricingTab } from './components/PricingTab';
 import { AdminTab } from './components/AdminTab';
 import { MetadataInjectorModal } from './components/commercial/MetadataInjectorModal';
+import { CheckoutModal } from './components/commercial/CheckoutModal';
+import { getCurrentUser } from './utils/adminStorage';
 import { generateProceduralPanorama } from './utils/proceduralPanoramas';
 import { AiHdriGeneratorPage } from './components/landing/AiHdriGeneratorPage';
 import { SkyboxGeneratorPage } from './components/landing/SkyboxGeneratorPage';
@@ -65,6 +68,17 @@ export function App() {
   const [studioPresetStyle, setStudioPresetStyle] = useState<StylePresetId | undefined>(undefined);
   const toolsDropdownRef = useRef<HTMLDivElement>(null);
   const closeTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Active user and checkout states
+  const [currentUser, setCurrentUser] = useState(() => getCurrentUser());
+  const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
+
+  useEffect(() => {
+    const refreshUser = () => setCurrentUser(getCurrentUser());
+    refreshUser();
+    window.addEventListener('focus', refreshUser);
+    return () => window.removeEventListener('focus', refreshUser);
+  }, [activeTab]);
 
   // Dynamic SEO metadata synchronization across active tabs & landing pages
   useEffect(() => {
@@ -157,7 +171,9 @@ export function App() {
   const navigateTo = (tab: ActiveTab, pushPath?: string) => {
     setActiveTab(tab);
     setIsToolsDropdownOpen(false);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (typeof window !== 'undefined' && window.scrollY > 0) {
+      window.scrollTo(0, 0);
+    }
 
     const targetPath = pushPath || (() => {
       switch (tab) {
@@ -265,7 +281,7 @@ export function App() {
       2048,
       1024
     );
-    return canvas.toDataURL('image/png');
+    return canvas.toDataURL('image/jpeg', 0.92);
   });
 
   const isEmbedMode = typeof window !== 'undefined' && (
@@ -277,21 +293,26 @@ export function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#040c1a] text-sky-100 flex flex-col relative overflow-hidden bg-grid-cyber selection:bg-cyan-500/30 selection:text-white">
+    <div className={`min-h-screen bg-[#040c1a] text-sky-100 flex flex-col relative overflow-hidden bg-grid-cyber selection:bg-cyan-500/30 selection:text-white ${activeTab !== 'admin' ? 'studio-shell' : ''}`}>
       {/* Dynamic Ambient Aurora Glows */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+      <div aria-hidden="true" className="studio-ambient fixed inset-0 pointer-events-none overflow-hidden z-0 will-change-transform">
         <div
-          className="absolute -top-32 left-1/4 w-[750px] h-[750px] bg-cyan-500/22 rounded-full blur-[160px] animate-pulse"
-          style={{ animationDuration: '9s' }}
+          className="absolute -top-32 left-1/4 w-[750px] h-[750px] bg-cyan-500/20 rounded-full blur-[120px]"
         />
         <div
-          className="absolute top-1/3 -right-24 w-[600px] h-[600px] bg-blue-600/22 rounded-full blur-[170px]"
+          className="absolute top-1/3 -right-24 w-[600px] h-[600px] bg-blue-600/20 rounded-full blur-[130px]"
         />
         <div
-          className="absolute -bottom-24 left-1/3 w-[650px] h-[650px] bg-teal-400/18 rounded-full blur-[160px]"
+          className="absolute -bottom-24 left-1/3 w-[650px] h-[650px] bg-teal-400/16 rounded-full blur-[120px]"
         />
       </div>
 
+      {activeTab !== 'admin' && (
+        <a className="studio-skip-link" href="#studio-main" onClick={(event) => {
+          event.preventDefault();
+          document.getElementById('studio-main')?.focus();
+        }}>Skip to workspace</a>
+      )}
       {/* Top Navigation Bar (Benchmarked from panoramagenerator.com) */}
       <header className="sticky top-0 z-50 bg-[#040e22]/90 backdrop-blur-2xl border-b border-cyan-500/20 shadow-[0_4px_35px_rgba(0,242,254,0.12)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4 relative z-10">
@@ -331,11 +352,19 @@ export function App() {
             >
               <button
                 type="button"
-                onClick={() => setIsToolsDropdownOpen((prev) => !prev)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer ${
+                aria-expanded={isToolsDropdownOpen}
+                aria-controls="studio-tools-menu"
+                onKeyDown={(event) => {
+                  if (event.key === 'Escape') setIsToolsDropdownOpen(false);
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsToolsDropdownOpen((prev) => !prev);
+                }}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer border ${
                   isToolsDropdownOpen
-                    ? 'bg-cyan-500/20 text-white border border-cyan-400/40 shadow-sm'
-                    : 'text-cyan-200/80 hover:text-white hover:bg-cyan-500/10'
+                    ? 'bg-cyan-500/20 text-white border-cyan-400/40 shadow-sm'
+                    : 'text-cyan-200/80 hover:text-white hover:bg-cyan-500/10 border-transparent'
                 }`}
               >
                 <span>Tools</span>
@@ -348,7 +377,12 @@ export function App() {
 
               {/* Tools Dropdown Card with zero-gap hitbox */}
               {isToolsDropdownOpen && (
-                <div className="absolute top-full left-0 pt-2 w-[340px] sm:w-[600px] z-50">
+                <div id="studio-tools-menu" onKeyDown={(event) => {
+                  if (event.key === 'Escape') {
+                    setIsToolsDropdownOpen(false);
+                    toolsDropdownRef.current?.querySelector('button')?.focus();
+                  }
+                }} className="absolute top-full left-0 pt-2 w-[340px] sm:w-[600px] z-50">
                   {/* Invisible Bridge above panel to prevent hover flickering */}
                   <div className="absolute -top-2 left-0 right-0 h-4 pointer-events-auto" />
                   <div className="bg-[#020b18]/95 border border-cyan-400/35 rounded-2xl p-4 shadow-2xl backdrop-blur-2xl animate-in fade-in zoom-in-95 duration-150 grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -629,31 +663,35 @@ export function App() {
             </button>
           </nav>
 
-          {/* Right Action Trigger, Language Selector & Free Credits Pill */}
-          <div className="hidden lg:flex items-center gap-3">
+          {/* Right Action Trigger, Active Account Status & Checkout */}
+          <div className="hidden lg:flex items-center gap-2.5">
             <button
               type="button"
-              onClick={() => setActiveTab('pricing')}
+              onClick={() => setIsCheckoutModalOpen(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cyan-950/60 border border-cyan-500/30 text-cyan-300 text-xs font-mono font-bold hover:bg-cyan-900/60 transition-colors cursor-pointer"
+              title={`${currentUser.name} (${currentUser.email}) - Click to recharge or upgrade`}
             >
               <Coins className="w-3.5 h-3.5 text-amber-400" />
-              <span>50 Free Credits</span>
+              <span>{currentUser.creditsBalance} Credits</span>
+              <span className="text-[10px] px-1.5 py-0.2 bg-cyan-500/20 rounded text-cyan-200 uppercase font-bold">
+                {currentUser.plan}
+              </span>
             </button>
 
             <button
               type="button"
-              onClick={() => setActiveTab('pricing')}
+              onClick={() => setIsCheckoutModalOpen(true)}
               className="shimmer-btn px-4 py-2 bg-gradient-to-r from-cyan-400 via-teal-300 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 text-xs font-extrabold rounded-xl shadow-lg shadow-cyan-400/35 hover:shadow-cyan-400/60 hover:scale-105 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer"
             >
               <Zap className="w-3.5 h-3.5 fill-current" />
-              <span>Upgrade to Pro</span>
+              <span>{currentUser.plan === 'enterprise' ? 'Studio Enterprise' : currentUser.plan === 'pro' ? 'Pro Member' : 'Upgrade to Pro'}</span>
             </button>
           </div>
         </div>
       </header>
 
       {/* Main App Canvas / Tab Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 relative z-10">
+      <main id="studio-main" key={activeTab} tabIndex={-1} className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 relative z-10 animate-in fade-in duration-200">
         {activeTab === 'generator' && (
           <GeneratorTab
             currentPanoramaUrl={currentPanoramaUrl}
@@ -905,14 +943,7 @@ export function App() {
                 <li>
                   <button
                     type="button"
-                    onClick={() => {
-                      const pin = prompt('Enter Admin Password:');
-                      if (pin === 'admin888') {
-                        navigateTo('admin', '/#admin');
-                      } else if (pin !== null) {
-                        alert('Incorrect password');
-                      }
-                    }}
+                    onClick={() => navigateTo('admin', '/#admin')}
                     className="text-cyan-500 hover:text-cyan-300 text-[11px] transition-colors cursor-pointer"
                   >
                     Admin Console
@@ -946,6 +977,15 @@ export function App() {
       <MetadataInjectorModal
         isOpen={isMetadataModalOpen}
         onClose={() => setIsMetadataModalOpen(false)}
+      />
+
+      {/* Global Commercial Checkout Modal */}
+      <CheckoutModal
+        isOpen={isCheckoutModalOpen}
+        onClose={() => setIsCheckoutModalOpen(false)}
+        initialPlan="pro"
+        initialCycle="yearly"
+        onSuccess={(u) => setCurrentUser(u)}
       />
     </div>
   );

@@ -90,6 +90,16 @@ export type ActiveTab =
   | 'landing-metadata'
   | 'landing-video';
 
+export type ModelRoutingMode = 'single' | 'failover' | 'round-robin';
+
+export interface ModelRoutingConfig {
+  mode: ModelRoutingMode;
+  primaryEndpointId: string;
+  secondaryEndpointId: string;
+  tertiaryEndpointId?: string;
+  roundRobinIndex: number;
+}
+
 export interface ModelEndpointConfig {
   id: string;
   name: string;
@@ -127,3 +137,57 @@ export interface SystemBillingConfig {
   creditCostPer2K: number;
   creditCostPer4K: number;
 }
+
+export type SubscriptionStatus = 'active' | 'past_due' | 'canceled' | 'trialing';
+
+export interface SubscriptionRecord {
+  id: string;
+  userId: string;
+  userEmail: string;
+  userName: string;
+  plan: 'pro' | 'enterprise';
+  billingCycle: 'monthly' | 'yearly';
+  amount: number;
+  currency: string;
+  status: SubscriptionStatus;
+  currentPeriodStart: string;
+  currentPeriodEnd: string;
+  cancelAtPeriodEnd: boolean;
+  paymentMethod: string;
+}
+
+export interface InvoiceRecord {
+  id: string;
+  subscriptionId: string;
+  userId: string;
+  userEmail: string;
+  amount: number;
+  currency: string;
+  status: 'paid' | 'open' | 'refunded';
+  date: string;
+  planName: string;
+}
+
+export interface PaymentGatewayConfig {
+  // Stripe Configuration
+  stripeEnabled: boolean;
+  stripePublishableKey: string;
+  stripeSecretKey: string;
+  stripeWebhookSecret: string;
+  stripeProMonthlyPriceId: string;
+  stripeProYearlyPriceId: string;
+  stripeEnterpriseMonthlyPriceId: string;
+  stripeEnterpriseYearlyPriceId: string;
+
+  // PayPal Subscriptions Configuration
+  paypalEnabled: boolean;
+  paypalMode: 'sandbox' | 'live';
+  paypalClientId: string;
+  paypalClientSecret: string;
+  paypalProMonthlyPlanId: string;
+  paypalProYearlyPlanId: string;
+  paypalEnterpriseMonthlyPlanId: string;
+  paypalEnterpriseYearlyPlanId: string;
+}
+
+

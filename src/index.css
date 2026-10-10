@@ -48,7 +48,10 @@
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(0, 242, 254, 0.14);
   box-shadow: 0 10px 35px 0 rgba(1, 8, 20, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.18s ease,
+    background-color 0.18s ease,
+    box-shadow 0.18s ease;
 }
 
 .glass-card:hover {
@@ -56,6 +59,10 @@
   border-color: rgba(0, 242, 254, 0.45);
   box-shadow: 0 16px 50px -10px rgba(0, 242, 254, 0.28);
   transform: translateY(-2px);
+}
+
+.glass-card:active {
+  transform: scale(0.985);
 }
 
 .glass-dock {

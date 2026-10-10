@@ -55,12 +55,15 @@ export function enhanceAndUpscalePanorama(
     const upOffset = (y - 1) * targetW;
     const downOffset = (y + 1) * targetW;
 
-    for (let x = 1; x < targetW - 1; x++) {
+    for (let x = 0; x < targetW; x++) {
       const idx = (rowOffset + x) * 4;
       const upIdx = (upOffset + x) * 4;
       const downIdx = (downOffset + x) * 4;
-      const leftIdx = (rowOffset + (x - 1)) * 4;
-      const rightIdx = (rowOffset + (x + 1)) * 4;
+      // Seamless 360° Horizontal Wrap: left of x=0 is targetW-1, right of targetW-1 is 0
+      const leftX = (x - 1 + targetW) % targetW;
+      const rightX = (x + 1) % targetW;
+      const leftIdx = (rowOffset + leftX) * 4;
+      const rightIdx = (rowOffset + rightX) * 4;
 
       for (let c = 0; c < 3; c++) {
         const center = src[idx + c];

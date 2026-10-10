@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import {
   Sparkles,
   Download,
@@ -8,12 +8,8 @@ import {
   CheckCircle2,
   RefreshCw,
   FileCode2,
-  Settings2,
-  Cpu,
   AlertCircle,
-  Check,
   Zap,
-  ExternalLink,
   ImagePlus,
   Trash2,
   Upload,
@@ -28,16 +24,10 @@ import {
 import confetti from 'canvas-confetti';
 import type { ActiveTab, StylePreset, StylePresetId, ResolutionTier } from '../types/panorama';
 import { SphereViewer } from './SphereViewer';
-import { generateProceduralPanorama } from '../utils/proceduralPanoramas';
 import { exportCanvasToHdrBlob } from '../utils/hdrExporter';
 import {
-  getStoredGeminiConfig,
-  saveStoredGeminiConfig,
   generateWithGemini,
   buildPanoramaPrompt,
-  testProxyConnection,
-  DEFAULT_GEMINI_CONFIG,
-  GOOGLE_OFFICIAL_CONFIG,
   type GeminiConfig,
 } from '../utils/geminiClient';
 import { ShowcaseGallery } from './commercial/ShowcaseGallery';
@@ -50,9 +40,16 @@ import { TestimonialsSection } from './commercial/TestimonialsSection';
 import { CommercialFaq } from './commercial/CommercialFaq';
 import { PhotoToVideoModal } from './commercial/PhotoToVideoModal';
 import { EmbedModal } from './commercial/EmbedModal';
+import { CheckoutModal } from './commercial/CheckoutModal';
 import { exportVrReadyJpegBlob } from '../utils/xmpInjector';
 import { healPanoramaSeam } from '../utils/seamHealer';
 import { enhanceAndUpscalePanorama } from '../utils/imageEnhancer';
+import {
+  getCurrentUser,
+  deductCurrentUserCredits,
+  getModelExecutionPipeline,
+  getStoredBillingConfig,
+} from '../utils/adminStorage';
 
 const PROMPT_BUILDER_CATEGORIES = [
   {
@@ -204,34 +201,27 @@ export function GeneratorTab({
   externalPrompt,
   externalStyle,
 }: GeneratorTabProps) {
-  const [inputMode, setInputMode] = useState<'text' | 'image'>(externalInputMode || 'text');
-
-  useEffect(() => {
-    if (externalInputMode && externalInputMode !== inputMode) {
-      setInputMode(externalInputMode);
-    }
-  }, [externalInputMode, inputMode]);
+  const [localInputMode, setInputMode] = useState<'text' | 'image'>(externalInputMode ?? 'text');
+  const inputMode = externalInputMode ?? localInputMode;
 
   const handleModeChange = (newMode: 'text' | 'image') => {
-    setInputMode(newMode);
+    if (externalInputMode === undefined) setInputMode(newMode);
     onInputModeChange?.(newMode);
   };
   const [prompt, setPrompt] = useState(
-    'futuristic cyberpunk city at night, neon holograms, rain reflections, volumetric fog, 8k equirectangular 360 panorama'
+    externalPrompt || 'futuristic cyberpunk city at night, neon holograms, rain reflections, volumetric fog, 8k equirectangular 360 panorama'
   );
-  const [selectedStyle, setSelectedStyle] = useState<StylePresetId>('cyberpunk');
+  const [selectedStyle, setSelectedStyle] = useState<StylePresetId>(externalStyle ?? 'cyberpunk');
+  const [previousPresets, setPreviousPresets] = useState({ prompt: externalPrompt, style: externalStyle, inputMode: externalInputMode });
 
-  useEffect(() => {
-    if (externalPrompt) {
-      setPrompt(externalPrompt);
-    }
-  }, [externalPrompt]);
-
-  useEffect(() => {
-    if (externalStyle) {
-      setSelectedStyle(externalStyle);
-    }
-  }, [externalStyle]);
+  // Apply changed external presets once, without overwriting subsequent local edits.
+  if (externalPrompt !== previousPresets.prompt || externalStyle !== previousPresets.style || externalInputMode !== previousPresets.inputMode) {
+    setPreviousPresets({ prompt: externalPrompt, style: externalStyle, inputMode: externalInputMode });
+    if (externalPrompt !== previousPresets.prompt && externalPrompt) setPrompt(externalPrompt);
+    if (externalStyle !== previousPresets.style && externalStyle) setSelectedStyle(externalStyle);
+    // Preserve the last controlled mode if the parent releases control.
+    if (externalInputMode !== previousPresets.inputMode && externalInputMode) setInputMode(externalInputMode);
+  }
 
   const [resolution, setResolution] = useState<ResolutionTier>('2K');
   const [seamCorrection, setSeamCorrection] = useState(true);
@@ -254,54 +244,24 @@ export function GeneratorTab({
   const [referenceImages, setReferenceImages] = useState<Array<{ id: string; name: string; preview: string }>>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Engine selection: 'procedural' (offline instant) vs 'gemini' (real AI image model)
-  const [engineMode, setEngineMode] = useState<'procedural' | 'gemini'>('gemini');
-  const [showConfigModal, setShowConfigModal] = useState(false);
-  const [geminiConfig, setGeminiConfig] = useState<GeminiConfig>(getStoredGeminiConfig());
   const [apiError, setApiError] = useState<string | null>(null);
-  const [isTestingConn, setIsTestingConn] = useState(false);
-  const [testConnResult, setTestConnResult] = useState<{ success: boolean; message: string } | null>(null);
   const [isUpscalingClarity, setIsUpscalingClarity] = useState(false);
   const [originalRawUrl, setOriginalRawUrl] = useState<string | null>(null);
   const [enhanced4kUrl, setEnhanced4kUrl] = useState<string | null>(null);
   const [feedbackNotice, setFeedbackNotice] = useState<string | null>(null);
 
-  const creditsCost = resolution === '4K' ? 12 : resolution === '2K' ? 6 : 3;
+  // User credit and commercial checkout state
+  const [currentUser, setCurrentUser] = useState(() => getCurrentUser());
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 
-  const handleTestConnection = async () => {
-    setIsTestingConn(true);
-    setTestConnResult(null);
-    const res = await testProxyConnection(geminiConfig);
-    setTestConnResult(res);
-    setIsTestingConn(false);
-  };
-
-  const handleLoad8317Default = () => {
-    setGeminiConfig(DEFAULT_GEMINI_CONFIG);
-    saveStoredGeminiConfig(DEFAULT_GEMINI_CONFIG);
-    setTestConnResult({
-      success: true,
-      message: 'Loaded local 8317 proxy presets (gemini-3.1-flash-image)! Direct image generation supported.',
-    });
-  };
-
-  const handleLoadGoogleOfficial = () => {
-    const isAlreadyGoogle = geminiConfig.baseUrl.includes('googleapis.com');
-    const newCfg: GeminiConfig = {
-      ...GOOGLE_OFFICIAL_CONFIG,
-      apiKey: isAlreadyGoogle ? geminiConfig.apiKey : '',
-    };
-    setGeminiConfig(newCfg);
-    setTestConnResult({
-      success: true,
-      message: 'Switched to Google AI Studio direct mode! Please enter your API Key starting with AIzaSy below.',
-    });
-  };
-
-  const handleSaveConfig = () => {
-    saveStoredGeminiConfig(geminiConfig);
-    setShowConfigModal(false);
-  };
+  // Dynamic credit cost from admin billing configuration
+  const billingConfig = getStoredBillingConfig();
+  const creditsCost =
+    resolution === '4K'
+      ? billingConfig.creditCostPer4K
+      : resolution === '2K'
+      ? billingConfig.creditCostPer2K
+      : billingConfig.creditCostPer1K;
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -375,126 +335,170 @@ export function GeneratorTab({
   };
 
   const handleGenerate = async () => {
-    setIsGenerating(true);
-    setApiError(null);
-    setGenerationProgress(15);
-
-    if (engineMode === 'gemini') {
-      try {
-        setGenerationProgress(25);
-        const styleObj = STYLE_PRESETS.find((s) => s.id === selectedStyle);
-        
-        let promptWithRefs = prompt;
-        if (referenceImages.length > 0) {
-          promptWithRefs += `, matched reference style palette and lighting from [${referenceImages.map((r) => r.name).join(', ')}]`;
-        }
-
-        const fullPrompt = buildPanoramaPrompt(promptWithRefs, styleObj?.promptSuffix || '');
-
-        setGenerationProgress(45);
-        const progressTimer = setInterval(() => {
-          setGenerationProgress((p) => (p < 85 ? p + 8 : p));
-        }, 500);
-
-        // Call Gemini local proxy / direct endpoint
-        const rawGenUrl = await generateWithGemini(fullPrompt, geminiConfig);
-        setOriginalRawUrl(rawGenUrl);
-
-        // Client-side super-resolution, sharpening & seam healing
-        let finalDataUrl = rawGenUrl;
-        try {
-          const img = new Image();
-          img.crossOrigin = 'anonymous';
-          finalDataUrl = await new Promise<string>((resolve) => {
-            img.onload = () => {
-              let canvas: HTMLCanvasElement;
-              if (resolution === '4K') {
-                canvas = enhanceAndUpscalePanorama(img, {
-                  scaleFactor: 2,
-                  sharpness: 0.8,
-                  contrastBoost: 1.1,
-                });
-              } else if (resolution === '2K') {
-                canvas = enhanceAndUpscalePanorama(img, {
-                  scaleFactor: 1,
-                  sharpness: 0.6,
-                  contrastBoost: 1.05,
-                });
-              } else {
-                canvas = document.createElement('canvas');
-                canvas.width = img.naturalWidth || img.width;
-                canvas.height = img.naturalHeight || img.height;
-                const ctx = canvas.getContext('2d');
-                if (ctx) ctx.drawImage(img, 0, 0);
-              }
-
-              const healed = seamCorrection ? healPanoramaSeam(canvas, 160) : canvas;
-              resolve(healed.toDataURL('image/png'));
-            };
-            img.onerror = () => resolve(rawGenUrl);
-            img.src = rawGenUrl;
-          });
-        } catch {
-          finalDataUrl = rawGenUrl;
-        }
-
-        if (finalDataUrl !== rawGenUrl) {
-          setEnhanced4kUrl(finalDataUrl);
-        } else {
-          setEnhanced4kUrl(null);
-        }
-
-        clearInterval(progressTimer);
-        setGenerationProgress(95);
-
-        onPanoramaChange(finalDataUrl);
-        setGenerationProgress(100);
-        setIsGenerating(false);
-
-        confetti({
-          particleCount: 50,
-          spread: 70,
-          origin: { y: 0.8 },
-        });
-      } catch (err: unknown) {
-        setIsGenerating(false);
-        const errMsg = err instanceof Error ? err.message : 'Unknown API call error';
-        setApiError(errMsg);
-      }
+    // 1. Account status check
+    const user = getCurrentUser();
+    if (user.status === 'suspended') {
+      setApiError('您的账户当前已被管理员封禁挂起，无法使用 AI 全景图生成服务。请联系系统管理员。');
       return;
     }
 
-    // Procedural generation fallback mode
-    const timer1 = setTimeout(() => setGenerationProgress(45), 350);
-    const timer2 = setTimeout(() => setGenerationProgress(75), 700);
+    // 2. Check credit balance before firing requests
+    if (user.creditsBalance < creditsCost) {
+      setApiError(
+        `账户全景图积分不足！生成 ${resolution} 全景图需要 ${creditsCost} 积分，但您的账号 (${user.name}) 当前仅有 ${user.creditsBalance} 积分。请升级会员套餐或充值积分。`
+      );
+      return;
+    }
 
-    const timerDone = setTimeout(() => {
+    // 3. Check execution pipeline availability
+    const pipeline = getModelExecutionPipeline();
+    if (pipeline.endpoints.length === 0) {
+      setApiError(
+        '当前无可用 AI 生图模型端点（所有端点均已被管理员停用，或指定的主模型未启用）。请前往管理员控制台检查并启用模型端点。'
+      );
+      return;
+    }
+
+    setIsGenerating(true);
+    setApiError(null);
+    setGenerationProgress(15);
+    let progressTimer: ReturnType<typeof setInterval> | null = null;
+
+    try {
+      setGenerationProgress(25);
+      const styleObj = STYLE_PRESETS.find((s) => s.id === selectedStyle);
+
+      let promptWithRefs = prompt;
+      if (referenceImages.length > 0) {
+        promptWithRefs += `, matched reference style palette and lighting from [${referenceImages.map((r) => r.name).join(', ')}]`;
+      }
+
+      const fullPrompt = buildPanoramaPrompt(promptWithRefs, styleObj?.promptSuffix || '');
+
+      setGenerationProgress(45);
+      progressTimer = setInterval(() => {
+        setGenerationProgress((p) => (p < 85 ? p + 8 : p));
+      }, 500);
+
+      // Attempt AI image generation across execution pipeline (Single, Failover, or Round-Robin)
+      let rawGenUrl: string | null = null;
+      let usedEndpointName = '';
+      let hadFailover = false;
+      const failedAttempts: Array<{ endpoint: string; error: string }> = [];
+
+      for (let i = 0; i < pipeline.endpoints.length; i++) {
+        const ep = pipeline.endpoints[i];
+        try {
+          const modelConfig: GeminiConfig = {
+            baseUrl: ep.baseUrl,
+            apiKey: ep.apiKey,
+            model: ep.model,
+          };
+          rawGenUrl = await generateWithGemini(fullPrompt, modelConfig);
+          usedEndpointName = ep.name;
+          if (i > 0) {
+            hadFailover = true;
+          }
+          break; // Succeeded! Stop trying further models
+        } catch (callErr) {
+          const errMessage = callErr instanceof Error ? callErr.message : String(callErr);
+          failedAttempts.push({ endpoint: ep.name, error: errMessage });
+
+          // If in strict single model mode, immediately fail without fallback
+          if (pipeline.mode === 'single') {
+            throw new Error(`[单模型模式锁定] ${ep.name} 调用失败：${errMessage}`);
+          }
+          // In failover or round-robin mode, seamlessly try next configured fallback model
+        }
+      }
+
+      if (!rawGenUrl) {
+        // All configured models failed: NEVER mock AI output with procedural graphics, NEVER deduct credits!
+        const detailLogs = failedAttempts
+          .map((f) => `• ${f.endpoint}: ${f.error}`)
+          .join('\n');
+        throw new Error(
+          `所有已配置的大模型端点均调用失败，本次生成未扣除任何积分。\n失败详情：\n${detailLogs}`
+        );
+      }
+
+      setOriginalRawUrl(rawGenUrl);
+
+      // Client-side super-resolution, sharpening & seam healing
+      let finalDataUrl = rawGenUrl;
+      try {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        finalDataUrl = await new Promise<string>((resolve) => {
+          img.onload = () => {
+            let canvas: HTMLCanvasElement;
+            if (resolution === '4K') {
+              canvas = enhanceAndUpscalePanorama(img, {
+                scaleFactor: 2,
+                sharpness: 0.8,
+                contrastBoost: 1.1,
+              });
+            } else if (resolution === '2K') {
+              canvas = enhanceAndUpscalePanorama(img, {
+                scaleFactor: 1,
+                sharpness: 0.6,
+                contrastBoost: 1.05,
+              });
+            } else {
+              canvas = document.createElement('canvas');
+              canvas.width = img.naturalWidth || img.width;
+              canvas.height = img.naturalHeight || img.height;
+              const ctx = canvas.getContext('2d');
+              if (ctx) ctx.drawImage(img, 0, 0);
+            }
+
+            const healed = seamCorrection ? healPanoramaSeam(canvas, 160) : canvas;
+            resolve(healed.toDataURL('image/png'));
+          };
+          img.onerror = () => resolve(rawGenUrl!);
+          img.src = rawGenUrl!;
+        });
+      } catch {
+        finalDataUrl = rawGenUrl;
+      }
+
+      if (finalDataUrl !== rawGenUrl) {
+        setEnhanced4kUrl(finalDataUrl);
+      } else {
+        setEnhanced4kUrl(null);
+      }
+
       setGenerationProgress(95);
+      onPanoramaChange(finalDataUrl);
 
-      const width = resolution === '4K' ? 3840 : resolution === '2K' ? 2048 : 1024;
-      const height = width / 2;
+      // Deduct user credits upon generation success
+      const deductRes = deductCurrentUserCredits(creditsCost);
+      if (deductRes.success) {
+        setCurrentUser(getCurrentUser());
+        const toastNotice = hadFailover
+          ? `主模型额度耗尽或异常，已自动切换至备用模型 [${usedEndpointName}] 生成成功！已扣除 ${creditsCost} 积分。`
+          : `360° 全景图通过 [${usedEndpointName}] 生成成功！扣除 ${creditsCost} 积分（剩余 ${deductRes.remaining} 积分）。`;
+        setFeedbackNotice(toastNotice);
+        setTimeout(() => setFeedbackNotice(null), 5000);
+      }
 
-      const canvas = generateProceduralPanorama(selectedStyle, prompt, width, height);
-      const dataUrl = canvas.toDataURL('image/png');
-      setOriginalRawUrl(dataUrl);
-      setEnhanced4kUrl(null);
-
-      onPanoramaChange(dataUrl);
-      setIsGenerating(false);
       setGenerationProgress(100);
+      setIsGenerating(false);
 
       confetti({
-        particleCount: 40,
-        spread: 60,
+        particleCount: 50,
+        spread: 70,
         origin: { y: 0.8 },
       });
-    }, 1100);
-
-    return () => {
-      clearTimeout(timer1);
-      clearTimeout(timer2);
-      clearTimeout(timerDone);
-    };
+    } catch (err: unknown) {
+      setIsGenerating(false);
+      const errMsg = err instanceof Error ? err.message : '未知生图错误';
+      setApiError(errMsg);
+    } finally {
+      if (progressTimer) {
+        clearInterval(progressTimer);
+      }
+    }
   };
 
   const handleDownloadPng = () => {
@@ -637,11 +641,16 @@ export function GeneratorTab({
   };
 
   return (
-    <div className="space-y-12">
+    <div className="studio-generator space-y-12">
       {/* =========================================================================
           HERO BANNER & VALUE PROP (Benchmarked from panoramagenerator.com)
       ========================================================================= */}
-      <div className="text-center max-w-4xl mx-auto pt-2 pb-6">
+      <div className="studio-hero text-center max-w-4xl mx-auto pt-2 pb-6">
+        <div className="studio-eyebrow" aria-hidden="true">
+          <span className="studio-coordinate">360° / CREATIVE WORKSPACE</span>
+          <span className="studio-orbit-mark">◎</span>
+          <span className="studio-coordinate">IMAGINE BEYOND THE FRAME</span>
+        </div>
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/15 border border-cyan-400/35 text-cyan-200 text-xs font-semibold mb-4 shadow-sm backdrop-blur-md">
           <span className="flex items-center text-amber-400 gap-0.5">
             <Star className="w-3.5 h-3.5 fill-current" />
@@ -663,214 +672,6 @@ export function GeneratorTab({
           STUDIO INTERACTIVE WORKBENCH (2 Columns: Controls & 360 Viewport)
       ========================================================================= */}
       <div id="studio-generator-workbench" className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start relative">
-        {/* Gemini Proxy Config Modal */}
-        {showConfigModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-in fade-in duration-200">
-            <div className="glass-panel border border-cyan-400/30 rounded-3xl max-w-md w-full p-6 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)] space-y-4">
-              <div className="flex items-center justify-between border-b border-cyan-500/20 pb-3">
-                <div className="flex items-center gap-2 text-white">
-                  <div className="p-1.5 bg-cyan-500/20 text-cyan-300 rounded-lg">
-                    <Settings2 className="w-4 h-4" />
-                  </div>
-                  <h3 className="font-bold text-base text-cyan-100">AI Model &amp; Proxy Settings</h3>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setShowConfigModal(false)}
-                  className="w-7 h-7 rounded-full bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 hover:text-white flex items-center justify-center text-xs transition-colors cursor-pointer"
-                >
-                  ✕
-                </button>
-              </div>
-
-              <div className="space-y-3.5 text-xs">
-                {/* Dual Preset Switcher */}
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={handleLoadGoogleOfficial}
-                    className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
-                      geminiConfig.baseUrl.includes('googleapis.com')
-                        ? 'bg-gradient-to-br from-teal-950/80 to-blue-950/80 border-teal-400/60 shadow-[0_0_15px_rgba(20,184,166,0.2)]'
-                        : 'bg-[#030d1d] border-cyan-500/20 hover:border-cyan-400/40 opacity-75 hover:opacity-100'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="font-bold text-teal-300 flex items-center gap-1">
-                        <Sparkles className="w-3.5 h-3.5" />
-                        Google Direct
-                      </span>
-                      <span className="text-[10px] px-1.5 py-0.2 bg-teal-400/20 text-teal-200 rounded font-mono font-bold">
-                        Imagen 3
-                      </span>
-                    </div>
-                    <div className="text-[10.5px] text-teal-200/70">
-                      Native Google AI Studio endpoint, highest quality
-                    </div>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={handleLoad8317Default}
-                    className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
-                      geminiConfig.baseUrl.includes('8317')
-                        ? 'bg-gradient-to-br from-cyan-950/80 to-blue-950/80 border-cyan-400/60 shadow-[0_0_15px_rgba(6,182,212,0.2)]'
-                        : 'bg-[#030d1d] border-cyan-500/20 hover:border-cyan-400/40 opacity-75 hover:opacity-100'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="font-bold text-cyan-300 flex items-center gap-1">
-                        <Zap className="w-3.5 h-3.5" />
-                        Local 8317 Proxy
-                      </span>
-                      <span className="text-[10px] px-1.5 py-0.2 bg-cyan-400/20 text-cyan-200 rounded font-mono font-bold">
-                        CLI Proxy
-                      </span>
-                    </div>
-                    <div className="text-[10.5px] text-cyan-200/70">
-                      Route via local port 8317 to Gemini or OpenAI models
-                    </div>
-                  </button>
-                </div>
-
-                <div>
-                  <label className="block text-cyan-200 font-semibold mb-1">
-                    API Endpoint (Base URL)
-                  </label>
-                  <input
-                    type="text"
-                    value={geminiConfig.baseUrl}
-                    onChange={(e) => setGeminiConfig({ ...geminiConfig, baseUrl: e.target.value })}
-                    placeholder="https://generativelanguage.googleapis.com or http://127.0.0.1:8317"
-                    className="w-full px-3.5 py-2.5 bg-[#030a17] border border-cyan-500/30 rounded-xl text-cyan-100 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/25 font-mono text-xs transition-all"
-                  />
-                  <p className="text-[11px] text-cyan-300/60 mt-1">
-                    {geminiConfig.baseUrl.includes('googleapis.com') ? (
-                      <span className="text-teal-300 flex items-center gap-1">
-                        <span>✓ Official Direct Mode (No local proxy required)</span>
-                      </span>
-                    ) : (
-                      <span>Local or third-party OpenAI-compatible reverse proxy endpoint</span>
-                    )}
-                  </p>
-                </div>
-
-                <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="text-cyan-200 font-semibold">
-                      API Key / Token
-                    </label>
-                    {geminiConfig.baseUrl.includes('googleapis.com') && (
-                      <a
-                        href="https://aistudio.google.com/app/apikey"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-[11px] text-teal-300 hover:text-teal-100 flex items-center gap-0.5 underline"
-                      >
-                        <span>Get Free Google Key</span>
-                        <ExternalLink className="w-3 h-3" />
-                      </a>
-                    )}
-                  </div>
-                  <input
-                    type="password"
-                    value={geminiConfig.apiKey}
-                    onChange={(e) => setGeminiConfig({ ...geminiConfig, apiKey: e.target.value })}
-                    placeholder={
-                      geminiConfig.baseUrl.includes('googleapis.com')
-                        ? 'Enter Google AI Studio API Key (AIzaSy...)'
-                        : 'Enter 8317 Proxy API Key (default sk-wTdKu3XLWeAsvmaXr)'
-                    }
-                    className="w-full px-3.5 py-2.5 bg-[#030a17] border border-cyan-500/30 rounded-xl text-cyan-100 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/25 font-mono text-xs transition-all"
-                  />
-                  <p className="text-[11px] text-cyan-300/60 mt-1">
-                    Keys are securely stored in your browser LocalStorage only, never sent to third-party tracking.
-                  </p>
-                </div>
-
-                <div>
-                  <label className="block text-cyan-200 font-semibold mb-1">
-                    Image Model Name
-                  </label>
-                  <input
-                    type="text"
-                    value={geminiConfig.model}
-                    onChange={(e) => setGeminiConfig({ ...geminiConfig, model: e.target.value })}
-                    placeholder={
-                      geminiConfig.baseUrl.includes('googleapis.com')
-                        ? 'imagen-3.0-generate-002'
-                        : 'gemini-3.1-flash-image'
-                    }
-                    className="w-full px-3.5 py-2.5 bg-[#030a17] border border-cyan-500/30 rounded-xl text-cyan-100 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/25 font-mono text-xs transition-all"
-                  />
-                  <div className="flex flex-wrap items-center gap-1.5 mt-2">
-                    <span className="text-[10px] text-cyan-300/70 font-semibold">Recommended Models:</span>
-                    {(geminiConfig.baseUrl.includes('googleapis.com')
-                      ? ['imagen-3.0-generate-002', 'imagen-3.0-fast-generate-001']
-                      : ['gemini-3.1-flash-image', 'gpt-image-2.5', 'grok-imagine-image-2.0']
-                    ).map((m) => (
-                      <button
-                        key={m}
-                        type="button"
-                        onClick={() => setGeminiConfig({ ...geminiConfig, model: m })}
-                        className={`text-[10px] px-2 py-0.5 rounded-lg font-mono cursor-pointer transition-all ${
-                          geminiConfig.model === m
-                            ? 'bg-gradient-to-r from-teal-400 to-cyan-400 text-slate-950 font-bold shadow-sm shadow-cyan-400/30'
-                            : 'bg-cyan-950/60 hover:bg-cyan-900/60 text-cyan-300 border border-cyan-500/20'
-                        }`}
-                      >
-                        {m}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Test Connection Result Notice */}
-                {testConnResult && (
-                  <div
-                    className={`p-3 rounded-xl border text-xs flex items-center gap-2 ${
-                      testConnResult.success
-                        ? 'bg-teal-500/15 border-teal-400/40 text-teal-300'
-                        : 'bg-red-500/15 border-red-500/40 text-red-300'
-                    }`}
-                  >
-                    <span className="shrink-0">{testConnResult.success ? '✓' : '⚠'}</span>
-                    <span>{testConnResult.message}</span>
-                  </div>
-                )}
-              </div>
-
-              <div className="flex items-center justify-between gap-2 pt-3 border-t border-cyan-500/20">
-                <button
-                  type="button"
-                  disabled={isTestingConn}
-                  onClick={handleTestConnection}
-                  className="px-3.5 py-2 bg-cyan-950/60 hover:bg-cyan-900/60 border border-cyan-500/30 text-cyan-200 rounded-xl text-xs font-semibold cursor-pointer disabled:opacity-50 transition-colors"
-                >
-                  {isTestingConn ? 'Testing...' : 'Test Connection'}
-                </button>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setShowConfigModal(false)}
-                    className="px-3 py-2 bg-slate-800 text-slate-300 rounded-xl text-xs font-semibold hover:bg-slate-700 cursor-pointer"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleSaveConfig}
-                    className="px-4 py-2 bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 font-bold rounded-xl text-xs cursor-pointer flex items-center gap-1.5 shadow-lg shadow-cyan-400/25 active:scale-95 transition-all"
-                  >
-                    <Check className="w-3.5 h-3.5" />
-                    <span>Save &amp; Apply</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* =========================================================================
             LEFT COLUMN: GENERATOR CONTROLS (Benchmarked from panoramagenerator.com)
         ========================================================================= */}
@@ -1114,7 +915,7 @@ export function GeneratorTab({
                   key={style.id}
                   type="button"
                   onClick={() => setSelectedStyle(style.id)}
-                  className={`p-2.5 rounded-2xl border text-left transition-all cursor-pointer relative overflow-hidden group ${
+                  className={`p-2.5 rounded-2xl border text-left transition-all cursor-pointer relative overflow-hidden group active:scale-[0.97] ${
                     selectedStyle === style.id
                       ? 'bg-cyan-500/20 border-cyan-400 text-white shadow-[0_0_20px_rgba(0,242,254,0.35)]'
                       : 'bg-[#030c1c]/60 border-cyan-500/15 text-cyan-200/60 hover:border-cyan-400/40 hover:text-cyan-100'
@@ -1142,7 +943,7 @@ export function GeneratorTab({
                     key={res}
                     type="button"
                     onClick={() => setResolution(res)}
-                    className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer active:scale-95 ${
                       resolution === res
                         ? 'bg-gradient-to-r from-cyan-400 to-blue-600 text-slate-950 shadow-md shadow-cyan-400/30'
                         : 'text-cyan-300/60 hover:text-white'
@@ -1171,68 +972,45 @@ export function GeneratorTab({
             </div>
           </div>
 
-          {/* Engine Selector & Config Bar */}
-          <div className="space-y-2 bg-[#020b18]/80 border border-cyan-500/20 rounded-2xl p-3 relative z-10">
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-bold text-cyan-200 flex items-center gap-1">
-                <Cpu className="w-3.5 h-3.5 text-cyan-400" />
-                <span>Backend Engine</span>
-              </span>
-              <button
-                type="button"
-                onClick={() => setShowConfigModal(true)}
-                className="text-[11px] text-cyan-400 hover:text-cyan-200 font-semibold underline cursor-pointer"
-              >
-                Model Settings
-              </button>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => setEngineMode('procedural')}
-                className={`p-2 rounded-xl border text-left text-xs transition-all cursor-pointer ${
-                  engineMode === 'procedural'
-                    ? 'bg-cyan-500/20 border-cyan-400 text-white'
-                    : 'bg-[#030915] border-cyan-500/15 text-cyan-200/60 hover:text-white'
-                }`}
-              >
-                <div className="font-bold">Instant Procedural</div>
-                <div className="text-[10px] text-cyan-300/60">0s instant preview</div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setEngineMode('gemini')}
-                className={`p-2 rounded-xl border text-left text-xs transition-all cursor-pointer ${
-                  engineMode === 'gemini'
-                    ? 'bg-gradient-to-r from-cyan-900/50 to-blue-900/50 border-cyan-400 text-white'
-                    : 'bg-[#030915] border-cyan-500/15 text-cyan-200/60 hover:text-white'
-                }`}
-              >
-                <div className="font-bold">AI Image Model</div>
-                <div className="text-[10px] text-cyan-300/80 truncate font-mono">{geminiConfig.model}</div>
-              </button>
-            </div>
-          </div>
-
           {/* API Error Notice */}
           {apiError && (
             <div className="p-3 bg-red-950/60 border border-red-500/50 rounded-2xl text-xs text-red-200 flex items-start gap-2">
               <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
-              <div>
-                <p className="font-bold">API Generation Error:</p>
+              <div className="flex-1">
+                <p className="font-bold">Generation Notice:</p>
                 <p className="text-[11px] text-red-300 break-all">{apiError}</p>
-                <button
-                  type="button"
-                  onClick={() => setShowConfigModal(true)}
-                  className="mt-1 text-[11px] underline text-red-300 hover:text-red-100 cursor-pointer"
-                >
-                  Verify Model &amp; Endpoint Settings →
-                </button>
+                {apiError.includes('Insufficient credit') && (
+                  <button
+                    type="button"
+                    onClick={() => setIsCheckoutOpen(true)}
+                    className="mt-2 px-3 py-1.5 bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 font-bold rounded-xl text-xs flex items-center gap-1.5 cursor-pointer shadow-md shadow-cyan-500/25"
+                  >
+                    <Zap className="w-3.5 h-3.5 fill-current" />
+                    <span>Top Up Credits or Upgrade Plan Now →</span>
+                  </button>
+                )}
               </div>
             </div>
           )}
+
+          {/* Active User Account & Balance Bar */}
+          <div className="flex items-center justify-between text-[11px] text-cyan-300/80 px-1 pt-1">
+            <span className="flex items-center gap-1">
+              <span>Account:</span>
+              <strong className="text-white">{currentUser.name}</strong>
+              <span className="uppercase text-[9px] px-1.5 py-0.2 bg-cyan-400/20 text-cyan-300 rounded font-bold font-mono">
+                {currentUser.plan}
+              </span>
+            </span>
+            <button
+              type="button"
+              onClick={() => setIsCheckoutOpen(true)}
+              className="text-amber-300 hover:text-white font-mono flex items-center gap-1 cursor-pointer"
+            >
+              <Coins className="w-3 h-3 text-amber-400" />
+              <span>{currentUser.creditsBalance} credits left</span>
+            </button>
+          </div>
 
           {/* Primary Generate Button (Benchmarked from panoramagenerator.com) */}
           <div className="pt-2 relative z-10">
@@ -1517,6 +1295,19 @@ export function GeneratorTab({
         isOpen={isEmbedModalOpen}
         onClose={() => setIsEmbedModalOpen(false)}
         currentPanoramaUrl={currentPanoramaUrl}
+      />
+
+      {/* Commercial Checkout Modal */}
+      <CheckoutModal
+        isOpen={isCheckoutOpen}
+        onClose={() => setIsCheckoutOpen(false)}
+        initialPlan="pro"
+        initialCycle="yearly"
+        onSuccess={(u) => {
+          setCurrentUser(u);
+          setFeedbackNotice(`Account upgraded successfully! New balance: ${u.creditsBalance} credits.`);
+          setTimeout(() => setFeedbackNotice(null), 4000);
+        }}
       />
     </div>
   );
